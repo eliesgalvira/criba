@@ -60,16 +60,14 @@ const STRINGS: Record<Lang, Strings> = {
     h1sub:
       "El telar de Jacquard fue la primera máquina programable, hace doscientos años. Esta página va de un paradigma que vuelve a computar así: tejiendo.",
     hint: "desliza",
-    minerh2: "Dale ejemplos. Recibe la receta.",
+    minerh2: "Dale ejemplos. Recibe el programa.",
     minerIntro:
-      "Una función es una máquina de números: entra uno, sale otro. Lo normal es que un programador escriba la receta a mano. Aquí no. Tú das unos pocos ejemplos de entrada y salida, y la página encuentra sola la receta más corta que los cumple todos — probando el espacio entero de recetas posibles a la vez. (A ese «todas a la vez» se le llama superposición; el truco que lo hace posible lo verás un poco más abajo.)",
-    minersub:
-      "Sin inteligencia artificial y sin trampa: la receta encontrada cumple tus ejemplos siempre, por construcción.",
-    run: "Cribar el espacio de recetas",
+      "Tú das ejemplos de entrada y salida. La página encuentra sola el programa más corto que los cumple todos — probando todos los programas posibles a la vez. (Ese «a la vez» tiene nombre: superposición. El truco, más abajo.)",
+    minersub: "Sin IA y sin trampa: lo que sale cumple tus ejemplos siempre, por construcción.",
+    run: "Cribar el espacio de programas",
     running: "Cribando…",
-    outidle:
-      "Estos cuatro ejemplos dicen «el doble». Pulsa el botón — o cambia los números e inventa tu propia función.",
-    foundHead: "La receta más corta que cumple tus ejemplos:",
+    outidle: "Estos ejemplos dicen «el doble». Púlsalo — o inventa tu propia función.",
+    foundHead: "El programa más corto que cumple tus ejemplos:",
     foundProven: "y está demostrado que no hay ninguna más corta",
     foundBest: "la más corta encontrada hasta donde exploramos",
     pieces: "piezas",
@@ -79,7 +77,7 @@ const STRINGS: Record<Lang, Strings> = {
     rawIntro: "Así se escribe en el idioma del telar:",
     rawLegend: "«0:» si es cero · «S» suma uno · «@» vuelve a empezar · «*» devuelve lo que quede",
     notfound:
-      "No existe ninguna receta, hasta el tamaño que exploramos, que cumpla todos esos ejemplos a la vez. O se contradicen entre sí, o piden algo que este mini-lenguaje no sabe decir — solo sabe contar y repetir. Antes que inventarse una respuesta, esta página prefiere decírtelo.",
+      "Ningún programa, hasta donde exploramos, cumple esos ejemplos a la vez: o se contradicen, o piden algo que este mini-lenguaje no sabe decir — solo cuenta y repite. Antes que inventar, te lo dice.",
     addPair: "añadir ejemplo",
     delPair: "quitar ejemplo",
     raceh2: "El truco: compartir el trabajo.",
@@ -129,16 +127,14 @@ const STRINGS: Record<Lang, Strings> = {
     h1sub:
       "The Jacquard loom was the first programmable machine, two hundred years ago. This page is about a paradigm that computes like that again: by weaving.",
     hint: "scroll",
-    minerh2: "Give it examples. Get the recipe.",
+    minerh2: "Give it examples. Get the program.",
     minerIntro:
-      "A function is a number machine: one goes in, another comes out. Normally a programmer writes the recipe by hand. Not here. You give a few input–output examples, and the page finds, by itself, the shortest recipe that fits them all — by trying the entire space of possible recipes at once. (That “all at once” is called a superposition; the trick that makes it possible is a bit further down.)",
-    minersub:
-      "No artificial intelligence and no tricks: the recipe found fits your examples always, by construction.",
-    run: "Sift the space of recipes",
+      "You give input–output examples. The page finds, by itself, the shortest program that fits them all — trying every possible program at once. (That “at once” has a name: superposition. The trick, further down.)",
+    minersub: "No AI and no tricks: what comes out fits your examples always, by construction.",
+    run: "Sift the space of programs",
     running: "Sifting…",
-    outidle:
-      "These four examples say “double it”. Press the button — or change the numbers and invent your own function.",
-    foundHead: "The shortest recipe that fits your examples:",
+    outidle: "These examples say “double it”. Press it — or invent your own function.",
+    foundHead: "The shortest program that fits your examples:",
     foundProven: "and it is proven that no shorter one exists",
     foundBest: "the shortest found as far as we explored",
     pieces: "pieces",
@@ -148,7 +144,7 @@ const STRINGS: Record<Lang, Strings> = {
     rawIntro: "This is how it is written in the loom's own language:",
     rawLegend: "“0:” if zero · “S” add one · “@” start over · “*” return what remains",
     notfound:
-      "No recipe exists, up to the size we explore, that fits all those examples at once. Either they contradict each other, or they ask for something this mini-language cannot say — it only knows how to count and repeat. Rather than make up an answer, this page prefers to tell you.",
+      "No program, as far as we explore, fits those examples at once: either they contradict each other, or they ask for something this mini-language cannot say — it only counts and repeats. Rather than invent, it tells you.",
     addPair: "add example",
     delPair: "remove example",
     raceh2: "The trick: sharing the work.",

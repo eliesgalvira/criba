@@ -214,27 +214,30 @@ h2 {
 .pairs {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.6rem;
-  padding: 1.2rem;
+  gap: 0.9rem;
+  padding: 1.5rem;
 }
 .pair {
   display: inline-flex;
   align-items: baseline;
-  padding: 0.3rem 0.55rem;
-  border: 1px solid var(--thread-dim);
-  font-size: 1.02rem;
+  padding: 0.55rem 0.9rem;
+  border: 1.5px solid var(--thread-dim);
+  font-size: 1.5rem;
+  font-family: "Solway", serif;
+  font-weight: 500;
 }
 .nf {
   display: inline-flex;
 }
 .nf-input {
   field-sizing: content;
-  min-width: 1.4ch;
+  min-width: 1.3ch;
   max-width: 4ch;
   background: none;
   border: 0;
   color: var(--mustard);
   font: inherit;
+  font-weight: 700;
   text-align: center;
   padding: 0 0.1ch;
 }
@@ -257,10 +260,13 @@ h2 {
 }
 .pair-add {
   color: var(--thread-dim);
-  border: 1px dashed var(--thread-dim);
+  border: 1.5px dashed var(--thread-dim);
   cursor: pointer;
   background: none;
   font: inherit;
+  font-size: 1.1rem;
+  font-weight: 400;
+  padding-inline: 1.1rem;
 }
 .run {
   display: block;
@@ -532,8 +538,9 @@ a,
   transform: translateY(1px);
 }
 .pair-del {
-  min-width: 2rem;
-  min-height: 2rem;
+  min-width: 2.2rem;
+  min-height: 2.2rem;
+  font-size: 0.6em;
   display: inline-grid;
   place-items: center;
   padding-left: 0.35rem;
