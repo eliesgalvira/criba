@@ -90,9 +90,12 @@ export function mountLoom(cv: HTMLCanvasElement, opts: LoomOpts = {}): () => voi
   let flash: LLink | null = null;
   let flashT = 0;
   function step() {
+    // barrer los rombos huérfanos: la aniquilación deja nodos sin ningún
+    // hilo, y quedarse flotando muertos ensucia la escena
+    nodes = nodes.filter((n) => n.ports.some((p) => p));
     // reponer SIEMPRE que falte población, haya o no interacción en curso:
     // tras una racha de aniquilaciones el lienzo no puede quedarse vacío
-    if (nodes.length < (opts.mini ? 24 : opts.big ? 32 : 28)) {
+    if (nodes.length < (opts.mini ? 24 : 28)) {
       opts.mini
         ? seed(W() / 2 + rnd(-30, 30), rnd(H() * .15, H() * .85))
         : seed(rnd(W() * .2, W() * .8), rnd(H() * .3, H() * .7));
@@ -157,10 +160,12 @@ export function mountLoom(cv: HTMLCanvasElement, opts: LoomOpts = {}): () => voi
       for (const m of nodes) {
         if (m !== n) {
           // repulsión ∝ S (no S²): con S² los muelles no la contienen y los
-          // anillos revientan hacia los bordes — visto en pantalla
+          // anillos revientan hacia los bordes — visto en pantalla. En big,
+          // más floja aún: el equilibrio del enjambre ha de caber en la caja
           const dx = n.x - m.x, dy = n.y - m.y, d2 = dx * dx + dy * dy + 60;
-          fx += dx / d2 * 34 * S;
-          fy += dy / d2 * 34 * S;
+          const rep = (opts.big ? 20 : 34) * S;
+          fx += dx / d2 * rep;
+          fy += dy / d2 * rep;
         }
       }
       n.vx = (n.vx + fx) * 0.92;
@@ -176,16 +181,17 @@ export function mountLoom(cv: HTMLCanvasElement, opts: LoomOpts = {}): () => voi
       l.b.vx -= dx / d * f;
       l.b.vy -= dy / d * f;
     }
-    // valla dura: ningún nodo sale del lienzo — pase lo que pase con las
-    // fuerzas, la red se queda donde se ve
-    const pad = 30 * S;
+    // paredes elásticas: empujan de vuelta en proporción a lo que el nodo se
+    // adentra en el margen — nada se sale, pero nadie queda CLAVADO en una
+    // línea recta contra el borde (eso pasaba con la valla dura)
+    const pad = 46 * S;
     for (const n of nodes) {
       n.x += n.vx;
       n.y += n.vy;
-      if (n.x < pad) (n.x = pad), (n.vx = 0);
-      else if (n.x > W() - pad) (n.x = W() - pad), (n.vx = 0);
-      if (n.y < pad) (n.y = pad), (n.vy = 0);
-      else if (n.y > H() - pad) (n.y = H() - pad), (n.vy = 0);
+      if (n.x < pad) n.vx += (pad - n.x) * 0.02;
+      else if (n.x > W() - pad) n.vx -= (n.x - (W() - pad)) * 0.02;
+      if (n.y < pad) n.vy += (pad - n.y) * 0.02;
+      else if (n.y > H() - pad) n.vy -= (n.y - (H() - pad)) * 0.02;
     }
   }
   function thread(l: LLink, t: number) {
