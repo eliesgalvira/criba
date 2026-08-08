@@ -12,5 +12,6 @@ const ctx = self as unknown as WorkerScope;
 ctx.onmessage = (e) => {
   const { n, budget } = e.data as { n: number; budget: number };
   const r = naiveDemo(n, budget, (betas) => ctx.postMessage({ type: "progress", betas }));
-  ctx.postMessage({ type: r.complete ? "done" : "dnf", betas: r.betas });
+  const type = r.complete ? "done" : r.oversize ? "oversize" : "dnf";
+  ctx.postMessage({ type, betas: r.betas });
 };

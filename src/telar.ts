@@ -231,6 +231,9 @@ export function fusionDemo(N: number): FusionResult {
 export interface NaiveResult {
   betas: number;
   complete: boolean;
+  /** El enunciado mismo (2^N nodos, uno por negación) desborda el presupuesto:
+   * ni se construye. El telar escribe el mismo encargo con N dobleces. */
+  oversize?: true;
 }
 
 /** Coste total exacto del encargo not^(2^N) en este evaluador (medido y
@@ -295,6 +298,10 @@ export function naiveDemo(
       for (const c of spine) normal(c.t, c.e);
     }
   };
+  // El enunciado clásico pesa 2^N nodos (una App por negación). Si ni eso
+  // cabe en el presupuesto, se dice y no se intenta: construirlo colgaría
+  // el worker antes de la primera β (visto en N=29).
+  if (2 ** N > budget) return { betas: 0, complete: false, oversize: true };
   const True = L(0, L(1, V(0)));
   const Not = L(2, L(3, L(4, A(A(V(2), V(4)), V(3)))));
   let term = True;

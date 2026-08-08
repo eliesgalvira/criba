@@ -12,7 +12,8 @@ import { useT } from "./i18n.tsx";
 
 type NaiveOutcome =
   | { kind: "ok"; betas: number; ms: number }
-  | { kind: "dnf"; betasTried: number; ms: number };
+  | { kind: "dnf"; betasTried: number; ms: number }
+  | { kind: "oversize" };
 
 type RaceState =
   | { status: "idle" }
@@ -23,7 +24,7 @@ const NAIVE_BUDGET = 6_000_000;
 
 export function Race() {
   const { lang, t } = useT();
-  const [n, setN] = useState(16);
+  const [n, setN] = useState(21);
   const [race, setRace] = useState<RaceState>({ status: "idle" });
   const workerRef = useRef<Worker | null>(null);
   const startRef = useRef(0);
@@ -48,7 +49,7 @@ export function Race() {
       // guardia de identidad: un mensaje tardío de una carrera muerta no toca
       // ni el estado ni el worker vivo
       if (workerRef.current !== w) return;
-      const msg = e.data as { type: "progress" | "done" | "dnf"; betas?: number };
+      const msg = e.data as { type: "progress" | "done" | "dnf" | "oversize"; betas?: number };
       if (msg.type === "progress") {
         setRace((r) => r.status === "running" ? { ...r, naiveBetas: msg.betas ?? 0 } : r);
         return;
@@ -60,6 +61,8 @@ export function Race() {
         if (r.status !== "running") return r;
         const naive: NaiveOutcome = msg.type === "done"
           ? { kind: "ok", betas: msg.betas ?? 0, ms }
+          : msg.type === "oversize"
+          ? { kind: "oversize" }
           : { kind: "dnf", betasTried: msg.betas ?? NAIVE_BUDGET, ms };
         return { status: "done", n: r.n, ic: r.ic, icMs: r.icMs, naive };
       });
@@ -111,12 +114,18 @@ export function Race() {
               )}
               {race.status === "done" && race.naive.kind === "dnf" &&
                 `${fmt(race.naive.betasTried)}+`}
+              {race.status === "done" && race.naive.kind === "oversize" && "—"}
             </span>
             <div className="slot">
               {race.status === "running" && <div className="weaving" aria-hidden="true" />}
               {race.status === "done" && race.naive.kind === "dnf" && (
                 <p className="note">
                   {t.dnfNoteA} {fmt(naiveCost(race.n))} {t.dnfNoteB}
+                </p>
+              )}
+              {race.status === "done" && race.naive.kind === "oversize" && (
+                <p className="note">
+                  {t.overA} {fmt(2 ** race.n)} {t.overB} {race.n} {t.overC}
                 </p>
               )}
             </div>

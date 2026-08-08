@@ -38,5 +38,12 @@ Deno.test("naive: completa con recuento exacto y sin desbordar la pila", () => {
 
 Deno.test("naive: al agotar presupuesto conserva el recuento (nada de «0+»)", () => {
   const dnf = naiveDemo(16, 100_000);
-  assert(!dnf.complete && dnf.betas >= 100_000);
+  assert(!dnf.complete && dnf.betas >= 100_000 && !dnf.oversize);
+});
+
+Deno.test("naive: si el enunciado no cabe, lo dice al instante sin construirlo", () => {
+  const t0 = performance.now();
+  const r = naiveDemo(29, 6_000_000); // regresión del cuelgue en N=29
+  assert(r.oversize === true && !r.complete && r.betas === 0);
+  assert(performance.now() - t0 < 50);
 });
