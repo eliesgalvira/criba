@@ -3,11 +3,16 @@
 > Actualizado 2026-08-08. La propuesta se presenta antes del 11-08 23:59; el mes de beca es 15-08 →
 > 15-09.
 
-## El objetivo, en una frase
+## El objetivo
 
-Una página-experiencia bilingüe donde cualquiera, en 90 segundos, toca un paradigma de computación
-que no conocía — y sale pensando «no hemos rascado ni la punta del iceberg» — con cada número
-saliendo de ejecuciones reales en su navegador y cada límite dicho en voz alta.
+**Máxima claridad del concepto** — para nosotros y para cualquiera. La vara de medir de cada
+decisión: ¿esto hace el Interaction Calculus más claro?
+
+**El objetivo ambicioso que lo encarna: un motor de animación del Interaction Calculus en la web.**
+Reducciones reales de Telar — no maquetas — con layout y animación de cada interacción, tocables. La
+página entera se convierte en lentes sobre ese motor: el hero es el motor en ambiente, el sandbox de
+reglas es el motor a cámara lenta, la carrera es el motor midiendo, el minador es el motor cribando.
+Nada ilustrado que no esté ocurriendo.
 
 ## Qué está hecho (el prototipo de la propuesta)
 
@@ -29,20 +34,19 @@ saliendo de ejecuciones reales en su navegador y cada límite dicho en voz alta.
 
 ## El mes de beca, semana a semana
 
-**S1 (15–22 ago) — El corazón que falta: las reglas.** El Acto II completo: sandbox de las
-interacciones (pares activos que se encienden, aniquilación/conmutación tocables) — no existe en
-ningún sitio y es el hueco que la investigación identificó. Rediseño de la carrera con el concepto
-elegido (ver abajo). Deploy continuo desde el día 1.
+**S1 (15–22 ago) — El motor de animación, primero.** Es la pieza de la que cuelga todo: layout de
+redes reales de Telar + animación de cada interacción (APP-LAM, DUP-SUP…), API interna limpia para
+que cualquier sección lo use. El hero pasa de maqueta a motor real esa misma semana. Deploy
+continuo.
 
-**S2 (22–29 ago) — Todo de verdad.** Sustituir la maqueta del hero por **reducciones reales de
-Telar** dibujadas (la promesa «esto que ves está computando» cumplida al 100%). Minador: animar la
-criba sobre las orillas (candidatos cayendo). Panel LLM-vs-minador (la frontera de IO donde evaluar
-Effect / API).
+**S2 (22–29 ago) — Las lentes.** Sandbox de las reglas sobre el motor (pares activos tocables, cada
+regla a cámara lenta — no existe en ningún sitio y es el hueco que la investigación identificó).
+Carrera nueva con el concepto elegido (la tira que se pliega) y su versión con el motor debajo.
 
-**S3 (29 ago–5 sep) — Profundidad y alcance.** Copy completo de las capas de lectura (bilingüe;
-evaluar General Translation en build-time). Sección «qué NO puede» interactiva (n², la lección de
-Kolmogorov con el ejemplo 3→12). Móvil y accesibilidad a fondo. SEO/OG para que el link luzca al
-compartirse.
+**S3 (29 ago–5 sep) — Profundidad y alcance.** Criba animada sobre las orillas + la vista visual del
+programa («la lanzadera calculando»). Panel LLM-vs-minador. Copy completo bilingüe (evaluar General
+Translation en build-time). Sección «qué NO puede» interactiva (la lección de Kolmogorov con el
+ejemplo 3→12). Móvil y accesibilidad a fondo. SEO/OG.
 
 **S4 (5–15 sep) — Pulido y entregable.** Craft final (animaciones, microcopy), rendimiento, y el
 **deliverable de la beca**: hilo público + repo abierto + vídeo corto, coordinado con la ola de
