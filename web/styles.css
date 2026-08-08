@@ -865,13 +865,32 @@ a,
 .trace .recipe {
   margin-top: 0.5rem;
 }
-.loom-window {
+.loom-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.see-result {
+  background: none;
+  border: 1.5px solid var(--mustard);
+  color: var(--mustard);
+  font-family: "Solway", serif;
+  font-size: 0.88rem;
+  padding: 0.4rem 1rem;
   cursor: pointer;
+}
+@media (hover: hover) {
+  .see-result:hover {
+    background: var(--mustard);
+    color: var(--indigo-deep);
+  }
 }
 .miniloom {
   display: block;
   width: 100%;
-  height: 150px;
+  height: 200px;
   margin-bottom: 0.4rem;
   /* monta solo cuando la criba supera 400 ms (lógica en Miner); entra suave */
   animation: miniloom-appear 0.25s var(--ease-out);

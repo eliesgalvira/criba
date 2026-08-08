@@ -1,10 +1,10 @@
 // El minador (Everett) — todos los controles son primitivas de Base UI;
 // la piel viene de los tokens del Telar en styles.css.
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 import { NumberField } from "@base-ui/react/number-field";
 import { Toggle } from "@base-ui/react/toggle";
 import { ToggleGroup } from "@base-ui/react/toggle-group";
-import type { EverettStats, SiftEvent } from "../../src/criba.ts";
+import type { EverettStats } from "../../src/criba.ts";
 import { explain, explainLoop, explainPatterns } from "../../src/explain.ts";
 import { run, show, size, type Term } from "../../src/peanito.ts";
 import { pickTraceInput, trace } from "../../src/trace.ts";
@@ -14,18 +14,57 @@ import { type ShorePair, Shores } from "./Shores.tsx";
 
 type Pair = ShorePair;
 
-type Outcome =
-  | { kind: "idle" }
-  | { kind: "notfound"; events: SiftEvent[] }
-  | {
-    kind: "found";
-    prog: Term;
-    proven: boolean;
-    steps: number;
-    ms: number;
-    verify: [number, number | null][];
-    events: SiftEvent[];
-  };
+type Found = {
+  kind: "found";
+  prog: Term;
+  proven: boolean;
+  steps: number;
+  ms: number;
+  verify: [number, number | null][];
+};
+type SiftResult = { kind: "notfound" } | Found;
+
+/** El ciclo de la criba como máquina de estados — una fase cada vez:
+ *  idle → sifting → loom (el telar, a ritmo del usuario) → shown.
+ *  En sifting, `prev` mantiene el resultado anterior en pantalla
+ *  (stale-while-sifting); el loader solo entra pasados 400 ms. */
+type MineState =
+  | { phase: "idle" }
+  | { phase: "sifting"; steps: number; loaderOn: boolean; prev: SiftResult | null }
+  | { phase: "loom"; result: SiftResult; steps: number }
+  | { phase: "shown"; result: SiftResult };
+
+type MineAction =
+  | { type: "reset" }
+  | { type: "start" }
+  | { type: "loader" }
+  | { type: "progress"; steps: number }
+  | { type: "done"; result: SiftResult; steps: number; skipLoom: boolean }
+  | { type: "show" };
+
+function mineReducer(s: MineState, a: MineAction): MineState {
+  switch (a.type) {
+    case "reset":
+      return { phase: "idle" };
+    case "start":
+      return {
+        phase: "sifting",
+        steps: 0,
+        loaderOn: false,
+        prev: s.phase === "shown" || s.phase === "loom" ? s.result : null,
+      };
+    case "loader":
+      return s.phase === "sifting" ? { ...s, loaderOn: true } : s;
+    case "progress":
+      return s.phase === "sifting" ? { ...s, steps: a.steps } : s;
+    case "done":
+      return a.skipLoom
+        ? { phase: "shown", result: a.result }
+        : { phase: "loom", result: a.result, steps: a.steps };
+    case "show":
+      return s.phase === "loom" ? { phase: "shown", result: s.result } : s;
+  }
+}
 
 const MINER_DEPTH = 5;
 const MINER_BUDGET = 50_000_000;
@@ -84,67 +123,6 @@ function PairField(props: {
   );
 }
 
-/** La criba, repetida: los eventos reales del worker, a ritmo humano.
- * Nada inventado — cada cifra de familias y de espacio es la registrada. */
-function SiftReplay({ events, onDone }: { events: SiftEvent[]; onDone: () => void }) {
-  const { lang, t } = useT();
-  const [idx, setIdx] = useState(0);
-  const doneRef = useRef(onDone);
-  useEffect(() => {
-    doneRef.current = onDone;
-  }, [onDone]);
-  const step = Math.min(340, Math.max(140, 2400 / Math.max(events.length, 1)));
-  useEffect(() => {
-    const finished = idx >= events.length;
-    const id = setTimeout(
-      () => finished ? doneRef.current() : setIdx((i) => i + 1),
-      finished ? 480 : step,
-    );
-    return () => clearTimeout(id);
-  }, [idx, events.length, step]);
-
-  let depth = 0;
-  let space = 0;
-  const sieves: { x: number; y: number; fam: number }[] = [];
-  let ended = false;
-  for (const e of events.slice(0, idx)) {
-    if (e.t === "depth") {
-      depth = e.depth;
-      space = e.space;
-      sieves.length = 0;
-    } else if (e.t === "sieve") sieves.push({ x: e.x, y: e.y, fam: e.families });
-    else ended = true;
-  }
-  const maxFam = Math.max(...sieves.map((s) => s.fam), 1);
-  return (
-    <div className="sift-replay">
-      <p className="meta rp-head">
-        {t.rpTitle}
-        <button type="button" className="rp-skip" onClick={onDone}>{t.rpSkip} ↦</button>
-      </p>
-      <p className="rp-depth">
-        {t.rpSize} <b>{depth}</b> — {space.toLocaleString(lang)} {t.rpAtOnce}
-      </p>
-      <ul className="rp-sieves">
-        {sieves.map((s) => (
-          <li key={`${depth}-${s.x}`}>
-            <span className="rp-pair">f({s.x})={s.y}</span>
-            <span
-              className="rp-band"
-              style={{ width: `${6 + 80 * s.fam / maxFam}%` }}
-              aria-hidden="true"
-            />
-            <b>{s.fam.toLocaleString(lang)}</b>&nbsp;{t.rpFam}
-          </li>
-        ))}
-        {sieves.length > 0 && sieves[sieves.length - 1]!.fam === 0 && !ended && (
-          <li className="rp-none">{t.rpNone}</li>
-        )}
-      </ul>
-    </div>
-  );
-}
-
 /** mini-telar: la animación del hero, reutilizada como loader de la criba */
 function MiniLoom() {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -199,13 +177,7 @@ export function Miner() {
     { id: 2, x: 2, y: 4 },
     { id: 3, x: 3, y: 6 },
   ]);
-  const [outcome, setOutcome] = useState<Outcome>({ kind: "idle" });
-  // la criba se lleva APARTE del resultado: durante una criba rápida el
-  // resultado anterior sigue en pantalla (stale-while-sifting) y solo si la
-  // criba pasa de 400 ms entra el loader — cero flashes de layout
-  const [sifting, setSifting] = useState<{ steps: number } | null>(null);
-  const [loaderOn, setLoaderOn] = useState(false);
-  const [replayDone, setReplayDone] = useState(false);
+  const [mine, dispatch] = useReducer(mineReducer, { phase: "idle" });
   const [activeRule, setActiveRule] = useState<string | null>("doble");
   const [view, setView] = useState<RecipeView>("loop");
   const workerRef = useRef<Worker | null>(null);
@@ -217,15 +189,20 @@ export function Miner() {
   };
   useEffect(() => stopWorker, []);
 
-  const isSifting = sifting !== null;
+  const isSifting = mine.phase === "sifting";
   useEffect(() => {
-    if (!isSifting) {
-      setLoaderOn(false);
-      return;
-    }
-    const id = setTimeout(() => setLoaderOn(true), 400);
+    if (!isSifting) return;
+    const id = setTimeout(() => dispatch({ type: "loader" }), 400);
     return () => clearTimeout(id);
   }, [isSifting]);
+
+  // lo que se enseña: el resultado mostrado — o el previo, durante una criba
+  // rápida (stale-while-sifting: cero flashes de layout)
+  const outcome: SiftResult | { kind: "idle" } = mine.phase === "shown"
+    ? mine.result
+    : mine.phase === "sifting" && mine.prev
+    ? mine.prev
+    : { kind: "idle" };
 
   // cambiar los ejemplos invalida el resultado: nada rancio en pantalla
   // (y tejer lo tuyo despega la pestaña activa: la regla ya es tuya)
@@ -233,16 +210,14 @@ export function Miner() {
     setPairsRaw(next);
     setActiveRule(null);
     stopWorker();
-    setSifting(null);
-    setOutcome({ kind: "idle" });
+    dispatch({ type: "reset" });
   };
 
   const loadRule = (key: string, ps: [number, number][]) => {
     setPairsRaw(ps.map(([x, y]) => ({ id: nextId++, x, y })));
     setActiveRule(key);
     stopWorker();
-    setSifting(null);
-    setOutcome({ kind: "idle" });
+    dispatch({ type: "reset" });
   };
 
   const busy = isSifting;
@@ -251,7 +226,7 @@ export function Miner() {
     const examples = pairs.map((p) => [p.x, p.y] as [number, number]);
     if (!examples.length) return;
     stopWorker();
-    setSifting({ steps: 0 });
+    dispatch({ type: "start" });
     startRef.current = performance.now();
     const w = new Worker("dist/miner-worker.js", { type: "module" });
     workerRef.current = w;
@@ -259,31 +234,35 @@ export function Miner() {
       if (workerRef.current !== w) return; // mensaje de una criba muerta
       const msg = e.data as
         | { type: "progress"; steps: number }
-        | { type: "done"; prog: Term | null; stats: EverettStats; events: SiftEvent[] };
+        | { type: "done"; prog: Term | null; stats: EverettStats };
       if (msg.type === "progress") {
-        setSifting((s) => s ? { steps: msg.steps } : s);
+        dispatch({ type: "progress", steps: msg.steps });
         return;
       }
       const ms = performance.now() - startRef.current;
       workerRef.current = null;
       w.terminate();
-      setSifting(null);
-      // la repetición se salta con reduced-motion: directo al resultado
-      setReplayDone(matchMedia("(prefers-reduced-motion: reduce)").matches);
-      if (!msg.prog) setOutcome({ kind: "notfound", events: msg.events });
+      let result: SiftResult;
+      if (!msg.prog) result = { kind: "notfound" };
       else {
         const prog = msg.prog;
         const maxX = Math.max(...examples.map(([x]) => x));
-        setOutcome({
+        result = {
           kind: "found",
           prog,
           proven: msg.stats.provenMinimal,
           steps: msg.stats.steps,
           ms,
           verify: [maxX + 1, maxX + 2, maxX + 3].map((x) => [x, run(prog, x, 100_000)]),
-          events: msg.events,
-        });
+        };
       }
+      dispatch({
+        type: "done",
+        result,
+        steps: msg.stats.steps,
+        // con reduced-motion no hay ventana de telar: directo al resultado
+        skipLoom: matchMedia("(prefers-reduced-motion: reduce)").matches,
+      });
     };
     w.postMessage({ examples, maxDepth: MINER_DEPTH, budget: MINER_BUDGET });
   };
@@ -311,9 +290,7 @@ export function Miner() {
           <Shores
             pairs={pairs}
             onChange={setPairs}
-            ghost={outcome.kind === "found" && replayDone
-              ? (x) => run(outcome.prog, x, 100_000)
-              : null}
+            ghost={outcome.kind === "found" ? (x) => run(outcome.prog, x, 100_000) : null}
           />
           <details className="text-editor">
             <summary>{t.editAsText}</summary>
@@ -350,79 +327,95 @@ export function Miner() {
             {busy ? t.running : t.run}
           </button>
           <div className="out" aria-live="polite">
-            {isSifting && loaderOn && (
-              <>
-                <MiniLoom />
-                <p className="meta">
-                  {sifting.steps.toLocaleString(lang)} {t.sharedSteps}…
-                </p>
-              </>
-            )}
-            {!(isSifting && loaderOn) && outcome.kind === "idle" && (
-              <p className="meta">{t.outidle}</p>
-            )}
-            {!(isSifting && loaderOn) && outcome.kind !== "idle" && !replayDone && (
-              <SiftReplay
-                events={outcome.events}
-                onDone={() => setReplayDone(true)}
-              />
-            )}
-            {!(isSifting && loaderOn) && outcome.kind === "notfound" && replayDone && (
-              <p className="meta fail reveal">{t.notfound}</p>
-            )}
-            {!(isSifting && loaderOn) && outcome.kind === "found" && replayDone && (
-              <div className="reveal" key={show(outcome.prog)}>
-                <div className="found-bar">
-                  <p className="found-head">{t.foundHead}</p>
-                  <ToggleGroup
-                    className="view-toggle"
-                    value={[view]}
-                    onValueChange={(v: unknown[]) => {
-                      const next = (v as RecipeView[])[0];
-                      if (next) {
-                        setView(next);
-                      }
-                    }}
-                  >
-                    <Toggle value="loop" className="view-tab">{t.viewLoop}</Toggle>
-                    <Toggle value="trace" className="view-tab">{t.viewTrace}</Toggle>
-                    <Toggle value="cases" className="view-tab">{t.viewCases}</Toggle>
-                    <Toggle value="patterns" className="view-tab">{t.viewPatterns}</Toggle>
-                  </ToggleGroup>
-                </div>
-                {view === "loop" && <pre className="recipe">{explainLoop(outcome.prog, lang)}</pre>}
-                {view === "trace" && (
-                  <TraceView
-                    prog={outcome.prog}
-                    examples={pairs.map((p) => [p.x, p.y] as [number, number])}
-                  />
-                )}
-                {view === "cases" && <pre className="recipe">{explain(outcome.prog, lang)}</pre>}
-                {view === "patterns" && (
-                  <>
-                    <pre className="recipe">{explainPatterns(outcome.prog, lang)}</pre>
-                    <p className="meta">{t.patternsNote}</p>
-                  </>
-                )}
-                <p className="meta">
-                  {size(outcome.prog)} {t.pieces} — {outcome.proven ? t.foundProven : t.foundBest} ·
-                  {" "}
-                  {t.foundIn} {outcome.ms.toFixed(0)} ms · {outcome.steps.toLocaleString(lang)}{" "}
-                  {t.sharedSteps}
-                </p>
-                <p className="verify">
-                  {t.verify} {outcome.verify.map(([x, y], i) => (
-                    <span key={x}>
-                      {i > 0 && " · "}f({x}) = <b>{y}</b>
-                    </span>
-                  ))}
-                </p>
-                <p className="raw">
-                  {t.rawIntro} <code>{show(outcome.prog)}</code>
-                  <span className="raw-legend">{t.rawLegend}</span>
-                </p>
-              </div>
-            )}
+            {(() => {
+              const loomOn = (mine.phase === "sifting" && mine.loaderOn) ||
+                mine.phase === "loom";
+              return (
+                <>
+                  {loomOn && (
+                    <div className="loom-window">
+                      <MiniLoom />
+                      <p className="meta loom-meta">
+                        <span>
+                          {(mine.phase === "sifting" || mine.phase === "loom" ? mine.steps : 0)
+                            .toLocaleString(lang)} {t.sharedSteps}…
+                        </span>
+                        {mine.phase === "loom" && (
+                          <button
+                            type="button"
+                            className="see-result"
+                            onClick={() => dispatch({ type: "show" })}
+                          >
+                            {t.seeResult} ↦
+                          </button>
+                        )}
+                      </p>
+                    </div>
+                  )}
+                  {!loomOn && outcome.kind === "idle" && <p className="meta">{t.outidle}</p>}
+                  {!loomOn && outcome.kind === "notfound" && (
+                    <p className="meta fail reveal">{t.notfound}</p>
+                  )}
+                  {!loomOn && outcome.kind === "found" && (
+                    <div className="reveal" key={show(outcome.prog)}>
+                      <div className="found-bar">
+                        <p className="found-head">{t.foundHead}</p>
+                        <ToggleGroup
+                          className="view-toggle"
+                          value={[view]}
+                          onValueChange={(v: unknown[]) => {
+                            const next = (v as RecipeView[])[0];
+                            if (next) {
+                              setView(next);
+                            }
+                          }}
+                        >
+                          <Toggle value="loop" className="view-tab">{t.viewLoop}</Toggle>
+                          <Toggle value="trace" className="view-tab">{t.viewTrace}</Toggle>
+                          <Toggle value="cases" className="view-tab">{t.viewCases}</Toggle>
+                          <Toggle value="patterns" className="view-tab">{t.viewPatterns}</Toggle>
+                        </ToggleGroup>
+                      </div>
+                      {view === "loop" && (
+                        <pre className="recipe">{explainLoop(outcome.prog, lang)}</pre>
+                      )}
+                      {view === "trace" && (
+                        <TraceView
+                          prog={outcome.prog}
+                          examples={pairs.map((p) => [p.x, p.y] as [number, number])}
+                        />
+                      )}
+                      {view === "cases" && (
+                        <pre className="recipe">{explain(outcome.prog, lang)}</pre>
+                      )}
+                      {view === "patterns" && (
+                        <>
+                          <pre className="recipe">{explainPatterns(outcome.prog, lang)}</pre>
+                          <p className="meta">{t.patternsNote}</p>
+                        </>
+                      )}
+                      <p className="meta">
+                        {size(outcome.prog)} {t.pieces} —{" "}
+                        {outcome.proven ? t.foundProven : t.foundBest} · {t.foundIn}{" "}
+                        {outcome.ms.toFixed(0)} ms · {outcome.steps.toLocaleString(lang)}{" "}
+                        {t.sharedSteps}
+                      </p>
+                      <p className="verify">
+                        {t.verify} {outcome.verify.map(([x, y], i) => (
+                          <span key={x}>
+                            {i > 0 && " · "}f({x}) = <b>{y}</b>
+                          </span>
+                        ))}
+                      </p>
+                      <p className="raw">
+                        {t.rawIntro} <code>{show(outcome.prog)}</code>
+                        <span className="raw-legend">{t.rawLegend}</span>
+                      </p>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </div>
         </div>
       </div>

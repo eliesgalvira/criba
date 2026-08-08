@@ -32,6 +32,7 @@ export interface Strings {
   addPair: string;
   editAsText: string;
   presets: Record<string, string>;
+  seeResult: string;
   viewLoop: string;
   viewTrace: string;
   viewCases: string;
@@ -103,6 +104,7 @@ const STRINGS: Record<Lang, Strings> = {
       mod3: "resto ÷3",
       resta2: "resta 2",
     },
+    seeResult: "ver el programa",
     viewLoop: "instrucciones",
     viewTrace: "en marcha",
     viewCases: "por casos",
@@ -193,6 +195,7 @@ const STRINGS: Record<Lang, Strings> = {
       mod3: "mod 3",
       resta2: "minus 2",
     },
+    seeResult: "see the program",
     viewLoop: "instructions",
     viewTrace: "running",
     viewCases: "by cases",
