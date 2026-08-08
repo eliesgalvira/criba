@@ -35,24 +35,10 @@ body {
   padding-inline: clamp(1.25rem, 4vw, 3rem);
 }
 
-/* ——— view transitions ———
-   lang: cross-fade sobrio. travel: el CTA morfea hasta el titular del minador
-   (mismo view-transition-name en origen y destino) mientras el resto cambia
-   al instante — efecto portal, no fundido. */
+/* ——— view transition: cross-fade sobrio del cambio de idioma ——— */
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation-duration: 0.35s;
-  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
-}
-html.vt-travel::view-transition-old(root),
-html.vt-travel::view-transition-new(root) {
-  animation: none;
-}
-.vt-hilo {
-  view-transition-name: hilo-viajero;
-}
-::view-transition-group(hilo-viajero) {
-  animation-duration: 0.55s;
   animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -149,17 +135,6 @@ h1 .hilo {
   max-width: 48ch;
   margin-inline: auto;
   text-wrap: pretty;
-}
-.headline .go {
-  pointer-events: auto;
-  display: inline-block;
-  margin-top: 2rem;
-  font-family: "Solway", serif;
-  font-size: 0.95rem;
-  color: var(--indigo-deep);
-  background: var(--thread);
-  text-decoration: none;
-  padding: 0.75rem 1.5rem;
 }
 
 /* ——— scroll hint: la lanzadera desciende por un hilo ——— */
@@ -533,10 +508,6 @@ a,
     box-shadow 0.18s var(--ease-out);
 }
 @media (hover: hover) {
-  .headline .go:hover {
-    background: var(--mustard);
-    color: var(--indigo-deep);
-  }
   .run:hover:not(:disabled) {
     background: oklch(0.64 0.17 28);
   }
@@ -555,7 +526,6 @@ a,
     box-shadow: 0 0 0 6px oklch(0.78 0.12 85 / 0.25);
   }
 }
-.headline .go:active,
 .run:active:not(:disabled),
 .gobtn:active:not(:disabled),
 .pair-add:active {

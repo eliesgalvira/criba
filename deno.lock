@@ -116,6 +116,13 @@
       "npm:@types/react@19",
       "npm:react-dom@^19.1.0",
       "npm:react@^19.1.0"
-    ]
+    ],
+    "packageJson": {
+      "dependencies": [
+        "npm:@base-ui/react@^1.7.0",
+        "npm:react-dom@^19.1.0",
+        "npm:react@^19.1.0"
+      ]
+    }
   }
 }

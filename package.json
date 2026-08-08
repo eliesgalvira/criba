@@ -1,0 +1,13 @@
+{
+  "name": "criba",
+  "private": true,
+  "description": "Shim de tooling: permite a react-doctor (y similares) detectar React. El runtime real es Deno; las versiones canónicas viven en deno.json.",
+  "dependencies": {
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "@base-ui/react": "^1.7.0"
+  },
+  "reactDoctor": {
+    "ignore": ["web/design/**", "web/dist/**", "lab/**"]
+  }
+}

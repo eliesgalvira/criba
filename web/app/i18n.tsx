@@ -12,7 +12,6 @@ export interface Strings {
   h1b: string;
   heroExplain: string;
   h1sub: string;
-  cta: string;
   hint: string;
   minerh2: string;
   minerIntro: string;
@@ -60,7 +59,6 @@ const STRINGS: Record<Lang, Strings> = {
       "Lo que se mueve ahí detrás no es un adorno: cada rombo es una máquina diminuta y cada hilo, una conexión. Cuando dos máquinas se tocan, se transforman según unas pocas reglas fijas — y de millones de esos toques sale cualquier cálculo que puedas imaginar.",
     h1sub:
       "El telar de Jacquard fue la primera máquina programable, hace doscientos años. Esta página va de un paradigma que vuelve a computar así: tejiendo.",
-    cta: "Ver lo que sabe hacer",
     hint: "desliza",
     minerh2: "Dale ejemplos. Recibe la receta.",
     minerIntro:
@@ -130,7 +128,6 @@ const STRINGS: Record<Lang, Strings> = {
       "What moves back there is not decoration: every diamond is a tiny machine and every thread, a connection. When two machines touch, they transform by a handful of fixed rules — and from millions of those touches comes any computation you can imagine.",
     h1sub:
       "The Jacquard loom was the first programmable machine, two hundred years ago. This page is about a paradigm that computes like that again: by weaving.",
-    cta: "See what it can do",
     hint: "scroll",
     minerh2: "Give it examples. Get the recipe.",
     minerIntro:

@@ -7,31 +7,22 @@ import { mountLoom } from "./loom.ts";
 import { Miner } from "./Miner.tsx";
 import { Race } from "./Race.tsx";
 
-/** Cambio de estado con View Transition, con clase de tipo en <html> para
- * que el CSS distinga viajes (morph + portal) de cambios de idioma (fade).
+/** Cross-fade del cambio de idioma vía View Transition.
  *
  * CRÍTICO: la mutación va envuelta en flushSync. startViewTransition captura
  * la instantánea «nueva» al resolver el callback, y los setState de React son
- * asíncronos — sin flushSync el navegador fotografiaba el DOM ANTES del
- * commit (nombres de transición aún sin mover: morphs rotos, elementos que
- * desaparecen). Progresivo: sin soporte o con reduced-motion, muta y punto. */
-function withViewTransition(kind: "travel" | "lang", mutate: () => void): Promise<void> {
+ * asíncronos — sin flushSync el navegador fotografiaba el DOM antes del
+ * commit. Progresivo: sin soporte o con reduced-motion, muta y punto. */
+function withViewTransition(mutate: () => void): void {
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const doc = document as Document & {
     startViewTransition?: (cb: () => void) => { finished: Promise<void> };
   };
-  if (reduced || !doc.startViewTransition) {
-    mutate();
-    return Promise.resolve();
-  }
-  document.documentElement.classList.add(`vt-${kind}`);
-  const vt = doc.startViewTransition(() => flushSync(mutate));
-  return vt.finished.finally(() => {
-    document.documentElement.classList.remove(`vt-${kind}`);
-  });
+  if (reduced || !doc.startViewTransition) mutate();
+  else doc.startViewTransition(() => flushSync(mutate));
 }
 
-function Hero(props: { travelling: boolean; onTravel: () => void }) {
+function Hero() {
   const { t } = useT();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [hintGone, setHintGone] = useState(false);
@@ -44,11 +35,6 @@ function Hero(props: { travelling: boolean; onTravel: () => void }) {
     addEventListener("scroll", onScroll, { passive: true });
     return () => removeEventListener("scroll", onScroll);
   }, []);
-
-  const goMiner = (e: React.MouseEvent) => {
-    e.preventDefault();
-    props.onTravel();
-  };
 
   return (
     <header>
@@ -63,13 +49,6 @@ function Hero(props: { travelling: boolean; onTravel: () => void }) {
           </h1>
           <p className="hero-explain">{t.heroExplain}</p>
           <p className="hero-sub">{t.h1sub}</p>
-          <a
-            className={"go" + (props.travelling ? "" : " vt-hilo")}
-            href="#miner"
-            onClick={goMiner}
-          >
-            {t.cta}
-          </a>
         </div>
       </div>
       <div className="selvage" aria-hidden="true" />
@@ -121,18 +100,10 @@ function Footer() {
 
 export function App() {
   const [lang, setLang] = useState<Lang>("es");
-  const [travelling, setTravelling] = useState(false);
 
   useEffect(() => {
     document.documentElement.lang = lang;
   }, [lang]);
-
-  const travel = () => {
-    withViewTransition("travel", () => {
-      setTravelling(true);
-      document.getElementById("miner")?.scrollIntoView({ behavior: "instant", block: "start" });
-    }).then(() => setTravelling(false));
-  };
 
   return (
     <LangContext.Provider value={{ lang, t: stringsFor(lang) }}>
@@ -141,15 +112,15 @@ export function App() {
           value={[lang]}
           onValueChange={(v: unknown[]) => {
             const next = (v as Lang[])[0];
-            if (next) withViewTransition("lang", () => setLang(next));
+            if (next) withViewTransition(() => setLang(next));
           }}
         >
           <Toggle value="es" className="lang-toggle" aria-label="Español">ES</Toggle>
           <Toggle value="en" className="lang-toggle" aria-label="English">EN</Toggle>
         </ToggleGroup>
       </nav>
-      <Hero travelling={travelling} onTravel={travel} />
-      <Miner morphTarget={travelling} />
+      <Hero />
+      <Miner />
       <Race />
       <Honesty />
       <Footer />
