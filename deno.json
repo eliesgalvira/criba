@@ -5,11 +5,18 @@
     "fmt": "deno fmt",
     "lint": "deno lint",
     "bundle": "deno bundle --platform browser web/main.ts -o web/dist/main.js",
-    "design": "deno run --allow-net --allow-read jsr:@std/http/file-server web/design --port 4507"
+    "design": "deno run --allow-net --allow-read jsr:@std/http/file-server web/design --port 4507",
+    "web": "deno task bundle && deno run --allow-net --allow-read jsr:@std/http/file-server web --port 4508"
   },
   "compilerOptions": {
     "strict": true,
-    "noUncheckedIndexedAccess": true
+    "noUncheckedIndexedAccess": true,
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext",
+      "deno.ns"
+    ]
   },
   "fmt": {
     "lineWidth": 100,
