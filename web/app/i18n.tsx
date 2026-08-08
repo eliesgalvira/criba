@@ -31,6 +31,7 @@ export interface Strings {
   notfound: string;
   addPair: string;
   editAsText: string;
+  presets: Record<string, string>;
   delPair: string;
   raceh2: string;
   racelead: string;
@@ -81,6 +82,14 @@ const STRINGS: Record<Lang, Strings> = {
       "Ningún programa, hasta donde exploramos, cumple esos ejemplos a la vez: o se contradicen, o piden algo que este mini-lenguaje no sabe decir — solo cuenta y repite. Antes que inventar, te lo dice.",
     addPair: "añadir ejemplo",
     editAsText: "✎ como números",
+    presets: {
+      doble: "el doble",
+      mitad: "la mitad",
+      mas3: "n + 3",
+      parimpar: "¿par o impar?",
+      triple: "el triple",
+      mod3: "resto de ÷3",
+    },
     delPair: "quitar ejemplo",
     raceh2: "El truco: compartir el trabajo.",
     racelead:
@@ -149,6 +158,14 @@ const STRINGS: Record<Lang, Strings> = {
       "No program, as far as we explore, fits those examples at once: either they contradict each other, or they ask for something this mini-language cannot say — it only counts and repeats. Rather than invent, it tells you.",
     addPair: "add example",
     editAsText: "✎ as numbers",
+    presets: {
+      doble: "double",
+      mitad: "half",
+      mas3: "n + 3",
+      parimpar: "odd or even?",
+      triple: "triple",
+      mod3: "remainder ÷3",
+    },
     delPair: "remove example",
     raceh2: "The trick: sharing the work.",
     racelead:

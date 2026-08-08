@@ -1,8 +1,8 @@
 // El minador (Everett) — todos los controles son primitivas de Base UI;
 // la piel viene de los tokens del Telar en styles.css.
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { NumberField } from "@base-ui/react/number-field";
-import { everett } from "../../src/criba.ts";
+import type { EverettStats } from "../../src/criba.ts";
 import { explain } from "../../src/explain.ts";
 import { run, show, size, type Term } from "../../src/peanito.ts";
 import { useT } from "./i18n.tsx";
@@ -12,6 +12,7 @@ type Pair = ShorePair;
 
 type Outcome =
   | { kind: "idle" }
+  | { kind: "sifting"; steps: number }
   | { kind: "notfound" }
   | {
     kind: "found";
@@ -21,6 +22,19 @@ type Outcome =
     ms: number;
     verify: [number, number | null][];
   };
+
+const MINER_DEPTH = 5;
+const MINER_BUDGET = 50_000_000;
+
+/** presets tejibles: enseñan de un vistazo el terreno que el minador domina */
+const PRESETS: [key: string, pairs: [number, number][]][] = [
+  ["doble", [[0, 0], [1, 2], [2, 4], [3, 6]]],
+  ["mitad", [[0, 0], [1, 0], [2, 1], [3, 1], [4, 2], [5, 2]]],
+  ["mas3", [[0, 3], [1, 4], [2, 5]]],
+  ["parimpar", [[0, 0], [1, 1], [2, 0], [3, 1], [4, 0]]],
+  ["triple", [[0, 0], [1, 3], [2, 6], [3, 9]]],
+  ["mod3", [[0, 0], [1, 1], [2, 2], [3, 0], [4, 1], [5, 2], [6, 0]]],
+];
 
 let nextId = 100;
 
@@ -73,37 +87,60 @@ export function Miner() {
     { id: 2, x: 2, y: 4 },
     { id: 3, x: 3, y: 6 },
   ]);
-  const [busy, setBusy] = useState(false);
   const [outcome, setOutcome] = useState<Outcome>({ kind: "idle" });
+  const workerRef = useRef<Worker | null>(null);
+  const startRef = useRef(0);
+
+  const stopWorker = () => {
+    workerRef.current?.terminate();
+    workerRef.current = null;
+  };
+  useEffect(() => stopWorker, []);
 
   // cambiar los ejemplos invalida el resultado: nada rancio en pantalla
   const setPairs = (next: Pair[]) => {
     setPairsRaw(next);
+    stopWorker();
     setOutcome({ kind: "idle" });
   };
+
+  const busy = outcome.kind === "sifting";
 
   const sift = () => {
     const examples = pairs.map((p) => [p.x, p.y] as [number, number]);
     if (!examples.length) return;
-    setBusy(true);
-    setTimeout(() => {
-      const t0 = performance.now();
-      const { prog, stats } = everett(examples, 5, 8_000_000);
-      const ms = performance.now() - t0;
-      if (!prog) setOutcome({ kind: "notfound" });
+    stopWorker();
+    setOutcome({ kind: "sifting", steps: 0 });
+    startRef.current = performance.now();
+    const w = new Worker("dist/miner-worker.js", { type: "module" });
+    workerRef.current = w;
+    w.onmessage = (e: MessageEvent) => {
+      if (workerRef.current !== w) return; // mensaje de una criba muerta
+      const msg = e.data as
+        | { type: "progress"; steps: number }
+        | { type: "done"; prog: Term | null; stats: EverettStats };
+      if (msg.type === "progress") {
+        setOutcome((o) => o.kind === "sifting" ? { kind: "sifting", steps: msg.steps } : o);
+        return;
+      }
+      const ms = performance.now() - startRef.current;
+      workerRef.current = null;
+      w.terminate();
+      if (!msg.prog) setOutcome({ kind: "notfound" });
       else {
+        const prog = msg.prog;
         const maxX = Math.max(...examples.map(([x]) => x));
         setOutcome({
           kind: "found",
           prog,
-          proven: stats.provenMinimal,
-          steps: stats.steps,
+          proven: msg.stats.provenMinimal,
+          steps: msg.stats.steps,
           ms,
           verify: [maxX + 1, maxX + 2, maxX + 3].map((x) => [x, run(prog, x, 100_000)]),
         });
       }
-      setBusy(false);
-    }, 30);
+    };
+    w.postMessage({ examples, maxDepth: MINER_DEPTH, budget: MINER_BUDGET });
   };
 
   return (
@@ -112,6 +149,18 @@ export function Miner() {
         <h2>{t.minerh2}</h2>
         <p className="intro">{t.minerIntro}</p>
         <p className="sub">{t.minersub}</p>
+        <div className="presets" role="group" aria-label="Funciones de ejemplo">
+          {PRESETS.map(([key, ps]) => (
+            <button
+              type="button"
+              key={key}
+              className="preset"
+              onClick={() => setPairs(ps.map(([x, y]) => ({ id: nextId++, x, y })))}
+            >
+              {t.presets[key as keyof typeof t.presets]}
+            </button>
+          ))}
+        </div>
         <div className="bench">
           <Shores
             pairs={pairs}
@@ -149,6 +198,11 @@ export function Miner() {
           </button>
           <div className="out" aria-live="polite">
             {outcome.kind === "idle" && <p className="meta">{t.outidle}</p>}
+            {outcome.kind === "sifting" && (
+              <p className="meta">
+                {outcome.steps.toLocaleString(lang)} {t.sharedSteps}…
+              </p>
+            )}
             {outcome.kind === "notfound" && <p className="meta fail">{t.notfound}</p>}
             {outcome.kind === "found" && (
               <>

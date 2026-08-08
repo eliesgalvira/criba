@@ -175,6 +175,7 @@ function check(
   fuel0: number,
   stats: EverettStats,
   budget: number,
+  onProgress?: (steps: number) => void,
 ): Env[] {
   const out: Env[] = [];
   const work: [Term, number, number, Env, number][] = [[prog, x0, 0, env0, fuel0]];
@@ -184,6 +185,7 @@ function check(
       fuel--;
       stats.steps++;
       if (stats.steps > budget) throw new BudgetExhausted();
+      if (onProgress && (stats.steps & 262143) === 0) onProgress(stats.steps);
       switch (t.t) {
         case "Sup": {
           const c = env.get(t.label);
@@ -263,6 +265,7 @@ export function everett(
   examples: readonly Example[],
   maxDepth = 6,
   budget = 20_000_000,
+  onProgress?: (steps: number) => void,
 ): EverettResult {
   const stats: EverettStats = {
     steps: 0,
@@ -279,7 +282,9 @@ export function everett(
       for (const [x, y] of examples) {
         const fuel = 4 * (x + 2) * (depth + 4) + y + 64;
         const next: Env[] = [];
-        for (const env of survivors) next.push(...check(tree, x, y, env, fuel, stats, budget));
+        for (const env of survivors) {
+          next.push(...check(tree, x, y, env, fuel, stats, budget, onProgress));
+        }
         survivors = next;
         if (!survivors.length) break;
       }

@@ -92,6 +92,12 @@ Deno.test("everett: const 4 y n+5 (imposibles para Copenhague), mínimos probado
   assertEquals(size(n5.prog), 6);
 });
 
+Deno.test("everett: mod 3 aparece con presupuesto amplio (regresión del minador corto)", () => {
+  const e = everett(ex((n) => n % 3, [0, 1, 2, 3, 4, 5, 6]), 5, 50_000_000);
+  assert(e.prog !== null);
+  for (let x = 0; x <= 10; x++) assertEquals(run(e.prog, x, 100_000), x % 3);
+});
+
 Deno.test("everett: lo inexpresable falla honestamente", () => {
   const e = everett(ex((n) => n * n), 4, 3_000_000);
   assertEquals(e.prog, null);

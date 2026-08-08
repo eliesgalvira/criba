@@ -20,7 +20,8 @@
     "entry": [
       "web/app/main.tsx",
       "web/app/race-worker.ts",
-      "src/*_test.ts"
+      "src/*_test.ts",
+      "web/app/miner-worker.ts"
     ],
     "project": [
       "src/**/*.ts",

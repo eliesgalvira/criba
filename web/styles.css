@@ -747,3 +747,26 @@ a,
   font-size: 1.1rem;
   padding: 0.35rem 0.6rem;
 }
+
+/* ═══ presets del minador ═══ */
+.presets {
+  margin-top: 1.6rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+.preset {
+  background: none;
+  border: 1px solid var(--seam);
+  color: var(--thread-dim);
+  font: inherit;
+  font-size: 0.92rem;
+  padding: 0.3rem 0.85rem;
+  cursor: pointer;
+}
+@media (hover: hover) {
+  .preset:hover {
+    border-color: var(--mustard);
+    color: var(--mustard);
+  }
+}
