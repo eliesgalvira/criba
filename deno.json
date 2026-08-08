@@ -28,6 +28,7 @@
   "imports": {
     "react": "npm:react@^19.1.0",
     "react-dom/client": "npm:react-dom@^19.1.0/client",
+    "@base-ui/react/dialog": "npm:@base-ui/react@^1.7.0/dialog",
     "@base-ui/react/number-field": "npm:@base-ui/react@^1.7.0/number-field",
     "@base-ui/react/slider": "npm:@base-ui/react@^1.7.0/slider",
     "@base-ui/react/toggle": "npm:@base-ui/react@^1.7.0/toggle",

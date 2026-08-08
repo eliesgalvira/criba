@@ -25,6 +25,10 @@ export interface Strings {
   pieces: string;
   foundIn: string;
   sharedSteps: string;
+  showLoom: string;
+  loomTitle: string;
+  loomNote: string;
+  close: string;
   verify: string;
   rawIntro: string;
   rawLegend: string;
@@ -87,6 +91,11 @@ const STRINGS: Record<Lang, Strings> = {
     pieces: "piezas",
     foundIn: "encontrada en",
     sharedSteps: "pasos de trabajo, compartidos entre todos los candidatos",
+    showLoom: "Enseñar el telar tejiendo",
+    loomTitle: "El telar, cribando",
+    loomNote:
+      "boceto en movimiento del proceso — la versión fiel, paso a paso y ligada al programa, es el trabajo del mes",
+    close: "Cerrar",
     verify: "Y generaliza — mírala funcionar donde no diste ejemplos:",
     rawIntro: "Así se escribe en el idioma del telar:",
     rawLegend: "«0:» si es cero · «S» suma uno · «@» vuelve a empezar · «*» devuelve lo que quede",
@@ -177,6 +186,11 @@ const STRINGS: Record<Lang, Strings> = {
     pieces: "pieces",
     foundIn: "found in",
     sharedSteps: "steps of work, shared across all candidates",
+    showLoom: "Show the loom weaving",
+    loomTitle: "The loom, sifting",
+    loomNote:
+      "a moving sketch of the process — the faithful, step-by-step version tied to the program is the month's work",
+    close: "Close",
     verify: "And it generalizes — watch it work where you gave no examples:",
     rawIntro: "This is how it is written in the loom's own language:",
     rawLegend: "“0:” if zero · “S” add one · “@” start over · “*” return what remains",

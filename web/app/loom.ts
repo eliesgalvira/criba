@@ -9,6 +9,9 @@ export interface LoomOpts {
   /** lienzo pequeño: anillos y enlaces cortos y reposición temprana, para que
    * la red se vea DENSA donde el hero usa distancias de pantalla completa */
   mini?: boolean;
+  /** modal a pantalla casi completa: todo escalado para VERSE (el hero dibuja
+   * en píxeles de búfer, que en retina son la mitad), y ritmo más vivo */
+  big?: boolean;
 }
 
 export function mountLoom(cv: HTMLCanvasElement, opts: LoomOpts = {}): () => void {
@@ -20,6 +23,7 @@ export function mountLoom(cv: HTMLCanvasElement, opts: LoomOpts = {}): () => voi
   fit();
   addEventListener("resize", fit);
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const S = opts.big ? devicePixelRatio * 1.15 : 1;
   const THREAD = "oklch(0.86 0.03 85 / 0.85)";
   const DIM = "oklch(0.6 0.035 85 / 0.4)";
   const MADDER = "oklch(0.62 0.17 28)";
@@ -51,8 +55,8 @@ export function mountLoom(cv: HTMLCanvasElement, opts: LoomOpts = {}): () => voi
       ring.push(
         addNode(
           kinds[Math.floor(rnd(0, kinds.length))]!,
-          cxx + Math.cos(a) * rnd(opts.mini ? 30 : 70, opts.mini ? 72 : 180),
-          cyy + Math.sin(a) * rnd(opts.mini ? 26 : 50, opts.mini ? 60 : 120),
+          cxx + Math.cos(a) * rnd(opts.mini ? 30 : 70 * S, opts.mini ? 72 : 180 * S),
+          cyy + Math.sin(a) * rnd(opts.mini ? 26 : 50 * S, opts.mini ? 60 : 120 * S),
         ),
       );
     }
@@ -88,7 +92,7 @@ export function mountLoom(cv: HTMLCanvasElement, opts: LoomOpts = {}): () => voi
   function step() {
     const l = findActive();
     if (!l) {
-      if (nodes.length < (opts.mini ? 24 : 28)) {
+      if (nodes.length < (opts.mini ? 24 : opts.big ? 32 : 28)) {
         opts.mini
           ? seed(W() / 2 + rnd(-30, 30), rnd(H() * .15, H() * .85))
           : seed(rnd(W() * .2, W() * .8), rnd(H() * .3, H() * .7));
@@ -141,7 +145,7 @@ export function mountLoom(cv: HTMLCanvasElement, opts: LoomOpts = {}): () => voi
         });
       }
       flash = null;
-    }, reduced ? 0 : 520);
+    }, reduced ? 0 : opts.big ? 380 : 520);
   }
   function physics() {
     for (const n of nodes) {
@@ -152,8 +156,8 @@ export function mountLoom(cv: HTMLCanvasElement, opts: LoomOpts = {}): () => voi
       for (const m of nodes) {
         if (m !== n) {
           const dx = n.x - m.x, dy = n.y - m.y, d2 = dx * dx + dy * dy + 60;
-          fx += dx / d2 * 34;
-          fy += dy / d2 * 34;
+          fx += dx / d2 * 34 * S * S;
+          fy += dy / d2 * 34 * S * S;
         }
       }
       n.vx = (n.vx + fx) * 0.92;
@@ -163,7 +167,7 @@ export function mountLoom(cv: HTMLCanvasElement, opts: LoomOpts = {}): () => voi
       const dx = l.b.x - l.a.x,
         dy = l.b.y - l.a.y,
         d = Math.hypot(dx, dy) || 1,
-        f = (d - (opts.mini ? 62 : 115)) * 0.002;
+        f = (d - (opts.mini ? 62 : 115 * S)) * 0.002;
       l.a.vx += dx / d * f;
       l.a.vy += dy / d * f;
       l.b.vx -= dx / d * f;
@@ -183,7 +187,7 @@ export function mountLoom(cv: HTMLCanvasElement, opts: LoomOpts = {}): () => voi
     for (let i = 0; i <= N; i++) {
       const u = i / N;
       const x = ax + dx * u, y = ay + dy * u;
-      const w = Math.sin(u * Math.PI * 6 + t * 0.002) * 3.2;
+      const w = Math.sin(u * Math.PI * 6 + t * 0.002) * 3.2 * S;
       if (i) cx.lineTo(x - nx * w, y + ny * w);
       else cx.moveTo(x - nx * w, y + ny * w);
     }
@@ -202,12 +206,12 @@ export function mountLoom(cv: HTMLCanvasElement, opts: LoomOpts = {}): () => voi
     }
     for (const l of links) {
       const active = l.pa === 0 && l.pb === 0;
-      cx.lineWidth = active ? 3 : 1.8;
+      cx.lineWidth = (active ? 3 : 1.8) * S;
       cx.strokeStyle = active ? MADDER : (l.pa === 0 || l.pb === 0 ? THREAD : DIM);
       thread(l, t);
     }
     for (const n of nodes) {
-      const r = n.k === "e" ? 6 : 10;
+      const r = (n.k === "e" ? 6 : 10) * S;
       cx.beginPath();
       cx.moveTo(n.x, n.y - r);
       cx.lineTo(n.x + r, n.y);
@@ -221,8 +225,8 @@ export function mountLoom(cv: HTMLCanvasElement, opts: LoomOpts = {}): () => voi
       flashT *= 0.95;
       for (const n of [flash.a, flash.b]) {
         cx.beginPath();
-        cx.arc(n.x, n.y, 18 + (1 - flashT) * 14, 0, 7);
-        cx.lineWidth = 2;
+        cx.arc(n.x, n.y, (18 + (1 - flashT) * 14) * S, 0, 7);
+        cx.lineWidth = 2 * S;
         cx.strokeStyle = MADDER;
         cx.globalAlpha = Math.max(flashT, 0.15);
         cx.stroke();
@@ -234,6 +238,10 @@ export function mountLoom(cv: HTMLCanvasElement, opts: LoomOpts = {}): () => voi
     seed(W() / 2, H() * 0.22);
     seed(W() / 2, H() * 0.5);
     seed(W() / 2, H() * 0.78);
+  } else if (opts.big) {
+    seed(W() * 0.25, H() * 0.35);
+    seed(W() * 0.55, H() * 0.65);
+    seed(W() * 0.78, H() * 0.32);
   } else {
     seed(W() * 0.35, H() * 0.45);
     seed(W() * 0.68, H() * 0.5);
@@ -245,7 +253,7 @@ export function mountLoom(cv: HTMLCanvasElement, opts: LoomOpts = {}): () => voi
       alive = false;
     };
   }
-  const interval = setInterval(step, 1500);
+  const interval = setInterval(step, opts.big ? 950 : 1500);
   const loop = (t: number) => {
     if (!alive) return;
     physics();

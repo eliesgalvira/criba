@@ -865,49 +865,96 @@ a,
 .trace .recipe {
   margin-top: 0.5rem;
 }
-/* ═══ el carril del telar: A LA DERECHA DE LA PÁGINA ═══
-   El banco mide 44rem dentro de un marco de 66rem: a su derecha queda página
-   vacía. El carril vive AHÍ, absoluto respecto a .out — fuera del flujo, así
-   que no roba ancho al programa ni puede empujar nada: cero CLS. */
-.out {
-  position: relative;
+/* ═══ el telar en modal: overlay a casi pantalla completa — cero CLS ═══ */
+.loom-open {
+  margin-top: 0.9rem;
+  padding: 0.5rem 1.1rem;
+  font-family: "Solway", serif;
+  font-size: 0.9rem;
+  color: var(--thread);
+  background: transparent;
+  border: 1px solid var(--seam);
+  cursor: pointer;
 }
-.loom-rail {
-  position: absolute;
-  left: calc(100% + 3.4rem);
-  top: 0;
-  bottom: 0;
-  width: 17rem;
+.loom-open:hover,
+.loom-open:focus-visible {
+  border-color: var(--thread);
+  background: oklch(0.3 0.05 265 / 0.5);
 }
-.loom-rail .miniloom {
-  position: absolute;
-  inset: 0 0 2.2rem 0;
-  width: auto;
-  height: auto;
+.loomdlg-back {
+  position: fixed;
+  inset: 0;
+  background: oklch(0.13 0.045 265 / 0.75);
+}
+.loomdlg {
+  position: fixed;
+  inset: 3vh 3vw;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--indigo-deep);
+  background-image: var(--grain);
+  border: 2px solid var(--thread);
+  padding: 1rem 1.25rem 0.9rem;
+  animation: loomdlg-in 0.25s var(--ease-out);
+}
+.loomdlg-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--seam);
+}
+.loomdlg-title {
+  font-family: "Solway", serif;
+  font-size: 1.15rem;
+  font-weight: 600;
   margin: 0;
 }
-.loom-rail .meta {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
+.loomdlg-close {
+  padding: 0.35rem 0.9rem;
+  font-family: "Solway", serif;
+  font-size: 0.85rem;
+  color: var(--thread);
+  background: transparent;
+  border: 1px solid var(--seam);
+  cursor: pointer;
 }
-/* sin margen de página suficiente: el telar pasa debajo del resultado */
-@media (max-width: 1120px) {
-  .loom-rail {
-    position: static;
-    width: auto;
-    margin-top: 1.4rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--seam);
+.loomdlg-close:hover,
+.loomdlg-close:focus-visible {
+  border-color: var(--thread);
+  background: oklch(0.3 0.05 265 / 0.5);
+}
+/* el lienzo, absoluto dentro del escenario flexible: ocupa TODO el hueco */
+.loomdlg-stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+.bigloom {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.loomdlg-note {
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--seam);
+  font-style: italic;
+  font-size: 0.9rem;
+  color: var(--thread-dim);
+  margin: 0;
+}
+@keyframes loomdlg-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
   }
-  .loom-rail .miniloom {
-    position: static;
-    width: 100%;
-    height: 210px;
-  }
-  .loom-rail .meta {
-    position: static;
+}
+@media (prefers-reduced-motion: reduce) {
+  .loomdlg {
+    animation: none;
   }
 }
 

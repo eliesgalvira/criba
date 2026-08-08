@@ -25,6 +25,9 @@ Nada ilustrado que no esté ocurriendo.
 - **Carrera**: worker con contador real, presupuesto de paciencia explicado, tres regímenes honestos
   (completa / se rinde / ni cabe).
 - **Etiqueta de honestidad**, ES/EN, React Doctor 100, textura de grano.
+- **El telar en modal**: botón en el resultado que abre la animación a pantalla casi completa
+  (boceto dinámico, así etiquetado en la propia web; hacerla entendible y ligada a la explicación es
+  exactamente el trabajo de S1 — y así se dirá en la propuesta).
 
 ## Qué falta ANTES del martes 11 (propuesta)
 
