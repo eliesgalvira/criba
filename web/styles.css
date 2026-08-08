@@ -119,14 +119,8 @@ header {
 .headline {
   position: relative;
   text-align: center;
-  padding: clamp(2.5rem, 7vh, 5rem) clamp(1.5rem, 5vw, 4rem);
+  padding: clamp(2rem, 6vh, 4rem) 1rem;
   pointer-events: none;
-  background: radial-gradient(
-    ellipse 70% 60% at center,
-    oklch(0.24 0.055 265 / 0.94) 45%,
-    oklch(0.24 0.055 265 / 0.7) 70%,
-    transparent 100%
-  );
 }
 h1 {
   font-family: "Solway", serif;
@@ -350,16 +344,18 @@ h2 {
 }
 .controls {
   margin-top: 2rem;
-  display: flex;
+  display: grid;
+  grid-template-columns: 6.5ch minmax(10rem, 20rem) auto;
   align-items: center;
-  gap: 1.4rem;
-  flex-wrap: wrap;
+  column-gap: 1.4rem;
+  row-gap: 0.35rem;
   font-family: "Solway", serif;
 }
 .nval {
   font-weight: 800;
   font-size: 1.2rem;
-  min-width: 5.5ch;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 .slider {
   width: min(18rem, 55vw);
@@ -580,17 +576,25 @@ a,
   color: var(--thread-dim);
   max-width: 62ch;
 }
-.nval {
-  display: grid;
-  line-height: 1.3;
-}
 .npasses {
+  grid-column: 1 / -1;
+  min-height: 1.4em;
   font-family: "Alegreya", serif;
   font-style: italic;
   font-weight: 400;
-  font-size: 0.82rem;
+  font-size: 0.86rem;
   color: var(--thread-dim);
+  font-variant-numeric: tabular-nums;
   white-space: nowrap;
+}
+@media (max-width: 620px) {
+  .controls {
+    grid-template-columns: 6.5ch minmax(0, 1fr);
+  }
+  .controls .gobtn {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   button,

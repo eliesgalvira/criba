@@ -39,13 +39,16 @@ export function Race() {
         <div className="controls">
           <span className="nval">
             N = <b>{n}</b>
-            <span className="npasses">2^{n} = {(2 ** n).toLocaleString(lang)} {t.passes}</span>
           </span>
           <Slider.Root
             value={n}
             min={4}
             max={30}
-            onValueChange={(v) => setN(Array.isArray(v) ? v[0]! : v)}
+            onValueChange={(v) => {
+              setN(Array.isArray(v) ? v[0]! : v);
+              setIc(null); // los resultados son de otro N: fuera, nada de mentir
+              setNaive(null);
+            }}
             className="slider"
           >
             <Slider.Control className="slider-control">
@@ -58,6 +61,7 @@ export function Race() {
           <button type="button" className="gobtn" onClick={weave} disabled={busy}>
             {t.gorace}
           </button>
+          <span className="npasses">2^{n} = {(2 ** n).toLocaleString(lang)} {t.passes}</span>
         </div>
         <div className="cloths">
           <div className="cloth naive">

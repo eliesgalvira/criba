@@ -57,3 +57,12 @@ cálido), nunca oscuro. Mostaza como relleno lleva texto `--indigo-deep` (es pá
 - **Contadores**: cifras Solway 800, tabulares; naive en rubia / IC en mostaza; barras de "tela
   tejida" como visualización de trabajo.
 - **Toggle ES/EN**: fijo arriba-derecha, mostaza el activo.
+
+## Textura (técnica apuntada, aún sin aplicar)
+
+Grano estilo t3code (`apps/web/src/index.css` de ese repo): SVG inline como data-URI con
+`feTurbulence type='fractalNoise' baseFrequency='0.9'
+numOctaves='4' stitchTiles='stitch'`, rect a
+opacidad ~0.035, usado como `background-image` POR ENCIMA del `background-color` de cada superficie
+que opta (utility), nunca como capa global. Si algún día el índigo pide textura de tela, es así — no
+con degradados que tapen el telar.
