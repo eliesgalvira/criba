@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { Toggle } from "@base-ui/react/toggle";
 import { ToggleGroup } from "@base-ui/react/toggle-group";
@@ -105,8 +105,12 @@ export function App() {
     document.documentElement.lang = lang;
   }, [lang]);
 
+  // valor estable: sin esto, cada render de App repinta a TODOS los
+  // consumidores del contexto (react-doctor/jsx-no-constructed-context-values)
+  const langCtx = useMemo(() => ({ lang, t: stringsFor(lang) }), [lang]);
+
   return (
-    <LangContext.Provider value={{ lang, t: stringsFor(lang) }}>
+    <LangContext.Provider value={langCtx}>
       <nav className="lang" aria-label="Idioma / Language">
         <ToggleGroup
           value={[lang]}

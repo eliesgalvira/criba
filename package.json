@@ -8,6 +8,23 @@
     "@base-ui/react": "^1.7.0"
   },
   "reactDoctor": {
-    "ignore": ["web/design/**", "web/dist/**", "lab/**"]
+    "ignore": {
+      "files": [
+        "web/design/**",
+        "web/dist/**",
+        "lab/**"
+      ]
+    }
+  },
+  "knip": {
+    "entry": [
+      "web/app/main.tsx",
+      "web/app/race-worker.ts",
+      "src/*_test.ts"
+    ],
+    "project": [
+      "src/**/*.ts",
+      "web/app/**/*.{ts,tsx}"
+    ]
   }
 }

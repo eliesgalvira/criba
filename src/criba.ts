@@ -302,6 +302,3 @@ export function everett(
   }
   return { prog: best?.prog ?? null, stats };
 }
-
-export { fits, run, show, size };
-export type { Example, Term };
