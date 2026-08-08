@@ -298,10 +298,14 @@ export function naiveDemo(
       for (const c of spine) normal(c.t, c.e);
     }
   };
-  // El enunciado clásico pesa 2^N nodos (una App por negación). Si ni eso
-  // cabe en el presupuesto, se dice y no se intenta: construirlo colgaría
-  // el worker antes de la primera β (visto en N=29).
-  if (2 ** N > budget) return { betas: 0, complete: false, oversize: true };
+  // El enunciado clásico pesa 2^N nodos (una App por negación). El tope de
+  // construcción es de MEMORIA (no de paciencia): más allá de 2^22 nodos
+  // (~230 MB) construirlo colgaría el worker antes de la primera β (visto
+  // en N=29). También aplica si el enunciado ya excede el presupuesto.
+  const BUILD_CAP = 2 ** 22;
+  if (2 ** N > Math.min(budget, BUILD_CAP)) {
+    return { betas: 0, complete: false, oversize: true };
+  }
   const True = L(0, L(1, V(0)));
   const Not = L(2, L(3, L(4, A(A(V(2), V(4)), V(3)))));
   let term = True;

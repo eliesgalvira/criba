@@ -88,7 +88,7 @@ const STRINGS: Record<Lang, Strings> = {
     racelead:
       "Un encargo deliberadamente absurdo: negar una afirmación 2^N veces seguidas. La forma clásica de computar — la de casi todo el software que usas — hace el trabajo de cada negación, una a una. El paradigma del telar se da cuenta de que casi todas las pasadas son idénticas… y las teje una sola vez. Mueve N y compara. Los dos contadores salen de ejecuciones reales, en tu navegador, ahora.",
     raceNote:
-      "(Los expertos llaman a estos dos mundos «λ-cálculo» y «evaluación óptima de redes de interacción». Los nombres dan igual por ahora; la diferencia entre las dos columnas, no. Al método clásico le damos un presupuesto de paciencia de 6 millones de pasos: si lo agota, se rinde y te dice cuánto le faltaba.)",
+      "(Los expertos llaman a estos dos mundos «λ-cálculo» y «evaluación óptima de redes de interacción». Los nombres dan igual por ahora; la diferencia entre las dos columnas, no. Al método clásico le damos un presupuesto de paciencia de 10 millones de pasos: si lo agota, se rinde y te dice cuánto le faltaba.)",
     gorace: "Hacerlo de verdad",
     goraceRunning: "Tejiendo…",
     passes: "negaciones",
@@ -158,7 +158,7 @@ const STRINGS: Record<Lang, Strings> = {
     racelead:
       "A deliberately absurd job: negate a statement 2^N times in a row. The classic way of computing — the one behind almost all the software you use — does the work of each negation, one by one. The loom paradigm notices that almost every pass is identical… and weaves it once. Move N and compare. Both counters come from real executions, in your browser, now.",
     raceNote:
-      "(Experts call these two worlds “λ-calculus” and “optimal evaluation of interaction nets”. The names don't matter yet; the difference between the two columns does. We give the classic method a patience budget of 6 million steps: if it runs out, it gives up and tells you how much was left.)",
+      "(Experts call these two worlds “λ-calculus” and “optimal evaluation of interaction nets”. The names don't matter yet; the difference between the two columns does. We give the classic method a patience budget of 10 million steps: if it runs out, it gives up and tells you how much was left.)",
     gorace: "Do it for real",
     goraceRunning: "Weaving…",
     passes: "negations",

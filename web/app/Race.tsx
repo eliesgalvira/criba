@@ -20,7 +20,11 @@ type RaceState =
   | { status: "running"; n: number; ic: number; icMs: number; naiveBetas: number }
   | { status: "done"; n: number; ic: number; icMs: number; naive: NaiveOutcome };
 
-const NAIVE_BUDGET = 6_000_000;
+// Presupuesto de paciencia: ~2 s de molienda real en el worker. Elegido
+// lejos de los costes 3·2^N (6,29M / 12,58M) para no rendirse al 97% del
+// trabajo, que parecía absurdo: N=21 ahora completa; N=22 se rinde a los
+// 10M faltándole aún 2,6M.
+const NAIVE_BUDGET = 10_000_000;
 
 export function Race() {
   const { lang, t } = useT();
