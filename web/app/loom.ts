@@ -163,14 +163,16 @@ export function mountLoom(cv: HTMLCanvasElement): () => void {
   }
   function thread(l: LLink, t: number) {
     const N = 14;
+    const ax = l.a.x, ay = l.a.y, bx = l.b.x, by = l.b.y;
+    const dx = bx - ax, dy = by - ay, d = Math.hypot(dx, dy) || 1;
+    const nx = dy / d, ny = dx / d;
     cx.beginPath();
     for (let i = 0; i <= N; i++) {
       const u = i / N;
-      const x = l.a.x + (l.b.x - l.a.x) * u, y = l.a.y + (l.b.y - l.a.y) * u;
-      const dx = l.b.x - l.a.x, dy = l.b.y - l.a.y, d = Math.hypot(dx, dy) || 1;
+      const x = ax + dx * u, y = ay + dy * u;
       const w = Math.sin(u * Math.PI * 6 + t * 0.002) * 3.2;
-      if (i) cx.lineTo(x - dy / d * w, y + dx / d * w);
-      else cx.moveTo(x - dy / d * w, y + dx / d * w);
+      if (i) cx.lineTo(x - nx * w, y + ny * w);
+      else cx.moveTo(x - nx * w, y + ny * w);
     }
     cx.stroke();
   }

@@ -23,8 +23,15 @@ Deno.test("fusión: not^(2^N) correcto y en O(N) interacciones (paridad spike)",
   assert(r100.interactions < 2000);
 });
 
-Deno.test("naive: el mismo cómputo agota el presupuesto ya en 2^16", () => {
-  const ok = naiveDemo(8, 2_000_000);
-  assert(ok !== null && ok.betas === 768);
-  assertEquals(naiveDemo(16, 100_000), null);
+Deno.test("naive: completa con recuento exacto y sin desbordar la pila", () => {
+  const ok = naiveDemo(8);
+  assert(ok.complete && ok.betas === 768);
+  // regresión del stack overflow del worker (~N=13 con whnf recursivo)
+  const deep = naiveDemo(14);
+  assert(deep.complete && deep.betas === 3 * 2 ** 14);
+});
+
+Deno.test("naive: al agotar presupuesto conserva el recuento (nada de «0+»)", () => {
+  const dnf = naiveDemo(16, 100_000);
+  assert(!dnf.complete && dnf.betas >= 100_000);
 });

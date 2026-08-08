@@ -222,18 +222,26 @@ export function fusionDemo(N: number): FusionResult {
 
 /**
  * El mismo cómputo en λ-cálculo naive (una β cada vez), con presupuesto.
- * Devuelve null si lo agota — que es el punto.
+ * whnf ITERATIVO (pila explícita en heap): la profundidad de recursión de la
+ * versión anterior crecía con 2^N y reventaba el stack del worker (~N=13).
+ * El resultado siempre conserva el recuento de pasos, complete o no.
  */
+export interface NaiveResult {
+  betas: number;
+  complete: boolean;
+}
+
 export function naiveDemo(
   N: number,
   budget = 2_000_000,
   onProgress?: (betas: number) => void,
-): { betas: number } | null {
+): NaiveResult {
   type T = { t: "Var"; n: number } | { t: "Lam"; n: number; b: T } | { t: "App"; f: T; a: T };
   const V = (n: number): T => ({ t: "Var", n });
   const L = (n: number, b: T): T => ({ t: "Lam", n, b });
   const A = (f: T, a: T): T => ({ t: "App", f, a });
   let betas = 0;
+  class BudgetOut extends Error {}
   const sub = (t: T, n: number, v: T): T => {
     switch (t.t) {
       case "Var":
@@ -245,20 +253,22 @@ export function naiveDemo(
     }
   };
   const whnf = (t: T): T => {
+    const spine: { t: "App"; f: T; a: T }[] = [];
     for (;;) {
-      if (betas > budget) throw new BudgetOut();
-      if (t.t === "App") {
-        const f = whnf(t.f);
-        if (f.t === "Lam") {
-          betas++;
-          if (onProgress && (betas & 131071) === 0) onProgress(betas);
-          t = sub(f.b, f.n, t.a);
-          continue;
-        }
-        return A(f, t.a);
+      while (t.t === "App") {
+        spine.push(t);
+        t = t.f;
       }
-      return t;
+      if (t.t === "Lam" && spine.length) {
+        const app = spine.pop()!;
+        betas++;
+        if (betas > budget) throw new BudgetOut();
+        if (onProgress && (betas & 131071) === 0) onProgress(betas);
+        t = sub(t.b, t.n, app.a);
+      } else break;
     }
+    while (spine.length) t = A(t, spine.pop()!.a);
+    return t;
   };
   const normal = (t: T): T => {
     t = whnf(t);
@@ -266,15 +276,14 @@ export function naiveDemo(
     if (t.t === "App") return A(normal(t.f), normal(t.a));
     return t;
   };
-  class BudgetOut extends Error {}
   const True = L(0, L(1, V(0)));
   const Not = L(2, L(3, L(4, A(A(V(2), V(4)), V(3)))));
   let term = True;
   for (let i = 0; i < 2 ** N; i++) term = A(Not, term);
   try {
     normal(term);
-    return { betas };
+    return { betas, complete: true };
   } catch {
-    return null;
+    return { betas, complete: false };
   }
 }

@@ -45,13 +45,17 @@ export function Race() {
     const w = new Worker("dist/worker.js", { type: "module" });
     workerRef.current = w;
     w.onmessage = (e: MessageEvent) => {
+      // guardia de identidad: un mensaje tardío de una carrera muerta no toca
+      // ni el estado ni el worker vivo
+      if (workerRef.current !== w) return;
       const msg = e.data as { type: "progress" | "done" | "dnf"; betas?: number };
       if (msg.type === "progress") {
         setRace((r) => r.status === "running" ? { ...r, naiveBetas: msg.betas ?? 0 } : r);
         return;
       }
       const ms = performance.now() - startRef.current;
-      stopWorker();
+      workerRef.current = null;
+      w.terminate();
       setRace((r) => {
         if (r.status !== "running") return r;
         const naive: NaiveOutcome = msg.type === "done"
@@ -97,34 +101,36 @@ export function Race() {
         </div>
         <div className="cloths" aria-live="polite">
           <div className="cloth naive">
-            {race.status === "idle" && <span className="n">—</span>}
-            {race.status === "running" && (
-              <>
-                <span className="n">{fmt(race.naiveBetas)}</span>
-                <div className="weaving" aria-hidden="true" />
-              </>
-            )}
-            {race.status === "done" && race.naive.kind === "ok" && (
-              <span className="n">
-                {fmt(race.naive.betas)} <small>· {race.naive.ms.toFixed(0)} ms</small>
-              </span>
-            )}
-            {race.status === "done" && race.naive.kind === "dnf" && (
-              <>
-                <span className="n">{fmt(race.naive.betasTried)}+</span>
+            <span className="n">
+              {race.status === "idle" && "—"}
+              {race.status === "running" && fmt(race.naiveBetas)}
+              {race.status === "done" && race.naive.kind === "ok" && (
+                <>
+                  {fmt(race.naive.betas)} <small>· {race.naive.ms.toFixed(0)} ms</small>
+                </>
+              )}
+              {race.status === "done" && race.naive.kind === "dnf" &&
+                `${fmt(race.naive.betasTried)}+`}
+            </span>
+            <div className="slot">
+              {race.status === "running" && <div className="weaving" aria-hidden="true" />}
+              {race.status === "done" && race.naive.kind === "dnf" && (
                 <p className="note">
                   {t.dnfNoteA} {fmt(3 * 2 ** race.n)} {t.dnfNoteB}
                 </p>
-              </>
-            )}
+              )}
+            </div>
             <span className="lbl">{t.naivelbl}</span>
           </div>
           <div className="cloth ic">
-            {race.status === "idle" ? <span className="n">—</span> : (
-              <span className="n">
-                {fmt(race.ic)} <small>· {race.icMs.toFixed(1)} ms</small>
-              </span>
-            )}
+            <span className="n">
+              {race.status === "idle" ? "—" : (
+                <>
+                  {fmt(race.ic)} <small>· {race.icMs.toFixed(1)} ms</small>
+                </>
+              )}
+            </span>
+            <div className="slot" />
             <span className="lbl">{t.iclbl}</span>
           </div>
         </div>
