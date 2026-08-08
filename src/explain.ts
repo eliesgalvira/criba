@@ -187,3 +187,111 @@ export function explainPatterns(term: Term, lang: "es" | "en"): string {
   const body = pblock(prender(term, 0, false, w), w);
   return [`${w.fn}(${PVARS[0]}):`, ...indent(body)].join("\n");
 }
+
+// ---------------------------------------------------------------------------
+// Vista «instrucciones»: SIN recursión. Todo programa Peanito es exactamente
+// «apunta al total y repite con un n más pequeño», así que se puede contar
+// como un bucle de instrucciones — la forma más llana que existe.
+// ---------------------------------------------------------------------------
+
+interface LWords {
+  start: string;
+  repeat: string;
+  eq: (d: number) => string;
+  ge: (d: number) => string;
+  stop: string;
+  addTotal: (e: string) => string;
+  again: (e: string) => string;
+  result: string;
+  resultIs: (e: string) => string;
+  and: string;
+}
+
+const LWORDS: Record<"es" | "en", LWords> = {
+  es: {
+    start: "empieza: total = 0",
+    repeat: "repite:",
+    eq: (d) => `si n = ${d}`,
+    ge: (d) => `si n ≥ ${d}`,
+    stop: "párate",
+    addTotal: (e) => `suma ${e} al total`,
+    again: (e) => `otra vez con n = ${e}`,
+    result: "al pararte, el resultado es el total",
+    resultIs: (e) => `el resultado es ${e}, tal cual`,
+    and: "y",
+  },
+  en: {
+    start: "start: total = 0",
+    repeat: "repeat:",
+    eq: (d) => `if n = ${d}`,
+    ge: (d) => `if n ≥ ${d}`,
+    stop: "stop",
+    addTotal: (e) => `add ${e} to the total`,
+    again: (e) => `again with n = ${e}`,
+    result: "when you stop, the result is the total",
+    resultIs: (e) => `the result is ${e}, as is`,
+    and: "and",
+  },
+};
+
+/** La acción de una hoja: qué sumar y si parar o repetir. */
+function leafAction(t: Term, d: number, isZero: boolean, w: LWords): string {
+  let k = 0;
+  let inner: Term = t;
+  while (inner.t === "Suc") {
+    k++;
+    inner = inner.body;
+  }
+  const val = isZero ? "0" : d === 0 ? "n" : `n − ${d}`;
+  const adds: string[] = [];
+  if (k > 0) adds.push(String(k));
+  let tail: string;
+  switch (inner.t) {
+    case "Zero":
+      tail = w.stop;
+      break;
+    case "Ret":
+      if (!isZero) adds.push(val);
+      tail = w.stop;
+      break;
+    case "Rec":
+      tail = w.again(val);
+      break;
+    default:
+      throw new Error("hoja inesperada");
+  }
+  const parts: string[] = [];
+  if (adds.length) parts.push(w.addTotal(adds.join(" + ")));
+  parts.push(tail);
+  return parts.join(` ${w.and} `);
+}
+
+function lrender(t: Term, d: number, isZero: boolean, w: LWords): string[] {
+  if (isZero && t.t === "Mat") return lrender(t.zero, d, true, w);
+  if (t.t !== "Mat") return [leafAction(t, d, isZero, w)];
+  const lines: string[] = [`${w.eq(d)} → ${lrender(t.zero, d, true, w).join("; ")}`];
+  if (t.succ.t === "Mat") lines.push(...lrender(t.succ, d + 1, false, w));
+  else lines.push(`${w.ge(d + 1)} → ${lrender(t.succ, d + 1, false, w).join("; ")}`);
+  return lines;
+}
+
+/** Pseudocódigo sin recursión: bucle de apuntar y repetir. */
+export function explainLoop(term: Term, lang: "es" | "en"): string {
+  const w = LWORDS[lang];
+  if (term.t !== "Mat") {
+    // sin casos no hay bucle: es una fórmula directa
+    const a = leafAction(term, 0, false, w);
+    if (a === w.stop) return w.resultIs("0");
+    if (!a.includes(w.again("n"))) {
+      const m = a.replace(` ${w.and} ${w.stop}`, "").replace(w.addTotal(""), "");
+      // «suma X al total y párate» sin bucle = el resultado es X
+      const expr = a.startsWith(w.addTotal("").slice(0, 4))
+        ? a.slice(a.indexOf(" ") + 1).replace(` al total ${w.and} ${w.stop}`, "")
+          .replace(` to the total ${w.and} ${w.stop}`, "")
+        : m;
+      return w.resultIs(expr);
+    }
+  }
+  const body = lrender(term, 0, false, w);
+  return [w.start, w.repeat, ...body.map((l) => "  " + l), w.result].join("\n");
+}

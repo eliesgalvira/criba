@@ -5,7 +5,7 @@ import { NumberField } from "@base-ui/react/number-field";
 import { Toggle } from "@base-ui/react/toggle";
 import { ToggleGroup } from "@base-ui/react/toggle-group";
 import type { EverettStats } from "../../src/criba.ts";
-import { explain, explainPatterns } from "../../src/explain.ts";
+import { explain, explainLoop, explainPatterns } from "../../src/explain.ts";
 import { run, show, size, type Term } from "../../src/peanito.ts";
 import { pickTraceInput, trace } from "../../src/trace.ts";
 import { useT } from "./i18n.tsx";
@@ -16,7 +16,6 @@ type Pair = ShorePair;
 
 type Outcome =
   | { kind: "idle" }
-  | { kind: "sifting"; steps: number }
   | { kind: "notfound" }
   | {
     kind: "found";
@@ -91,7 +90,7 @@ function MiniLoom() {
   return <canvas ref={ref} className="miniloom" aria-hidden="true" />;
 }
 
-type RecipeView = "trace" | "cases" | "patterns";
+type RecipeView = "loop" | "trace" | "cases" | "patterns";
 
 function TraceView({ prog, examples }: { prog: Term; examples: [number, number][] }) {
   const { lang, t } = useT();
@@ -139,8 +138,13 @@ export function Miner() {
     { id: 3, x: 3, y: 6 },
   ]);
   const [outcome, setOutcome] = useState<Outcome>({ kind: "idle" });
+  // la criba se lleva APARTE del resultado: durante una criba rápida el
+  // resultado anterior sigue en pantalla (stale-while-sifting) y solo si la
+  // criba pasa de 400 ms entra el loader — cero flashes de layout
+  const [sifting, setSifting] = useState<{ steps: number } | null>(null);
+  const [loaderOn, setLoaderOn] = useState(false);
   const [activeRule, setActiveRule] = useState<string | null>("doble");
-  const [view, setView] = useState<RecipeView>("trace");
+  const [view, setView] = useState<RecipeView>("loop");
   const workerRef = useRef<Worker | null>(null);
   const startRef = useRef(0);
 
@@ -150,12 +154,23 @@ export function Miner() {
   };
   useEffect(() => stopWorker, []);
 
+  const isSifting = sifting !== null;
+  useEffect(() => {
+    if (!isSifting) {
+      setLoaderOn(false);
+      return;
+    }
+    const id = setTimeout(() => setLoaderOn(true), 400);
+    return () => clearTimeout(id);
+  }, [isSifting]);
+
   // cambiar los ejemplos invalida el resultado: nada rancio en pantalla
   // (y tejer lo tuyo despega la pestaña activa: la regla ya es tuya)
   const setPairs = (next: Pair[]) => {
     setPairsRaw(next);
     setActiveRule(null);
     stopWorker();
+    setSifting(null);
     setOutcome({ kind: "idle" });
   };
 
@@ -163,16 +178,17 @@ export function Miner() {
     setPairsRaw(ps.map(([x, y]) => ({ id: nextId++, x, y })));
     setActiveRule(key);
     stopWorker();
+    setSifting(null);
     setOutcome({ kind: "idle" });
   };
 
-  const busy = outcome.kind === "sifting";
+  const busy = isSifting;
 
   const sift = () => {
     const examples = pairs.map((p) => [p.x, p.y] as [number, number]);
     if (!examples.length) return;
     stopWorker();
-    setOutcome({ kind: "sifting", steps: 0 });
+    setSifting({ steps: 0 });
     startRef.current = performance.now();
     const w = new Worker("dist/miner-worker.js", { type: "module" });
     workerRef.current = w;
@@ -182,12 +198,13 @@ export function Miner() {
         | { type: "progress"; steps: number }
         | { type: "done"; prog: Term | null; stats: EverettStats };
       if (msg.type === "progress") {
-        setOutcome((o) => o.kind === "sifting" ? { kind: "sifting", steps: msg.steps } : o);
+        setSifting((s) => s ? { steps: msg.steps } : s);
         return;
       }
       const ms = performance.now() - startRef.current;
       workerRef.current = null;
       w.terminate();
+      setSifting(null);
       if (!msg.prog) setOutcome({ kind: "notfound" });
       else {
         const prog = msg.prog;
@@ -265,17 +282,21 @@ export function Miner() {
             {busy ? t.running : t.run}
           </button>
           <div className="out" aria-live="polite">
-            {outcome.kind === "idle" && <p className="meta">{t.outidle}</p>}
-            {outcome.kind === "sifting" && (
+            {isSifting && loaderOn && (
               <>
                 <MiniLoom />
                 <p className="meta">
-                  {outcome.steps.toLocaleString(lang)} {t.sharedSteps}…
+                  {sifting.steps.toLocaleString(lang)} {t.sharedSteps}…
                 </p>
               </>
             )}
-            {outcome.kind === "notfound" && <p className="meta fail">{t.notfound}</p>}
-            {outcome.kind === "found" && (
+            {!(isSifting && loaderOn) && outcome.kind === "idle" && (
+              <p className="meta">{t.outidle}</p>
+            )}
+            {!(isSifting && loaderOn) && outcome.kind === "notfound" && (
+              <p className="meta fail">{t.notfound}</p>
+            )}
+            {!(isSifting && loaderOn) && outcome.kind === "found" && (
               <>
                 <div className="found-bar">
                   <p className="found-head">{t.foundHead}</p>
@@ -287,11 +308,13 @@ export function Miner() {
                       if (next) setView(next);
                     }}
                   >
+                    <Toggle value="loop" className="view-tab">{t.viewLoop}</Toggle>
                     <Toggle value="trace" className="view-tab">{t.viewTrace}</Toggle>
                     <Toggle value="cases" className="view-tab">{t.viewCases}</Toggle>
                     <Toggle value="patterns" className="view-tab">{t.viewPatterns}</Toggle>
                   </ToggleGroup>
                 </div>
+                {view === "loop" && <pre className="recipe">{explainLoop(outcome.prog, lang)}</pre>}
                 {view === "trace" && (
                   <TraceView
                     prog={outcome.prog}

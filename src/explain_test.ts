@@ -1,5 +1,5 @@
 import { assertEquals } from "jsr:@std/assert";
-import { explain, explainPatterns } from "./explain.ts";
+import { explain, explainLoop, explainPatterns } from "./explain.ts";
 import { Mat, Rec, Ret, Suc, Zero } from "./peanito.ts";
 
 Deno.test("explain: doble — casos sobre n, sin variables inventadas", () => {
@@ -73,4 +73,34 @@ Deno.test("explainPatterns: la vista del cribador (doble)", () => {
   si n = m + 1:
     devuelve 2 + f(m)`,
   );
+});
+
+Deno.test("explainLoop: el doble, sin recursión", () => {
+  assertEquals(
+    explainLoop(Mat(Zero, Suc(Suc(Rec))), "es"),
+    `empieza: total = 0
+repite:
+  si n = 0 → párate
+  si n ≥ 1 → suma 2 al total y otra vez con n = n − 1
+al pararte, el resultado es el total`,
+  );
+});
+
+Deno.test("explainLoop: resto ÷3, sin recursión", () => {
+  const prog = Mat(Zero, Mat(Suc(Rec), Mat(Suc(Suc(Rec)), Rec)));
+  assertEquals(
+    explainLoop(prog, "es"),
+    `empieza: total = 0
+repite:
+  si n = 0 → párate
+  si n = 1 → suma 1 al total y otra vez con n = 0
+  si n = 2 → suma 2 al total y otra vez con n = 0
+  si n ≥ 3 → otra vez con n = n − 3
+al pararte, el resultado es el total`,
+  );
+});
+
+Deno.test("explainLoop: identidad y constante, fórmula directa", () => {
+  assertEquals(explainLoop(Ret, "es"), "el resultado es n, tal cual");
+  assertEquals(explainLoop(Suc(Suc(Zero)), "es"), "el resultado es 2, tal cual");
 });
