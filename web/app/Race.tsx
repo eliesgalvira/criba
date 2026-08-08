@@ -7,7 +7,7 @@
 // vivo: la asimetría de tiempos se ve, no se cuenta.
 import { useEffect, useRef, useState } from "react";
 import { Slider } from "@base-ui/react/slider";
-import { fusionDemo, naiveCost } from "../../src/telar.ts";
+import { fusionDemo, naiveCost, naiveOversize } from "../../src/telar.ts";
 import { useT } from "./i18n.tsx";
 
 type NaiveOutcome =
@@ -44,6 +44,12 @@ export function Race() {
     const t0 = performance.now();
     const ic = fusionDemo(n);
     const icMs = performance.now() - t0;
+    if (naiveOversize(n, NAIVE_BUDGET)) {
+      // veredicto puro e instantáneo: directo al mensaje, sin pasar por
+      // «corriendo» (evita el flash del 0 mientras arrancaba el worker)
+      setRace({ status: "done", n, ic: ic.interactions, icMs, naive: { kind: "oversize" } });
+      return;
+    }
     // el telar ya ha terminado; el clásico empieza ahora, en su propio hilo
     setRace({ status: "running", n, ic: ic.interactions, icMs, naiveBetas: 0 });
     startRef.current = performance.now();

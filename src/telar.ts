@@ -242,6 +242,18 @@ export function naiveCost(N: number): number {
   return 3 * 2 ** N;
 }
 
+/** Tope de construcción del enunciado clásico: límite de MEMORIA, no de
+ * paciencia. Más allá de 2^22 nodos (~230 MB) construirlo colgaría el worker
+ * antes de la primera β (visto en N=29). */
+export const NAIVE_BUILD_CAP = 2 ** 22;
+
+/** ¿El enunciado (2^N nodos, uno por negación) ni siquiera cabe? Predicado
+ * puro y síncrono: la UI lo consulta antes de lanzar el worker, y naiveDemo
+ * lo aplica igualmente — una sola fuente de verdad. */
+export function naiveOversize(N: number, budget: number): boolean {
+  return 2 ** N > Math.min(budget, NAIVE_BUILD_CAP);
+}
+
 export function naiveDemo(
   N: number,
   budget = 2_000_000,
@@ -298,14 +310,7 @@ export function naiveDemo(
       for (const c of spine) normal(c.t, c.e);
     }
   };
-  // El enunciado clásico pesa 2^N nodos (una App por negación). El tope de
-  // construcción es de MEMORIA (no de paciencia): más allá de 2^22 nodos
-  // (~230 MB) construirlo colgaría el worker antes de la primera β (visto
-  // en N=29). También aplica si el enunciado ya excede el presupuesto.
-  const BUILD_CAP = 2 ** 22;
-  if (2 ** N > Math.min(budget, BUILD_CAP)) {
-    return { betas: 0, complete: false, oversize: true };
-  }
+  if (naiveOversize(N, budget)) return { betas: 0, complete: false, oversize: true };
   const True = L(0, L(1, V(0)));
   const Not = L(2, L(3, L(4, A(A(V(2), V(4)), V(3)))));
   let term = True;

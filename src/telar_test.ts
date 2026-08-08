@@ -1,6 +1,16 @@
 // Tests de Telar: paridad con el spike verificado (lab/spike-ic.js).
 import { assert, assertEquals } from "jsr:@std/assert";
-import { App, fusionDemo, Lam, naiveCost, naiveDemo, showIC, Telar, Var } from "./telar.ts";
+import {
+  App,
+  fusionDemo,
+  Lam,
+  naiveCost,
+  naiveDemo,
+  naiveOversize,
+  showIC,
+  Telar,
+  Var,
+} from "./telar.ts";
 
 Deno.test("β básica: (λx.λt.(t x) λy.y) → λt.(t λy.y)", () => {
   const m = new Telar();
@@ -46,4 +56,6 @@ Deno.test("naive: si el enunciado no cabe, lo dice al instante sin construirlo",
   const r = naiveDemo(29, 6_000_000); // regresión del cuelgue en N=29
   assert(r.oversize === true && !r.complete && r.betas === 0);
   assert(performance.now() - t0 < 50);
+  // el predicado que consulta la UI coincide con lo que hace el evaluador
+  assert(naiveOversize(23, 10_000_000) && !naiveOversize(22, 10_000_000));
 });
