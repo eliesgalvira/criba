@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dirección A — La Estampa (Byrne)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Libre+Caslon+Display&display=swap"
+      rel="stylesheet">
+    <style>
+    :root {
+      --bg: oklch(1 0 0);
+      --ink: oklch(0.18 0 0);
+      --muted: oklch(0.45 0 0);
+      --byrne-blue: oklch(0.48 0.14 255);
+      --byrne-red: oklch(0.55 0.19 27);
+      --byrne-yellow: oklch(0.82 0.14 90);
+      --rule: oklch(0.18 0 0);
+      --step: clamp(4rem, 10vh, 8rem);
+    }
+    * {
+      margin: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Libre Caslon Text", Georgia, serif;
+      font-size: 1.0625rem;
+      line-height: 1.65;
+    }
+    .frame {
+      max-width: 68rem;
+      margin-inline: auto;
+      padding-inline: clamp(1.25rem, 4vw, 3rem);
+    }
+
+    /* ——— lang toggle ——— */
+    .lang {
+      position: fixed;
+      top: 1.1rem;
+      right: 1.25rem;
+      z-index: 10;
+      font-size: 0.85rem;
+      letter-spacing: 0.02em;
+    }
+    .lang button {
+      background: none;
+      border: 1px solid var(--ink);
+      color: var(--ink);
+      font: inherit;
+      padding: 0.2rem 0.6rem;
+      cursor: pointer;
+    }
+    .lang button[aria-pressed="true"] {
+      background: var(--ink);
+      color: var(--bg);
+    }
+    .lang button + button {
+      border-left: 0;
+    }
+
+    /* ——— hero ——— */
+    header {
+      min-height: 92vh;
+      display: grid;
+      grid-template-rows: 1fr auto;
+      border-bottom: 3px double var(--rule);
+    }
+    .plate {
+      position: relative;
+      display: grid;
+      place-items: center;
+      padding-top: var(--step);
+    }
+    .plate canvas {
+      width: min(92vw, 46rem);
+      height: auto;
+      display: block;
+    }
+    .plate figcaption {
+      position: absolute;
+      bottom: 0.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-style: italic;
+      font-size: 0.85rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .headline {
+      text-align: center;
+      padding-block: 2.5rem var(--step);
+    }
+    h1 {
+      font-family: "Libre Caslon Display", "Libre Caslon Text", serif;
+      font-weight: 400;
+      font-size: clamp(2.1rem, 5.5vw, 4.25rem);
+      line-height: 1.12;
+      letter-spacing: -0.01em;
+      text-wrap: balance;
+      max-width: 22ch;
+      margin-inline: auto;
+    }
+    .headline p {
+      margin-top: 1.4rem;
+      font-size: clamp(1rem, 1.6vw, 1.2rem);
+      color: var(--muted);
+      max-width: 52ch;
+      margin-inline: auto;
+      text-wrap: pretty;
+    }
+    .headline .go {
+      display: inline-block;
+      margin-top: 2.2rem;
+      font-style: italic;
+      color: var(--ink);
+      text-decoration: none;
+      border-bottom: 1px solid var(--ink);
+      padding-bottom: 0.15rem;
+    }
+
+    /* ——— proposition / prose ——— */
+    section {
+      padding-block: var(--step);
+    }
+    .prop {
+      border-bottom: 1px solid var(--rule);
+    }
+    .prop .frame {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+      gap: clamp(2rem, 6vw, 5rem);
+      align-items: start;
+    }
+    .prop h2 {
+      font-family: "Libre Caslon Display", serif;
+      font-weight: 400;
+      font-size: clamp(1.6rem, 3vw, 2.4rem);
+      line-height: 1.2;
+      text-wrap: balance;
+    }
+    .prop h2 em {
+      font-style: italic;
+    }
+    .prop .body p + p {
+      margin-top: 1em;
+    }
+    .prop .demo {
+      margin-top: 1.75rem;
+      border: 1px solid var(--rule);
+      padding: 1.25rem 1.4rem;
+    }
+    .counters {
+      display: flex;
+      gap: 2.5rem;
+      font-variant-numeric: tabular-nums;
+    }
+    .counters div span {
+      display: block;
+    }
+    .counters .n {
+      font-size: 1.9rem;
+      font-family: "Libre Caslon Display", serif;
+    }
+    .counters .naive .n {
+      color: var(--byrne-red);
+    }
+    .counters .ic .n {
+      color: var(--byrne-blue);
+    }
+    .counters .lbl {
+      font-size: 0.85rem;
+      font-style: italic;
+      color: var(--muted);
+    }
+
+    /* ——— miner ——— */
+    .miner {
+      border-bottom: 1px solid var(--rule);
+    }
+    .miner h2 {
+      font-family: "Libre Caslon Display", serif;
+      font-weight: 400;
+      font-size: clamp(1.8rem, 3.6vw, 2.8rem);
+      text-align: center;
+      text-wrap: balance;
+    }
+    .miner .sub {
+      text-align: center;
+      color: var(--muted);
+      font-style: italic;
+      margin-top: 0.6rem;
+    }
+    .bench {
+      margin: 2.5rem auto 0;
+      max-width: 40rem;
+      border: 1.5px solid var(--rule);
+    }
+    .bench .pairs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      padding: 1.2rem;
+      border-bottom: 1.5px solid var(--rule);
+    }
+    .pair {
+      font-size: 1.05rem;
+      padding: 0.35rem 0.8rem;
+      border: 1px solid var(--muted);
+    }
+    .pair b {
+      font-weight: 400;
+      color: var(--byrne-blue);
+    }
+    .pair.add {
+      color: var(--muted);
+      border-style: dashed;
+      cursor: pointer;
+      background: none;
+      font-family: inherit;
+    }
+    .bench .run {
+      display: block;
+      width: 100%;
+      padding: 0.9rem;
+      background: var(--ink);
+      color: var(--bg);
+      font: inherit;
+      font-style: italic;
+      font-size: 1.1rem;
+      border: 0;
+      cursor: pointer;
+    }
+    .bench .out {
+      padding: 1.2rem 1.4rem;
+      border-top: 1.5px solid var(--rule);
+    }
+    .bench .out code {
+      font-family: inherit;
+      font-size: 1.15rem;
+      letter-spacing: 0.01em;
+    }
+    .out code .z {
+      color: var(--byrne-yellow);
+      -webkit-text-stroke: 0.4px var(--ink);
+    }
+    .out code .s {
+      color: var(--byrne-red);
+    }
+    .out code .r {
+      color: var(--byrne-blue);
+    }
+    .bench .out .meta {
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+      font-style: italic;
+      color: var(--muted);
+    }
+
+    /* ——— honesty ——— */
+    .honesty .frame {
+      max-width: 46rem;
+    }
+    .honesty h2 {
+      font-family: "Libre Caslon Display", serif;
+      font-weight: 400;
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+    }
+    .honesty ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 1.5rem;
+    }
+    .honesty li {
+      padding-block: 0.9rem;
+      border-top: 1px solid oklch(0.8 0 0);
+    }
+    .honesty li:last-child {
+      border-bottom: 1px solid oklch(0.8 0 0);
+    }
+    .honesty li b {
+      font-weight: 700;
+    }
+
+    /* ——— specimen strip (solo para comparar direcciones) ——— */
+    .spec {
+      background: oklch(0.96 0 0);
+      font-size: 0.8rem;
+      padding-block: 2rem;
+    }
+    .spec .frame {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      align-items: center;
+    }
+    .sw {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+    .sw i {
+      width: 1.1rem;
+      height: 1.1rem;
+      display: inline-block;
+      border: 1px solid var(--ink);
+    }
+
+    @media (max-width: 760px) {
+      .prop .frame {
+        grid-template-columns: 1fr;
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .plate figcaption::after {
+        content: " · (animación pausada)";
+      }
+    }
+    </style>
+  </head>
+  <body>
+    <nav class="lang" aria-label="Idioma">
+  <button aria-pressed="true">ES</button><button aria-pressed="false">EN</button>
+    </nav>
+
+    <header>
+      <figure class="plate">
+        <canvas id="net" width="1200" height="640"
+          aria-label="Una interaction net reduciéndose"></canvas>
+        <figcaption>Lámina I. — Una computación, reduciéndose. Cada rectificación es real.</figcaption>
+      </figure>
+      <div class="headline frame">
+        <h1>La computación no tiene por qué costar lo que cuesta.</h1>
+        <p>Un paseo interactivo por el paradigma donde compartir trabajo es ley física — y donde un programa se encuentra, no se escribe.</p>
+        <a class="go" href="#miner">Dame 60 segundos ↓</a>
+      </div>
+    </header>
+
+    <section class="miner" id="miner">
+      <div class="frame">
+        <h2>Dale ejemplos. Recibe el programa.</h2>
+        <p class="sub">Sin modelo. Sin entrenamiento. Correcto por construcción.</p>
+        <div class="bench">
+          <div class="pairs">
+            <span class="pair">f(0) = <b>0</b></span>
+            <span class="pair">f(1) = <b>2</b></span>
+            <span class="pair">f(2) = <b>4</b></span>
+            <span class="pair">f(3) = <b>6</b></span>
+            <button class="pair add">+ añadir ejemplo</button>
+          </div>
+          <button class="run">Cribar el espacio de programas</button>
+          <div class="out">
+            <code>{ <span class="z">0</span>: * &nbsp;|&nbsp; <span class="s">S</span>: (S (S <span class="r">@</span>)) }</code>
+            <p
+              class="meta">Programa mínimo hallado — 287 candidatos probados, 41.203 interacciones compartidas. f(50) = 100, garantizado.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="prop">
+      <div class="frame">
+        <h2>El mismo cómputo, <em>dos veces</em>.</h2>
+        <div class="body">
+          <p>A la izquierda, el λ-cálculo de los libros: cada copia repite el trabajo. A la derecha, el cálculo de interacciones: cada copia lo comparte. No es una optimización — es otro modelo de coste, y la diferencia no es un porcentaje: es una clase de complejidad.</p>
+          <div class="demo">
+            <div class="counters">
+              <div
+                class="naive"><span class="n">196.608</span><span class="lbl">β-reducciones · 156 s</span></div>
+              <div
+                class="ic"><span class="n">196</span><span class="lbl">interacciones · 0,1 ms</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="honesty">
+      <div class="frame">
+        <h2>Lo que esto <em>no</em> es</h2>
+        <ul>
+          <li><b>No computa lo incomputable.</b> Misma clase de Church-Turing; cambia el coste, no el poder.</li>
+          <li><b>No es más rápido en tu código de cada día.</b> Hoy, un bucle en C le gana. La ventaja vive en lo simbólico: buscar, invertir, demostrar.</li>
+          <li><b>No es cuántica.</b> Las «superposiciones» comparten estructura; no hay qubits ni magia.</li>
+        </ul>
+      </div>
+    </section>
+
+    <footer class="spec">
+      <div class="frame">
+        <strong>Dirección A · «La Estampa»</strong>
+        <span class="sw"><i style="background:var(--byrne-blue)"></i> γ constructor</span>
+        <span class="sw"><i style="background:var(--byrne-red)"></i> δ duplicador</span>
+        <span class="sw"><i style="background:var(--byrne-yellow)"></i> ε borrador</span>
+        <span>Libre Caslon · blanco puro · el color ES la leyenda (Byrne, 1847)</span>
+      </div>
+    </footer>
+
+    <script>
+    // Maqueta: animación estilizada de reducción de una interaction net.
+    // (En el sitio final, esto corre sobre Telar: reducciones reales + contador.)
+    (() => {
+      const cv = document.getElementById("net"), cx = cv.getContext("2d");
+      const CSS = getComputedStyle(document.documentElement);
+      const COL = {
+        g: CSS.getPropertyValue("--byrne-blue"),
+        d: CSS.getPropertyValue("--byrne-red"),
+        e: CSS.getPropertyValue("--byrne-yellow"),
+      };
+      const INK = CSS.getPropertyValue("--ink");
+      const W = cv.width, H = cv.height;
+      const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      let nodes = [], links = [], nid = 0;
+      const rnd = (a, b) => a + Math.random() * (b - a);
+      const kinds = ["g", "g", "d", "d", "e"];
+      function addNode(k, x, y) {
+        const n = { id: nid++, k, x, y, vx: 0, vy: 0, ports: [null, null, null] };
+        nodes.push(n);
+        return n;
+      }
+      function connect(a, pa, b, pb) {
+        const l = { a, pa, b, pb };
+        a.ports[pa] = l;
+        b.ports[pb] = l;
+        links.push(l);
+      }
+      function seed(cxx, cyy) {
+        const ring = [];
+        for (let i = 0; i < 7; i++) {
+          const a = i / 7 * Math.PI * 2;
+          ring.push(
+            addNode(
+              kinds[Math.floor(rnd(0, kinds.length))],
+              cxx + Math.cos(a) * rnd(60, 140),
+              cyy + Math.sin(a) * rnd(40, 90),
+            ),
+          );
+        }
+        for (let i = 0; i < ring.length; i++) {
+          const a = ring[i], b = ring[(i + 1) % ring.length];
+          const pa = a.ports.findIndex((p) => !p), pb = b.ports.findIndex((p) => !p);
+          if (pa >= 0 && pb >= 0) connect(a, pa, b, pb);
+        }
+        // un par activo garantizado (principal-principal)
+        const m = addNode(
+          kinds[Math.floor(rnd(0, kinds.length))],
+          cxx + rnd(-40, 40),
+          cyy + rnd(-30, 30),
+        );
+        const t = ring[0];
+        if (!t.ports[0] && !m.ports[0]) connect(t, 0, m, 0);
+      }
+      function unlink(l) {
+        l.a.ports[l.pa] = null;
+        l.b.ports[l.pb] = null;
+        links = links.filter((x) => x !== l);
+      }
+      function removeNode(n) {
+        n.ports.forEach((l) => l && unlink(l));
+        nodes = nodes.filter((x) => x !== n);
+      }
+      function findActive() {
+        return links.find((l) => l.pa === 0 && l.pb === 0) || null;
+      }
+      let flash = null, flashT = 0;
+      function step() {
+        const l = findActive();
+        if (!l) {
+          if (nodes.length < 26) seed(rnd(W * .25, W * .75), rnd(H * .3, H * .7));
+          return;
+        }
+        flash = l;
+        flashT = 1;
+        const { a, b } = l;
+        setTimeout(() => {
+          if (a.k === b.k) { // aniquilación: reconecta auxiliares
+            const an = a.ports.slice(1).filter(Boolean), bn = b.ports.slice(1).filter(Boolean);
+            const ends = [...an, ...bn].map((x) =>
+              x.a === a || x.a === b ? { n: x.b, p: x.pb } : { n: x.a, p: x.pa }
+            );
+            removeNode(a);
+            removeNode(b);
+            for (let i = 0; i + 1 < ends.length; i += 2) {
+              if (!ends[i].n.ports[ends[i].p] && !ends[i + 1].n.ports[ends[i + 1].p]) {
+                connect(ends[i].n, ends[i].p, ends[i + 1].n, ends[i + 1].p);
+              }
+            }
+          } else if (a.k === "e" || b.k === "e") { // borrado: propaga ε
+            const er = a.k === "e" ? a : b, ot = a.k === "e" ? b : a;
+            const outs = ot.ports.slice(1).filter(Boolean).map((x) =>
+              x.a === ot ? { n: x.b, p: x.pb } : { n: x.a, p: x.pa }
+            );
+            removeNode(er);
+            removeNode(ot);
+            outs.forEach((o) => {
+              if (!o.n.ports[o.p]) {
+                const e2 = addNode("e", o.n.x + rnd(-30, 30), o.n.y + rnd(-30, 30));
+                connect(e2, 0, o.n, o.p);
+              }
+            });
+          } else { // conmutación: 2 → 4
+            const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+            const outsA = a.ports.slice(1).filter(Boolean).map((x) =>
+              x.a === a ? { n: x.b, p: x.pb } : { n: x.a, p: x.pa }
+            );
+            const outsB = b.ports.slice(1).filter(Boolean).map((x) =>
+              x.a === b ? { n: x.b, p: x.pb } : { n: x.a, p: x.pa }
+            );
+            const ka = a.k, kb = b.k;
+            removeNode(a);
+            removeNode(b);
+            const n1 = addNode(kb, mx - 34, my - 30), n2 = addNode(kb, mx + 34, my - 30);
+            const n3 = addNode(ka, mx - 34, my + 30), n4 = addNode(ka, mx + 34, my + 30);
+            connect(n1, 1, n3, 1);
+            connect(n1, 2, n4, 1);
+            connect(n2, 1, n3, 2);
+            connect(n2, 2, n4, 2);
+            [n1, n2].forEach((n, i) => {
+              const o = outsA[i];
+              if (o && !o.n.ports[o.p]) connect(n, 0, o.n, o.p);
+            });
+            [n3, n4].forEach((n, i) => {
+              const o = outsB[i];
+              if (o && !o.n.ports[o.p]) connect(n, 0, o.n, o.p);
+            });
+          }
+          flash = null;
+        }, reduced ? 0 : 520);
+      }
+      function physics() {
+        for (const n of nodes) {
+          let fx = (W / 2 - n.x) * 0.0006, fy = (H / 2 - n.y) * 0.0012;
+          for (const m of nodes) {
+            if (m !== n) {
+              const dx = n.x - m.x, dy = n.y - m.y, d2 = dx * dx + dy * dy + 40;
+              fx += dx / d2 * 26;
+              fy += dy / d2 * 26;
+            }
+          }
+          n.vx = (n.vx + fx) * 0.92;
+          n.vy = (n.vy + fy) * 0.92;
+        }
+        for (const l of links) {
+          const dx = l.b.x - l.a.x,
+            dy = l.b.y - l.a.y,
+            d = Math.hypot(dx, dy) || 1,
+            f = (d - 92) * 0.002;
+          l.a.vx += dx / d * f;
+          l.a.vy += dy / d * f;
+          l.b.vx -= dx / d * f;
+          l.b.vy -= dy / d * f;
+        }
+        for (const n of nodes) {
+          n.x += n.vx;
+          n.y += n.vy;
+        }
+      }
+      function tri(n) {
+        const r = 17, rot = Math.atan2(H / 2 - n.y, W / 2 - n.x);
+        cx.beginPath();
+        for (let i = 0; i < 3; i++) {
+          const a = rot + i * Math.PI * 2 / 3;
+          cx[i ? "lineTo" : "moveTo"](n.x + Math.cos(a) * r, n.y + Math.sin(a) * r);
+        }
+        cx.closePath();
+      }
+      function draw() {
+        cx.clearRect(0, 0, W, H);
+        cx.lineWidth = 1.6;
+        cx.strokeStyle = INK;
+        for (const l of links) {
+          cx.beginPath();
+          cx.moveTo(l.a.x, l.a.y);
+          const mx = (l.a.x + l.b.x) / 2 + (l.a.y - l.b.y) * 0.12,
+            my = (l.a.y + l.b.y) / 2 + (l.b.x - l.a.x) * 0.12;
+          cx.quadraticCurveTo(mx, my, l.b.x, l.b.y);
+          cx.stroke();
+        }
+        for (const n of nodes) {
+          tri(n);
+          cx.fillStyle = n.k === "g" ? COL.g : n.k === "d" ? COL.d : COL.e;
+          cx.fill();
+          cx.lineWidth = 1.6;
+          cx.strokeStyle = INK;
+          cx.stroke();
+        }
+        if (flash) {
+          flashT *= 0.96;
+          for (const n of [flash.a, flash.b]) {
+            cx.beginPath();
+            cx.arc(n.x, n.y, 26 + (1 - flashT) * 8, 0, 7);
+            cx.lineWidth = 2.5;
+            cx.strokeStyle = INK;
+            cx.stroke();
+          }
+        }
+      }
+      seed(W * 0.38, H * 0.5);
+      seed(W * 0.66, H * 0.45);
+      if (reduced) {
+        physics();
+        for (let i = 0; i < 200; i++) physics();
+        draw();
+        return;
+      }
+      setInterval(step, 1400);
+      (function loop() {
+        physics();
+        draw();
+        requestAnimationFrame(loop);
+      })();
+    })();
+    </script>
+  </body>
+</html>

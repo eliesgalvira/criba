@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dirección B — El Reactor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:ital,wght@0,400;0,500;0,700;0,900;1,400&family=Fragment+Mono&display=swap"
+      rel="stylesheet">
+    <style>
+    :root {
+      --bg: oklch(0.09 0 0);
+      --surface: oklch(0.14 0.008 250);
+      --ink: oklch(0.93 0.006 250);
+      --muted: oklch(0.68 0.015 250);
+      --glow: oklch(0.65 0.16 250);
+      --glow-dim: oklch(0.40 0.10 250);
+      --amber: oklch(0.76 0.13 65);
+      --danger: oklch(0.62 0.17 25);
+      --step: clamp(4rem, 10vh, 8rem);
+    }
+    * {
+      margin: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Schibsted Grotesk", system-ui, sans-serif;
+      font-size: 1.0425rem;
+      line-height: 1.7;
+    }
+    .frame {
+      max-width: 68rem;
+      margin-inline: auto;
+      padding-inline: clamp(1.25rem, 4vw, 3rem);
+    }
+    .mono {
+      font-family: "Fragment Mono", monospace;
+    }
+
+    .lang {
+      position: fixed;
+      top: 1.1rem;
+      right: 1.25rem;
+      z-index: 10;
+      font-family: "Fragment Mono", monospace;
+      font-size: 0.78rem;
+    }
+    .lang button {
+      background: none;
+      border: 1px solid var(--glow-dim);
+      color: var(--muted);
+      font: inherit;
+      padding: 0.25rem 0.65rem;
+      cursor: pointer;
+    }
+    .lang button[aria-pressed="true"] {
+      color: var(--bg);
+      background: var(--glow);
+      border-color: var(--glow);
+    }
+    .lang button + button {
+      border-left: 0;
+    }
+
+    /* ——— hero: el net ES el fondo ——— */
+    header {
+      position: relative;
+      min-height: 100vh;
+      display: grid;
+      align-items: end;
+      overflow: hidden;
+    }
+    header canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .headline {
+      position: relative;
+      padding-block: 0 clamp(3rem, 8vh, 6rem);
+      text-shadow: 0 2px 24px var(--bg);
+    }
+    h1 {
+      font-weight: 900;
+      font-size: clamp(2.4rem, 6.5vw, 5.4rem);
+      line-height: 1.02;
+      letter-spacing: -0.025em;
+      text-wrap: balance;
+      max-width: 15ch;
+    }
+    .headline p {
+      margin-top: 1.4rem;
+      font-size: clamp(1rem, 1.7vw, 1.25rem);
+      color: var(--muted);
+      max-width: 46ch;
+      text-wrap: pretty;
+    }
+    .headline .go {
+      display: inline-block;
+      margin-top: 2rem;
+      font-family: "Fragment Mono", monospace;
+      font-size: 0.9rem;
+      color: var(--amber);
+      text-decoration: none;
+      border: 1px solid oklch(0.4 0.07 65);
+      padding: 0.7rem 1.2rem;
+    }
+    .readout {
+      position: absolute;
+      top: 1.2rem;
+      left: 1.25rem;
+      font-family: "Fragment Mono", monospace;
+      font-size: 0.78rem;
+      color: var(--glow);
+      opacity: 0.85;
+    }
+    .readout b {
+      color: var(--amber);
+      font-weight: 400;
+    }
+
+    section {
+      padding-block: var(--step);
+    }
+
+    /* ——— miner ——— */
+    .miner {
+      border-top: 1px solid oklch(0.22 0.02 250);
+    }
+    .miner h2 {
+      font-weight: 700;
+      font-size: clamp(1.8rem, 3.8vw, 2.9rem);
+      letter-spacing: -0.02em;
+      text-wrap: balance;
+    }
+    .miner .sub {
+      color: var(--muted);
+      margin-top: 0.5rem;
+    }
+    .bench {
+      margin-top: 2.2rem;
+      max-width: 42rem;
+      background: var(--surface);
+      border: 1px solid oklch(0.24 0.02 250);
+    }
+    .bench .pairs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      padding: 1.2rem;
+    }
+    .pair {
+      font-family: "Fragment Mono", monospace;
+      font-size: 0.92rem;
+      padding: 0.4rem 0.75rem;
+      background: var(--bg);
+      border: 1px solid oklch(0.3 0.03 250);
+    }
+    .pair b {
+      font-weight: 400;
+      color: var(--glow);
+    }
+    .pair.add {
+      color: var(--muted);
+      border-style: dashed;
+      cursor: pointer;
+      font-family: "Fragment Mono", monospace;
+    }
+    .bench .run {
+      display: block;
+      width: 100%;
+      padding: 1rem;
+      background: var(--glow);
+      color: var(--bg);
+      font: inherit;
+      font-weight: 700;
+      font-size: 1.05rem;
+      border: 0;
+      cursor: pointer;
+    }
+    .bench .out {
+      padding: 1.3rem 1.4rem;
+      border-top: 1px solid oklch(0.24 0.02 250);
+    }
+    .bench .out code {
+      font-family: "Fragment Mono", monospace;
+      font-size: 1.05rem;
+      color: var(--ink);
+    }
+    .out code .hot {
+      color: var(--amber);
+    }
+    .bench .out .meta {
+      margin-top: 0.6rem;
+      font-family: "Fragment Mono", monospace;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    /* ——— race ——— */
+    .prop .frame {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+      gap: clamp(2rem, 6vw, 5rem);
+      align-items: center;
+    }
+    .prop h2 {
+      font-weight: 700;
+      font-size: clamp(1.7rem, 3.2vw, 2.5rem);
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      text-wrap: balance;
+    }
+    .prop .body p + p {
+      margin-top: 1em;
+    }
+    .gauges {
+      margin-top: 1.8rem;
+      display: grid;
+      gap: 1rem;
+    }
+    .gauge {
+      background: var(--surface);
+      padding: 1rem 1.2rem;
+      border: 1px solid oklch(0.22 0.02 250);
+    }
+    .gauge .n {
+      font-family: "Fragment Mono", monospace;
+      font-size: 1.7rem;
+      display: block;
+    }
+    .gauge.naive .n {
+      color: var(--danger);
+    }
+    .gauge.ic .n {
+      color: var(--glow);
+    }
+    .gauge .lbl {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    .gauge .bar {
+      height: 3px;
+      margin-top: 0.6rem;
+      background: oklch(0.2 0 0);
+      position: relative;
+      overflow: hidden;
+    }
+    .gauge.naive .bar::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      background: var(--danger);
+    }
+    .gauge.ic .bar::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      width: 0.4%;
+      background: var(--glow);
+      box-shadow: 0 0 8px var(--glow);
+    }
+
+    /* ——— honesty ——— */
+    .honesty {
+      border-top: 1px solid oklch(0.22 0.02 250);
+    }
+    .honesty .frame {
+      max-width: 46rem;
+    }
+    .honesty h2 {
+      font-weight: 700;
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      letter-spacing: -0.02em;
+    }
+    .honesty h2 .mono {
+      color: var(--amber);
+      font-size: 0.8em;
+    }
+    .honesty ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 1.6rem;
+      display: grid;
+      gap: 0.8rem;
+    }
+    .honesty li {
+      background: var(--surface);
+      padding: 1rem 1.2rem;
+      border: 1px solid oklch(0.22 0.02 250);
+    }
+    .honesty li b {
+      color: var(--amber);
+      font-weight: 500;
+    }
+
+    .spec {
+      border-top: 1px solid oklch(0.22 0.02 250);
+      font-size: 0.8rem;
+      padding-block: 2rem;
+      color: var(--muted);
+    }
+    .spec .frame {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      align-items: center;
+    }
+    .sw {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+    .sw i {
+      width: 1.05rem;
+      height: 1.05rem;
+      display: inline-block;
+      border-radius: 50%;
+    }
+
+    @media (max-width: 760px) {
+      .prop .frame {
+        grid-template-columns: 1fr;
+      }
+    }
+    </style>
+  </head>
+  <body>
+    <nav class="lang" aria-label="Idioma">
+  <button aria-pressed="true">ES</button><button aria-pressed="false">EN</button>
+    </nav>
+
+    <header>
+      <canvas id="net" aria-label="Una interaction net reduciéndose en la oscuridad"></canvas>
+      <p class="readout"
+        id="readout">interacciones <b id="ictr">0</b> · pares activos <b id="actr">0</b> · reducción en vivo</p>
+      <div class="headline frame">
+        <h1>Esto que ves está computando.</h1>
+        <p>No es un vídeo. Es una interaction net reduciéndose en tu navegador — el paradigma donde compartir trabajo es ley física y un programa se encuentra, no se escribe.</p>
+        <a class="go" href="#miner">./dame_60_segundos ↓</a>
+      </div>
+    </header>
+
+    <section class="miner" id="miner">
+      <div class="frame">
+        <h2>Dale ejemplos. Recibe el programa.</h2>
+        <p class="sub">Sin modelo. Sin entrenamiento. Correcto por construcción.</p>
+        <div class="bench">
+          <div class="pairs">
+            <span class="pair">f(0)=<b>0</b></span>
+            <span class="pair">f(1)=<b>2</b></span>
+            <span class="pair">f(2)=<b>4</b></span>
+            <span class="pair">f(3)=<b>6</b></span>
+            <button class="pair add">+ ejemplo</button>
+          </div>
+          <button class="run">▸ Cribar el espacio de programas</button>
+          <div class="out">
+            <code>{0: * | S: (S (S <span class="hot">@</span>))}</code>
+            <p
+              class="meta">✓ mínimo · 287 candidatos · 41.203 interacciones compartidas · f(50)=100 garantizado</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="prop">
+      <div class="frame">
+        <div>
+          <h2>El mismo cómputo, dos veces.</h2>
+        </div>
+        <div class="body">
+          <p>Arriba, el λ-cálculo de los libros: cada copia repite el trabajo. Abajo, el cálculo de interacciones: cada copia lo comparte. No es una optimización — es otro modelo de coste, y la diferencia no es un porcentaje: es una clase de complejidad.</p>
+          <div class="gauges">
+            <div
+              class="gauge naive"><span class="n">196 608</span><span class="lbl">β-reducciones · 156 s · λ-cálculo</span><div class="bar"></div></div>
+            <div
+              class="gauge ic"><span class="n">196</span><span class="lbl">interacciones · 0,1 ms · IC</span><div class="bar"></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="honesty">
+      <div class="frame">
+        <h2><span class="mono">[!]</span> Lo que esto no es</h2>
+        <ul>
+          <li><b>No computa lo incomputable.</b> Misma clase de Church-Turing; cambia el coste, no el poder.</li>
+          <li><b>No es más rápido en tu código de cada día.</b> Hoy, un bucle en C le gana. La ventaja vive en lo simbólico: buscar, invertir, demostrar.</li>
+          <li><b>No es cuántica.</b> Las «superposiciones» comparten estructura; no hay qubits ni magia.</li>
+        </ul>
+      </div>
+    </section>
+
+    <footer class="spec">
+      <div class="frame">
+        <strong style="color: var(--ink)">Dirección B · «El Reactor»</strong>
+        <span
+          class="sw"><i style="background:var(--glow); box-shadow: 0 0 8px var(--glow)"></i> cobalto (semilla)</span>
+        <span class="sw"><i style="background:var(--amber)"></i> ámbar instrumento</span>
+        <span>Schibsted Grotesk + Fragment Mono · negro puro · la net es el fondo</span>
+      </div>
+    </footer>
+
+    <script>
+    // Maqueta: misma lógica de reducción que la dirección A, render de fósforo.
+    (() => {
+      const cv = document.getElementById("net"), cx = cv.getContext("2d");
+      const ictr = document.getElementById("ictr"), actr = document.getElementById("actr");
+      let inters = 0;
+      function fit() {
+        cv.width = cv.clientWidth * devicePixelRatio;
+        cv.height = cv.clientHeight * devicePixelRatio;
+      }
+      fit();
+      addEventListener("resize", fit);
+      const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const GLOW = "oklch(0.65 0.16 250)",
+        DIM = "oklch(0.42 0.11 250)",
+        AMBER = "oklch(0.76 0.13 65)",
+        RED = "oklch(0.62 0.17 25)";
+
+      let nodes = [], links = [], nid = 0;
+      const rnd = (a, b) => a + Math.random() * (b - a);
+      const kinds = ["g", "g", "d", "d", "e"];
+      const W = () => cv.width, H = () => cv.height;
+      function addNode(k, x, y) {
+        const n = { id: nid++, k, x, y, vx: 0, vy: 0, ports: [null, null, null] };
+        nodes.push(n);
+        return n;
+      }
+      function connect(a, pa, b, pb) {
+        const l = { a, pa, b, pb };
+        a.ports[pa] = l;
+        b.ports[pb] = l;
+        links.push(l);
+      }
+      function seed(cxx, cyy) {
+        const ring = [];
+        for (let i = 0; i < 7; i++) {
+          const a = i / 7 * Math.PI * 2;
+          ring.push(
+            addNode(
+              kinds[Math.floor(rnd(0, kinds.length))],
+              cxx + Math.cos(a) * rnd(80, 200),
+              cyy + Math.sin(a) * rnd(60, 140),
+            ),
+          );
+        }
+        for (let i = 0; i < ring.length; i++) {
+          const a = ring[i], b = ring[(i + 1) % ring.length];
+          const pa = a.ports.findIndex((p) => !p), pb = b.ports.findIndex((p) => !p);
+          if (pa >= 0 && pb >= 0) connect(a, pa, b, pb);
+        }
+        const m = addNode(
+          kinds[Math.floor(rnd(0, kinds.length))],
+          cxx + rnd(-60, 60),
+          cyy + rnd(-40, 40),
+        );
+        const t = ring[0];
+        if (!t.ports[0] && !m.ports[0]) connect(t, 0, m, 0);
+      }
+      function unlink(l) {
+        l.a.ports[l.pa] = null;
+        l.b.ports[l.pb] = null;
+        links = links.filter((x) => x !== l);
+      }
+      function removeNode(n) {
+        n.ports.forEach((l) => l && unlink(l));
+        nodes = nodes.filter((x) => x !== n);
+      }
+      function findActive() {
+        return links.filter((l) => l.pa === 0 && l.pb === 0);
+      }
+      let flash = null, flashT = 0;
+      function step() {
+        const act = findActive(), l = act[0];
+        actr.textContent = act.length;
+        if (!l) {
+          if (nodes.length < 30) seed(rnd(W() * .2, W() * .8), rnd(H() * .25, H() * .65));
+          return;
+        }
+        flash = l;
+        flashT = 1;
+        const { a, b } = l;
+        setTimeout(() => {
+          inters++;
+          ictr.textContent = inters.toLocaleString("es");
+          if (a.k === b.k) {
+            const an = a.ports.slice(1).filter(Boolean), bn = b.ports.slice(1).filter(Boolean);
+            const ends = [...an, ...bn].map((x) =>
+              x.a === a || x.a === b ? { n: x.b, p: x.pb } : { n: x.a, p: x.pa }
+            );
+            removeNode(a);
+            removeNode(b);
+            for (let i = 0; i + 1 < ends.length; i += 2) {
+              if (!ends[i].n.ports[ends[i].p] && !ends[i + 1].n.ports[ends[i + 1].p]) {
+                connect(ends[i].n, ends[i].p, ends[i + 1].n, ends[i + 1].p);
+              }
+            }
+          } else if (a.k === "e" || b.k === "e") {
+            const er = a.k === "e" ? a : b, ot = a.k === "e" ? b : a;
+            const outs = ot.ports.slice(1).filter(Boolean).map((x) =>
+              x.a === ot ? { n: x.b, p: x.pb } : { n: x.a, p: x.pa }
+            );
+            removeNode(er);
+            removeNode(ot);
+            outs.forEach((o) => {
+              if (!o.n.ports[o.p]) {
+                const e2 = addNode("e", o.n.x + rnd(-40, 40), o.n.y + rnd(-40, 40));
+                connect(e2, 0, o.n, o.p);
+              }
+            });
+          } else {
+            const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+            const outsA = a.ports.slice(1).filter(Boolean).map((x) =>
+              x.a === a ? { n: x.b, p: x.pb } : { n: x.a, p: x.pa }
+            );
+            const outsB = b.ports.slice(1).filter(Boolean).map((x) =>
+              x.a === b ? { n: x.b, p: x.pb } : { n: x.a, p: x.pa }
+            );
+            const ka = a.k, kb = b.k;
+            removeNode(a);
+            removeNode(b);
+            const n1 = addNode(kb, mx - 44, my - 40), n2 = addNode(kb, mx + 44, my - 40);
+            const n3 = addNode(ka, mx - 44, my + 40), n4 = addNode(ka, mx + 44, my + 40);
+            connect(n1, 1, n3, 1);
+            connect(n1, 2, n4, 1);
+            connect(n2, 1, n3, 2);
+            connect(n2, 2, n4, 2);
+            [n1, n2].forEach((n, i) => {
+              const o = outsA[i];
+              if (o && !o.n.ports[o.p]) connect(n, 0, o.n, o.p);
+            });
+            [n3, n4].forEach((n, i) => {
+              const o = outsB[i];
+              if (o && !o.n.ports[o.p]) connect(n, 0, o.n, o.p);
+            });
+          }
+          flash = null;
+        }, reduced ? 0 : 520);
+      }
+      function physics() {
+        for (const n of nodes) {
+          let fx = (W() / 2 - n.x) * 0.0005, fy = (H() * 0.42 - n.y) * 0.001;
+          for (const m of nodes) {
+            if (m !== n) {
+              const dx = n.x - m.x, dy = n.y - m.y, d2 = dx * dx + dy * dy + 60;
+              fx += dx / d2 * 40;
+              fy += dy / d2 * 40;
+            }
+          }
+          n.vx = (n.vx + fx) * 0.92;
+          n.vy = (n.vy + fy) * 0.92;
+        }
+        for (const l of links) {
+          const dx = l.b.x - l.a.x,
+            dy = l.b.y - l.a.y,
+            d = Math.hypot(dx, dy) || 1,
+            f = (d - 130) * 0.002;
+          l.a.vx += dx / d * f;
+          l.a.vy += dy / d * f;
+          l.b.vx -= dx / d * f;
+          l.b.vy -= dy / d * f;
+        }
+        for (const n of nodes) {
+          n.x += n.vx;
+          n.y += n.vy;
+        }
+      }
+      function draw() {
+        cx.clearRect(0, 0, W(), H());
+        cx.globalCompositeOperation = "lighter";
+        for (const l of links) {
+          const active = l.pa === 0 && l.pb === 0;
+          cx.beginPath();
+          cx.moveTo(l.a.x, l.a.y);
+          const mx = (l.a.x + l.b.x) / 2 + (l.a.y - l.b.y) * 0.1,
+            my = (l.a.y + l.b.y) / 2 + (l.b.x - l.a.x) * 0.1;
+          cx.quadraticCurveTo(mx, my, l.b.x, l.b.y);
+          cx.lineWidth = active ? 2.4 : 1.2;
+          cx.strokeStyle = active ? AMBER : DIM;
+          cx.shadowColor = active ? AMBER : GLOW;
+          cx.shadowBlur = active ? 18 : 8;
+          cx.stroke();
+        }
+        for (const n of nodes) {
+          cx.beginPath();
+          cx.arc(n.x, n.y, n.k === "e" ? 4 : 6.5, 0, 7);
+          cx.fillStyle = n.k === "e" ? RED : GLOW;
+          cx.shadowColor = cx.fillStyle;
+          cx.shadowBlur = 16;
+          cx.fill();
+        }
+        if (flash) {
+          flashT *= 0.95;
+          for (const n of [flash.a, flash.b]) {
+            cx.beginPath();
+            cx.arc(n.x, n.y, 20 + (1 - flashT) * 26, 0, 7);
+            cx.lineWidth = 1.5;
+            cx.strokeStyle = AMBER;
+            cx.shadowColor = AMBER;
+            cx.shadowBlur = 22;
+            cx.globalAlpha = flashT;
+            cx.stroke();
+            cx.globalAlpha = 1;
+          }
+        }
+        cx.globalCompositeOperation = "source-over";
+        cx.shadowBlur = 0;
+      }
+      seed(W() * 0.35, H() * 0.4);
+      seed(W() * 0.68, H() * 0.42);
+      if (reduced) {
+        for (let i = 0; i < 200; i++) physics();
+        draw();
+        document.getElementById("readout").textContent =
+          "reducción pausada (reduced motion) — fotograma real";
+        return;
+      }
+      setInterval(step, 1300);
+      (function loop() {
+        physics();
+        draw();
+        requestAnimationFrame(loop);
+      })();
+    })();
+    </script>
+  </body>
+</html>
