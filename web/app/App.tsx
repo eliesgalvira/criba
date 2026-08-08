@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { Toggle } from "@base-ui/react/toggle";
 import { ToggleGroup } from "@base-ui/react/toggle-group";
 import { type Lang, LangContext, stringsFor, useT } from "./i18n.tsx";
@@ -8,7 +9,12 @@ import { Race } from "./Race.tsx";
 
 /** Cambio de estado con View Transition, con clase de tipo en <html> para
  * que el CSS distinga viajes (morph + portal) de cambios de idioma (fade).
- * Progresivo: sin soporte o con reduced-motion, muta y punto. */
+ *
+ * CRÍTICO: la mutación va envuelta en flushSync. startViewTransition captura
+ * la instantánea «nueva» al resolver el callback, y los setState de React son
+ * asíncronos — sin flushSync el navegador fotografiaba el DOM ANTES del
+ * commit (nombres de transición aún sin mover: morphs rotos, elementos que
+ * desaparecen). Progresivo: sin soporte o con reduced-motion, muta y punto. */
 function withViewTransition(kind: "travel" | "lang", mutate: () => void): Promise<void> {
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const doc = document as Document & {
@@ -19,7 +25,7 @@ function withViewTransition(kind: "travel" | "lang", mutate: () => void): Promis
     return Promise.resolve();
   }
   document.documentElement.classList.add(`vt-${kind}`);
-  const vt = doc.startViewTransition(mutate);
+  const vt = doc.startViewTransition(() => flushSync(mutate));
   return vt.finished.finally(() => {
     document.documentElement.classList.remove(`vt-${kind}`);
   });
