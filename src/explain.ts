@@ -1,39 +1,45 @@
 // Traductor de programas Peanito a pseudocódigo humano (ES/EN).
-// La salida del minador nunca se muestra "en crudo" primero: esta receta
+// La salida del minador nunca se muestra "en crudo" primero: esta versión
 // legible es la capa principal; la notación del telar es la curiosidad final.
 //
-//   Mat(Zero, Suc(Suc(Rec)))  →   f(n):
-//                                   si n = 0:
-//                                     devuelve 0
-//                                   si n = m + 1:
-//                                     devuelve 2 + f(m)
+// Sin variables inventadas: los match anidados sobre el predecesor se aplanan
+// a casos directos sobre n («si n = 2», «si n ≥ 3», «f(n − 3)»). La notación
+// de pattern-matching (si n = m + 1) es jeroglífico para quien no programa
+// en funcional — y este texto es para quien no programa en funcional.
+//
+//   Mat(Zero, Mat(Suc Zero, Mat(SS Zero, Rec)))  →   f(n):
+//                                                      si n = 0: devuelve 0
+//                                                      si n = 1: devuelve 1
+//                                                      si n = 2: devuelve 2
+//                                                      si n ≥ 3: devuelve f(n − 3)
 
 import type { Term } from "./peanito.ts";
 
-const VARS = ["n", "m", "k", "j", "i", "h"];
-
 interface Words {
-  ifZero: (v: string) => string;
-  ifSucc: (v: string, w: string) => string;
+  eq: (d: number) => string;
+  ge: (d: number) => string;
   ret: (e: string) => string;
   addTo: (k: number) => string;
   fn: string;
+  n: string;
 }
 
 const WORDS: Record<"es" | "en", Words> = {
   es: {
-    ifZero: (v) => `si ${v} = 0:`,
-    ifSucc: (v, w) => `si ${v} = ${w} + 1:`,
+    eq: (d) => `si n = ${d}:`,
+    ge: (d) => `si n ≥ ${d}:`,
     ret: (e) => `devuelve ${e}`,
     addTo: (k) => `suma ${k} a lo que salga de:`,
     fn: "f",
+    n: "n",
   },
   en: {
-    ifZero: (v) => `if ${v} = 0:`,
-    ifSucc: (v, w) => `if ${v} = ${w} + 1:`,
+    eq: (d) => `if n = ${d}:`,
+    ge: (d) => `if n ≥ ${d}:`,
     ret: (e) => `return ${e}`,
     addTo: (k) => `add ${k} to the result of:`,
     fn: "f",
+    n: "n",
   },
 };
 
@@ -43,16 +49,18 @@ function indent(lines: string[]): string[] {
   return lines.map((l) => "  " + l);
 }
 
-/**
- * v = nombre de la variable actual; isZero = estamos en una rama donde v vale 0
- * (ahí «la entrada» es literalmente 0 y se muestra como tal).
- */
-function render(t: Term, v: string, depth: number, isZero: boolean, w: Words): Rendered {
+/** El valor actual a profundidad d: n, n − d, o 0 exacto en rama de cero. */
+function value(d: number, isZero: boolean, w: Words): string {
+  if (isZero) return "0";
+  return d === 0 ? w.n : `${w.n} − ${d}`;
+}
+
+function render(t: Term, d: number, isZero: boolean, w: Words): Rendered {
   switch (t.t) {
     case "Ret":
-      return { kind: "expr", s: isZero ? "0" : v };
+      return { kind: "expr", s: value(d, isZero, w) };
     case "Rec":
-      return { kind: "expr", s: `${w.fn}(${isZero ? "0" : v})` };
+      return { kind: "expr", s: `${w.fn}(${value(d, isZero, w)})` };
     case "Zero":
       return { kind: "expr", s: "0" };
     case "Suc": {
@@ -62,20 +70,27 @@ function render(t: Term, v: string, depth: number, isZero: boolean, w: Words): R
         k++;
         inner = inner.body;
       }
-      const r = render(inner, v, depth, isZero, w);
+      const r = render(inner, d, isZero, w);
       if (r.kind === "expr") {
         return { kind: "expr", s: r.s === "0" ? String(k) : `${k} + ${r.s}` };
       }
       return { kind: "block", lines: [w.addTo(k), ...indent(r.lines)] };
     }
     case "Mat": {
-      const next = VARS[Math.min(depth + 1, VARS.length - 1)]!;
-      const zero = asBlock(render(t.zero, v, depth, true, w), w);
-      const succ = asBlock(render(t.succ, next, depth + 1, false, w), w);
-      return {
-        kind: "block",
-        lines: [w.ifZero(v), ...indent(zero), w.ifSucc(v, next), ...indent(succ)],
-      };
+      // en una rama de cero el valor ES 0: solo su rama de cero puede ocurrir
+      if (isZero) return render(t.zero, d, true, w);
+      const lines: string[] = [
+        w.eq(d),
+        ...indent(asBlock(render(t.zero, d, true, w), w)),
+      ];
+      if (t.succ.t === "Mat") {
+        // el siguiente match refina los casos: sus condiciones ya bastan
+        const sub = render(t.succ, d + 1, false, w);
+        lines.push(...(sub as { lines: string[] }).lines);
+      } else {
+        lines.push(w.ge(d + 1), ...indent(asBlock(render(t.succ, d + 1, false, w), w)));
+      }
+      return { kind: "block", lines };
     }
     case "Sup":
       throw new Error("explain() espera un programa concreto (sin Sup)");
@@ -89,6 +104,6 @@ function asBlock(r: Rendered, w: Words): string[] {
 /** Pseudocódigo humano, multilínea. */
 export function explain(term: Term, lang: "es" | "en"): string {
   const w = WORDS[lang];
-  const body = asBlock(render(term, VARS[0]!, 0, false, w), w);
-  return [`${w.fn}(${VARS[0]}):`, ...indent(body)].join("\n");
+  const body = asBlock(render(term, 0, false, w), w);
+  return [`${w.fn}(${w.n}):`, ...indent(body)].join("\n");
 }
