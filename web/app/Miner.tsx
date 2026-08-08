@@ -64,7 +64,7 @@ function PairField(props: {
   );
 }
 
-export function Miner() {
+export function Miner(props: { morphTarget?: boolean }) {
   const { lang, t } = useT();
   const [pairs, setPairs] = useState<Pair[]>([
     { id: 0, x: 0, y: 0 },
@@ -104,7 +104,7 @@ export function Miner() {
   return (
     <section className="miner" id="miner">
       <div className="frame">
-        <h2>{t.minerh2}</h2>
+        <h2 className={props.morphTarget ? "vt-hilo" : undefined}>{t.minerh2}</h2>
         <p className="intro">{t.minerIntro}</p>
         <p className="sub">{t.minersub}</p>
         <div className="bench">

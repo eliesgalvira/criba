@@ -6,15 +6,26 @@ import { mountLoom } from "./loom.ts";
 import { Miner } from "./Miner.tsx";
 import { Race } from "./Race.tsx";
 
-/** Cambio de estado con View Transition (progresivo: cross-fade si existe). */
-function withViewTransition(mutate: () => void) {
+/** Cambio de estado con View Transition, con clase de tipo en <html> para
+ * que el CSS distinga viajes (morph + portal) de cambios de idioma (fade).
+ * Progresivo: sin soporte o con reduced-motion, muta y punto. */
+function withViewTransition(kind: "travel" | "lang", mutate: () => void): Promise<void> {
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const doc = document as Document & { startViewTransition?: (cb: () => void) => void };
-  if (!reduced && doc.startViewTransition) doc.startViewTransition(mutate);
-  else mutate();
+  const doc = document as Document & {
+    startViewTransition?: (cb: () => void) => { finished: Promise<void> };
+  };
+  if (reduced || !doc.startViewTransition) {
+    mutate();
+    return Promise.resolve();
+  }
+  document.documentElement.classList.add(`vt-${kind}`);
+  const vt = doc.startViewTransition(mutate);
+  return vt.finished.finally(() => {
+    document.documentElement.classList.remove(`vt-${kind}`);
+  });
 }
 
-function Hero() {
+function Hero(props: { travelling: boolean; onTravel: () => void }) {
   const { t } = useT();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [hintGone, setHintGone] = useState(false);
@@ -30,9 +41,7 @@ function Hero() {
 
   const goMiner = (e: React.MouseEvent) => {
     e.preventDefault();
-    withViewTransition(() => {
-      document.getElementById("miner")?.scrollIntoView({ behavior: "instant", block: "start" });
-    });
+    props.onTravel();
   };
 
   return (
@@ -48,7 +57,13 @@ function Hero() {
           </h1>
           <p className="hero-explain">{t.heroExplain}</p>
           <p className="hero-sub">{t.h1sub}</p>
-          <a className="go" href="#miner" onClick={goMiner}>{t.cta}</a>
+          <a
+            className={"go" + (props.travelling ? "" : " vt-hilo")}
+            href="#miner"
+            onClick={goMiner}
+          >
+            {t.cta}
+          </a>
         </div>
       </div>
       <div className="selvage" aria-hidden="true" />
@@ -100,10 +115,18 @@ function Footer() {
 
 export function App() {
   const [lang, setLang] = useState<Lang>("es");
+  const [travelling, setTravelling] = useState(false);
 
   useEffect(() => {
     document.documentElement.lang = lang;
   }, [lang]);
+
+  const travel = () => {
+    withViewTransition("travel", () => {
+      setTravelling(true);
+      document.getElementById("miner")?.scrollIntoView({ behavior: "instant", block: "start" });
+    }).then(() => setTravelling(false));
+  };
 
   return (
     <LangContext.Provider value={{ lang, t: stringsFor(lang) }}>
@@ -112,15 +135,15 @@ export function App() {
           value={[lang]}
           onValueChange={(v: unknown[]) => {
             const next = (v as Lang[])[0];
-            if (next) withViewTransition(() => setLang(next));
+            if (next) withViewTransition("lang", () => setLang(next));
           }}
         >
           <Toggle value="es" className="lang-toggle" aria-label="Español">ES</Toggle>
           <Toggle value="en" className="lang-toggle" aria-label="English">EN</Toggle>
         </ToggleGroup>
       </nav>
-      <Hero />
-      <Miner />
+      <Hero travelling={travelling} onTravel={travel} />
+      <Miner morphTarget={travelling} />
       <Race />
       <Honesty />
       <Footer />
