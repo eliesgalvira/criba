@@ -107,3 +107,83 @@ export function explain(term: Term, lang: "es" | "en"): string {
   const body = asBlock(render(term, 0, false, w), w);
   return [`${w.fn}(${w.n}):`, ...indent(body)].join("\n");
 }
+
+// ---------------------------------------------------------------------------
+// Vista «como el cribador»: pattern-matching con variables frescas (m, k, j…).
+// Es la forma nativa en que Peanito piensa — se ofrece como tercera vista,
+// con nota, para quien quiera asomarse a la maquinaria.
+// ---------------------------------------------------------------------------
+
+const PVARS = ["n", "m", "k", "j", "i", "h"];
+
+interface PWords {
+  ifZero: (v: string) => string;
+  ifSucc: (v: string, w: string) => string;
+  ret: (e: string) => string;
+  addTo: (k: number) => string;
+  fn: string;
+}
+
+const PWORDS: Record<"es" | "en", PWords> = {
+  es: {
+    ifZero: (v) => `si ${v} = 0:`,
+    ifSucc: (v, w) => `si ${v} = ${w} + 1:`,
+    ret: (e) => `devuelve ${e}`,
+    addTo: (k) => `suma ${k} a lo que salga de:`,
+    fn: "f",
+  },
+  en: {
+    ifZero: (v) => `if ${v} = 0:`,
+    ifSucc: (v, w) => `if ${v} = ${w} + 1:`,
+    ret: (e) => `return ${e}`,
+    addTo: (k) => `add ${k} to the result of:`,
+    fn: "f",
+  },
+};
+
+function prender(t: Term, vi: number, isZero: boolean, w: PWords): Rendered {
+  const v = PVARS[Math.min(vi, PVARS.length - 1)]!;
+  switch (t.t) {
+    case "Ret":
+      return { kind: "expr", s: isZero ? "0" : v };
+    case "Rec":
+      return { kind: "expr", s: `${w.fn}(${isZero ? "0" : v})` };
+    case "Zero":
+      return { kind: "expr", s: "0" };
+    case "Suc": {
+      let k = 0;
+      let inner: Term = t;
+      while (inner.t === "Suc") {
+        k++;
+        inner = inner.body;
+      }
+      const r = prender(inner, vi, isZero, w);
+      if (r.kind === "expr") {
+        return { kind: "expr", s: r.s === "0" ? String(k) : `${k} + ${r.s}` };
+      }
+      return { kind: "block", lines: [w.addTo(k), ...indent(r.lines)] };
+    }
+    case "Mat": {
+      const next = PVARS[Math.min(vi + 1, PVARS.length - 1)]!;
+      const zero = pblock(prender(t.zero, vi, true, w), w);
+      const succ = pblock(prender(t.succ, vi + 1, false, w), w);
+      return {
+        kind: "block",
+        lines: [w.ifZero(v), ...indent(zero), w.ifSucc(v, next), ...indent(succ)],
+      };
+    }
+    case "Sup":
+      throw new Error("explainPatterns() espera un programa concreto (sin Sup)");
+  }
+}
+
+function pblock(r: Rendered, w: PWords): string[] {
+  return r.kind === "expr" ? [w.ret(r.s)] : r.lines;
+}
+
+/** La vista de pattern-matching (m, k, j…): así piensa el cribador. */
+export function explainPatterns(term: Term, lang: "es" | "en"): string {
+  const w = PWORDS[lang];
+  const body = pblock(prender(term, 0, false, w), w);
+  return [`${w.fn}(${PVARS[0]}):`, ...indent(body)].join("\n");
+}

@@ -1,5 +1,5 @@
 import { assertEquals } from "jsr:@std/assert";
-import { explain } from "./explain.ts";
+import { explain, explainPatterns } from "./explain.ts";
 import { Mat, Rec, Ret, Suc, Zero } from "./peanito.ts";
 
 Deno.test("explain: doble — casos sobre n, sin variables inventadas", () => {
@@ -61,5 +61,16 @@ Deno.test("explain: Suc alrededor de un Mat (bloque)", () => {
       devuelve 0
     si n ≥ 1:
       devuelve f(n − 1)`,
+  );
+});
+
+Deno.test("explainPatterns: la vista del cribador (doble)", () => {
+  assertEquals(
+    explainPatterns(Mat(Zero, Suc(Suc(Rec))), "es"),
+    `f(n):
+  si n = 0:
+    devuelve 0
+  si n = m + 1:
+    devuelve 2 + f(m)`,
   );
 });

@@ -2,10 +2,14 @@
 // la piel viene de los tokens del Telar en styles.css.
 import { useEffect, useRef, useState } from "react";
 import { NumberField } from "@base-ui/react/number-field";
+import { Toggle } from "@base-ui/react/toggle";
+import { ToggleGroup } from "@base-ui/react/toggle-group";
 import type { EverettStats } from "../../src/criba.ts";
-import { explain } from "../../src/explain.ts";
+import { explain, explainPatterns } from "../../src/explain.ts";
 import { run, show, size, type Term } from "../../src/peanito.ts";
+import { pickTraceInput, trace } from "../../src/trace.ts";
 import { useT } from "./i18n.tsx";
+import { mountLoom } from "./loom.ts";
 import { type ShorePair, Shores } from "./Shores.tsx";
 
 type Pair = ShorePair;
@@ -80,6 +84,52 @@ function PairField(props: {
   );
 }
 
+/** mini-telar: la animación del hero, reutilizada como loader de la criba */
+function MiniLoom() {
+  const ref = useRef<HTMLCanvasElement>(null);
+  useEffect(() => mountLoom(ref.current!), []);
+  return <canvas ref={ref} className="miniloom" aria-hidden="true" />;
+}
+
+type RecipeView = "trace" | "cases" | "patterns";
+
+function TraceView({ prog, examples }: { prog: Term; examples: [number, number][] }) {
+  const { lang, t } = useT();
+  const maxX = Math.max(...examples.map(([x]) => x));
+  const candidates = [maxX + 1, maxX + 2, maxX, maxX + 3, 3, 4, 5];
+  const n = pickTraceInput(prog, candidates);
+  if (n === null) return null;
+  const tr = trace(prog, n);
+  if (!tr) return null;
+  const jots: number[] = [];
+  for (const s of tr.steps) {
+    if (s.add > 0) jots.push(s.add);
+    if (s.next === null && (s.base ?? 0) > 0) jots.push(s.base!);
+  }
+  return (
+    <div className="trace">
+      <p className="trace-head">
+        {t.trHead} {n}:
+      </p>
+      <pre className="recipe">
+        {tr.steps.map((s) => {
+          if (s.next === null) {
+            return `${s.v} ▸ ${t.trEnd} ${(s.add > 0 ? `${s.add} + ` : "") + s.base}
+`;
+          }
+          if (s.add > 0) return `${s.v} ▸ ${t.trJot} ${s.add} ${t.trFollow} ${s.next}
+`;
+          return `${s.v} ▸ ${t.trFollowOnly} ${s.next}
+`;
+        }).join("")}
+        {`${t.trTotal}: ${
+          jots.length > 1 ? jots.join(" + ") + " = " : ""
+        }${tr.total.toLocaleString(lang)}`}
+      </pre>
+    </div>
+  );
+}
+
 export function Miner() {
   const { lang, t } = useT();
   const [pairs, setPairsRaw] = useState<Pair[]>([
@@ -90,6 +140,7 @@ export function Miner() {
   ]);
   const [outcome, setOutcome] = useState<Outcome>({ kind: "idle" });
   const [activeRule, setActiveRule] = useState<string | null>("doble");
+  const [view, setView] = useState<RecipeView>("trace");
   const workerRef = useRef<Worker | null>(null);
   const startRef = useRef(0);
 
@@ -205,21 +256,55 @@ export function Miner() {
               </button>
             </div>
           </details>
-          <button type="button" className="run" onClick={sift} disabled={busy}>
+          <button
+            type="button"
+            className={"run" + (busy ? " sifting" : "")}
+            onClick={sift}
+            disabled={busy}
+          >
             {busy ? t.running : t.run}
           </button>
           <div className="out" aria-live="polite">
             {outcome.kind === "idle" && <p className="meta">{t.outidle}</p>}
             {outcome.kind === "sifting" && (
-              <p className="meta">
-                {outcome.steps.toLocaleString(lang)} {t.sharedSteps}…
-              </p>
+              <>
+                <MiniLoom />
+                <p className="meta">
+                  {outcome.steps.toLocaleString(lang)} {t.sharedSteps}…
+                </p>
+              </>
             )}
             {outcome.kind === "notfound" && <p className="meta fail">{t.notfound}</p>}
             {outcome.kind === "found" && (
               <>
-                <p className="found-head">{t.foundHead}</p>
-                <pre className="recipe">{explain(outcome.prog, lang)}</pre>
+                <div className="found-bar">
+                  <p className="found-head">{t.foundHead}</p>
+                  <ToggleGroup
+                    className="view-toggle"
+                    value={[view]}
+                    onValueChange={(v: unknown[]) => {
+                      const next = (v as RecipeView[])[0];
+                      if (next) setView(next);
+                    }}
+                  >
+                    <Toggle value="trace" className="view-tab">{t.viewTrace}</Toggle>
+                    <Toggle value="cases" className="view-tab">{t.viewCases}</Toggle>
+                    <Toggle value="patterns" className="view-tab">{t.viewPatterns}</Toggle>
+                  </ToggleGroup>
+                </div>
+                {view === "trace" && (
+                  <TraceView
+                    prog={outcome.prog}
+                    examples={pairs.map((p) => [p.x, p.y] as [number, number])}
+                  />
+                )}
+                {view === "cases" && <pre className="recipe">{explain(outcome.prog, lang)}</pre>}
+                {view === "patterns" && (
+                  <>
+                    <pre className="recipe">{explainPatterns(outcome.prog, lang)}</pre>
+                    <p className="meta">{t.patternsNote}</p>
+                  </>
+                )}
                 <p className="meta">
                   {size(outcome.prog)} {t.pieces} — {outcome.proven ? t.foundProven : t.foundBest} ·
                   {" "}

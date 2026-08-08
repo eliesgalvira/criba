@@ -32,6 +32,17 @@ export interface Strings {
   addPair: string;
   editAsText: string;
   presets: Record<string, string>;
+  viewTrace: string;
+  viewCases: string;
+  viewPatterns: string;
+  patternsNote: string;
+  trHead: string;
+  trJot: string;
+  trFollow: string;
+  trFollowOnly: string;
+  trEnd: string;
+  trTotal: string;
+  trJotted: string;
   delPair: string;
   raceh2: string;
   racelead: string;
@@ -91,6 +102,18 @@ const STRINGS: Record<Lang, Strings> = {
       mod3: "resto ÷3",
       resta2: "resta 2",
     },
+    viewTrace: "en marcha",
+    viewCases: "por casos",
+    viewPatterns: "como el cribador",
+    patternsNote:
+      "(así piensa el cribador por dentro: «si n = m + 1» significa «si n es el siguiente de algún m»)",
+    trHead: "Míralo funcionar con n =",
+    trJot: "apunta",
+    trFollow: "y sigue con",
+    trFollowOnly: "sigue con",
+    trEnd: "termina con",
+    trTotal: "total",
+    trJotted: "lo apuntado",
     delPair: "quitar ejemplo",
     raceh2: "El truco: compartir el trabajo.",
     racelead:
@@ -168,6 +191,18 @@ const STRINGS: Record<Lang, Strings> = {
       mod3: "mod 3",
       resta2: "minus 2",
     },
+    viewTrace: "running",
+    viewCases: "by cases",
+    viewPatterns: "as the sifter",
+    patternsNote:
+      "(this is how the sifter thinks inside: “if n = m + 1” means “if n is the successor of some m”)",
+    trHead: "Watch it run with n =",
+    trJot: "jot down",
+    trFollow: "and carry on with",
+    trFollowOnly: "carry on with",
+    trEnd: "finish with",
+    trTotal: "total",
+    trJotted: "what was jotted",
     delPair: "remove example",
     raceh2: "The trick: sharing the work.",
     racelead:
