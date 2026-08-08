@@ -177,13 +177,18 @@ export function Shores({ pairs, onChange, ghost }: Props) {
         className="rail"
       />
 
-      {/* hilos fantasma: la generalización del programa minado */}
-      {ghosts.map(([x, y]) => (
-        <path
+      {
+        /* hilos fantasma: la generalización del programa minado, tejiéndose
+          de izquierda a derecha al llegar el resultado */
+      }
+      {ghosts.map(([x, y], i) => (
+        <g
           key={`g${x}`}
-          className="thread ghost"
-          d={threadPath(LX + 4, slotY(x), RX - 4, slotY(y))}
-        />
+          className="ghost-reveal"
+          style={{ animationDelay: `${i * 110}ms` }}
+        >
+          <path className="thread ghost" d={threadPath(LX + 4, slotY(x), RX - 4, slotY(y))} />
+        </g>
       ))}
 
       {/* hilos de ejemplo */}

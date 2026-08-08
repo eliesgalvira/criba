@@ -294,10 +294,10 @@ export function Miner() {
               <p className="meta">{t.outidle}</p>
             )}
             {!(isSifting && loaderOn) && outcome.kind === "notfound" && (
-              <p className="meta fail">{t.notfound}</p>
+              <p className="meta fail reveal">{t.notfound}</p>
             )}
             {!(isSifting && loaderOn) && outcome.kind === "found" && (
-              <>
+              <div className="reveal" key={show(outcome.prog)}>
                 <div className="found-bar">
                   <p className="found-head">{t.foundHead}</p>
                   <ToggleGroup
@@ -305,7 +305,9 @@ export function Miner() {
                     value={[view]}
                     onValueChange={(v: unknown[]) => {
                       const next = (v as RecipeView[])[0];
-                      if (next) setView(next);
+                      if (next) {
+                        setView(next);
+                      }
                     }}
                   >
                     <Toggle value="loop" className="view-tab">{t.viewLoop}</Toggle>
@@ -345,7 +347,7 @@ export function Miner() {
                   {t.rawIntro} <code>{show(outcome.prog)}</code>
                   <span className="raw-legend">{t.rawLegend}</span>
                 </p>
-              </>
+              </div>
             )}
           </div>
         </div>

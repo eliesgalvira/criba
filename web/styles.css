@@ -878,3 +878,31 @@ a,
     opacity: 0;
   }
 }
+
+/* ═══ la llegada del resultado ═══ */
+.reveal {
+  animation: rise-in 0.3s var(--ease-out) both;
+}
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+}
+/* los hilos fantasma se tejen de izquierda a derecha, escalonados */
+.ghost-reveal {
+  clip-path: inset(-5% 100% -5% 0);
+  animation: ghost-weave 0.5s var(--ease-out) both;
+}
+@keyframes ghost-weave {
+  to {
+    clip-path: inset(-5% 0% -5% 0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .ghost-reveal {
+    animation-duration: 0.01s;
+    animation-delay: 0s !important;
+  }
+}

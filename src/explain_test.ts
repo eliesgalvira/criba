@@ -78,10 +78,10 @@ Deno.test("explainPatterns: la vista del cribador (doble)", () => {
 Deno.test("explainLoop: el doble, sin recursión", () => {
   assertEquals(
     explainLoop(Mat(Zero, Suc(Suc(Rec))), "es"),
-    `empieza: total = 0
-repite:
+    `empieza: total = 0, y toma tu n
+repite (el total no se borra entre vueltas):
   si n = 0 → párate
-  si n ≥ 1 → suma 2 al total y otra vez con n = n − 1
+  si n ≥ 1 → suma 2 al total y vuelve arriba con n = n − 1
 al pararte, el resultado es el total`,
   );
 });
@@ -90,12 +90,12 @@ Deno.test("explainLoop: resto ÷3, sin recursión", () => {
   const prog = Mat(Zero, Mat(Suc(Rec), Mat(Suc(Suc(Rec)), Rec)));
   assertEquals(
     explainLoop(prog, "es"),
-    `empieza: total = 0
-repite:
+    `empieza: total = 0, y toma tu n
+repite (el total no se borra entre vueltas):
   si n = 0 → párate
-  si n = 1 → suma 1 al total y otra vez con n = 0
-  si n = 2 → suma 2 al total y otra vez con n = 0
-  si n ≥ 3 → otra vez con n = n − 3
+  si n = 1 → suma 1 al total y vuelve arriba con n = 0
+  si n = 2 → suma 2 al total y vuelve arriba con n = 0
+  si n ≥ 3 → vuelve arriba con n = n − 3
 al pararte, el resultado es el total`,
   );
 });
