@@ -1,10 +1,16 @@
 // Tests de paridad con kolmo.py (verificado exhaustivamente) y sanidad general.
 import { assert, assertEquals } from "jsr:@std/assert";
-import { collapse, copenhague, enumerate, everett } from "./criba.ts";
+import { collapse, copenhague, enumerate, everett, spaceAtDepth } from "./criba.ts";
 import { type Example, run, show, size } from "./peanito.ts";
 
 const ex = (f: (n: number) => number, xs = [0, 1, 2, 3, 4, 5]): Example[] =>
   xs.map((x) => [x, f(x)] as const);
+
+Deno.test("spaceAtDepth: recurrencia = conteo real del collapse", () => {
+  for (let d = 0; d <= 3; d++) {
+    assertEquals(spaceAtDepth(d), [...collapse(enumerate(false, d))].length);
+  }
+});
 
 Deno.test("collapse: cardinalidades exactas (paridad kolmo)", () => {
   const count = (d: number) => [...collapse(enumerate(false, d))].length;

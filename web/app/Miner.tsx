@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { NumberField } from "@base-ui/react/number-field";
 import { Toggle } from "@base-ui/react/toggle";
 import { ToggleGroup } from "@base-ui/react/toggle-group";
-import type { EverettStats } from "../../src/criba.ts";
+import type { EverettStats, SiftEvent } from "../../src/criba.ts";
 import { explain, explainLoop, explainPatterns } from "../../src/explain.ts";
 import { run, show, size, type Term } from "../../src/peanito.ts";
 import { pickTraceInput, trace } from "../../src/trace.ts";
@@ -16,7 +16,7 @@ type Pair = ShorePair;
 
 type Outcome =
   | { kind: "idle" }
-  | { kind: "notfound" }
+  | { kind: "notfound"; events: SiftEvent[] }
   | {
     kind: "found";
     prog: Term;
@@ -24,6 +24,7 @@ type Outcome =
     steps: number;
     ms: number;
     verify: [number, number | null][];
+    events: SiftEvent[];
   };
 
 const MINER_DEPTH = 5;
@@ -80,6 +81,67 @@ function PairField(props: {
         ✕
       </button>
     </span>
+  );
+}
+
+/** La criba, repetida: los eventos reales del worker, a ritmo humano.
+ * Nada inventado — cada cifra de familias y de espacio es la registrada. */
+function SiftReplay({ events, onDone }: { events: SiftEvent[]; onDone: () => void }) {
+  const { lang, t } = useT();
+  const [idx, setIdx] = useState(0);
+  const doneRef = useRef(onDone);
+  useEffect(() => {
+    doneRef.current = onDone;
+  }, [onDone]);
+  const step = Math.min(340, Math.max(140, 2400 / Math.max(events.length, 1)));
+  useEffect(() => {
+    const finished = idx >= events.length;
+    const id = setTimeout(
+      () => finished ? doneRef.current() : setIdx((i) => i + 1),
+      finished ? 480 : step,
+    );
+    return () => clearTimeout(id);
+  }, [idx, events.length, step]);
+
+  let depth = 0;
+  let space = 0;
+  const sieves: { x: number; y: number; fam: number }[] = [];
+  let ended = false;
+  for (const e of events.slice(0, idx)) {
+    if (e.t === "depth") {
+      depth = e.depth;
+      space = e.space;
+      sieves.length = 0;
+    } else if (e.t === "sieve") sieves.push({ x: e.x, y: e.y, fam: e.families });
+    else ended = true;
+  }
+  const maxFam = Math.max(...sieves.map((s) => s.fam), 1);
+  return (
+    <div className="sift-replay">
+      <p className="meta rp-head">
+        {t.rpTitle}
+        <button type="button" className="rp-skip" onClick={onDone}>{t.rpSkip} ↦</button>
+      </p>
+      <p className="rp-depth">
+        {t.rpSize} <b>{depth}</b> — {space.toLocaleString(lang)} {t.rpAtOnce}
+      </p>
+      <ul className="rp-sieves">
+        {sieves.map((s) => (
+          <li key={`${depth}-${s.x}`}>
+            <span className="rp-pair">f({s.x})={s.y}</span>
+            <span
+              className="rp-band"
+              style={{ width: `${6 + 80 * s.fam / maxFam}%` }}
+              aria-hidden="true"
+            />
+            <b>{s.fam.toLocaleString(lang)}</b>&nbsp;{t.rpFam}
+          </li>
+        ))}
+        {sieves.length > 0 && sieves[sieves.length - 1]!.fam === 0 && !ended && (
+          <li className="rp-none">{t.rpNone}</li>
+        )}
+      </ul>
+    </div>
   );
 }
 
@@ -143,6 +205,7 @@ export function Miner() {
   // criba pasa de 400 ms entra el loader — cero flashes de layout
   const [sifting, setSifting] = useState<{ steps: number } | null>(null);
   const [loaderOn, setLoaderOn] = useState(false);
+  const [replayDone, setReplayDone] = useState(false);
   const [activeRule, setActiveRule] = useState<string | null>("doble");
   const [view, setView] = useState<RecipeView>("loop");
   const workerRef = useRef<Worker | null>(null);
@@ -196,7 +259,7 @@ export function Miner() {
       if (workerRef.current !== w) return; // mensaje de una criba muerta
       const msg = e.data as
         | { type: "progress"; steps: number }
-        | { type: "done"; prog: Term | null; stats: EverettStats };
+        | { type: "done"; prog: Term | null; stats: EverettStats; events: SiftEvent[] };
       if (msg.type === "progress") {
         setSifting((s) => s ? { steps: msg.steps } : s);
         return;
@@ -205,7 +268,9 @@ export function Miner() {
       workerRef.current = null;
       w.terminate();
       setSifting(null);
-      if (!msg.prog) setOutcome({ kind: "notfound" });
+      // la repetición se salta con reduced-motion: directo al resultado
+      setReplayDone(matchMedia("(prefers-reduced-motion: reduce)").matches);
+      if (!msg.prog) setOutcome({ kind: "notfound", events: msg.events });
       else {
         const prog = msg.prog;
         const maxX = Math.max(...examples.map(([x]) => x));
@@ -216,6 +281,7 @@ export function Miner() {
           steps: msg.stats.steps,
           ms,
           verify: [maxX + 1, maxX + 2, maxX + 3].map((x) => [x, run(prog, x, 100_000)]),
+          events: msg.events,
         });
       }
     };
@@ -245,7 +311,9 @@ export function Miner() {
           <Shores
             pairs={pairs}
             onChange={setPairs}
-            ghost={outcome.kind === "found" ? (x) => run(outcome.prog, x, 100_000) : null}
+            ghost={outcome.kind === "found" && replayDone
+              ? (x) => run(outcome.prog, x, 100_000)
+              : null}
           />
           <details className="text-editor">
             <summary>{t.editAsText}</summary>
@@ -293,10 +361,16 @@ export function Miner() {
             {!(isSifting && loaderOn) && outcome.kind === "idle" && (
               <p className="meta">{t.outidle}</p>
             )}
-            {!(isSifting && loaderOn) && outcome.kind === "notfound" && (
+            {!(isSifting && loaderOn) && outcome.kind !== "idle" && !replayDone && (
+              <SiftReplay
+                events={outcome.events}
+                onDone={() => setReplayDone(true)}
+              />
+            )}
+            {!(isSifting && loaderOn) && outcome.kind === "notfound" && replayDone && (
               <p className="meta fail reveal">{t.notfound}</p>
             )}
-            {!(isSifting && loaderOn) && outcome.kind === "found" && (
+            {!(isSifting && loaderOn) && outcome.kind === "found" && replayDone && (
               <div className="reveal" key={show(outcome.prog)}>
                 <div className="found-bar">
                   <p className="found-head">{t.foundHead}</p>

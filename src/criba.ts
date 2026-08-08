@@ -151,6 +151,27 @@ export function copenhague(examples: readonly Example[], limit = 50_000): Copenh
 
 type Env = Map<number, 0 | 1>;
 
+/** Eventos reales de la criba, para poder repetirla a ritmo humano. */
+export type SiftEvent =
+  | { t: "depth"; depth: number; space: number }
+  | { t: "sieve"; x: number; y: number; families: number }
+  | { t: "found"; depth: number }
+  | { t: "notfound" };
+
+/** Programas concretos en la superposición de profundidad d (recurrencia
+ * exacta, verificada contra collapse: 2, 13, 240, 59.291, …). */
+export function spaceAtDepth(d: number): number {
+  let cT = 3;
+  let cF = 2;
+  for (let i = 1; i <= d; i++) {
+    const nT = 3 + cT + cT * cT;
+    const nF = 2 + cF + cT * cT;
+    cT = nT;
+    cF = nF;
+  }
+  return cF;
+}
+
 export interface EverettStats {
   steps: number;
   depthFound: number | null;
@@ -266,6 +287,7 @@ export function everett(
   maxDepth = 6,
   budget = 20_000_000,
   onProgress?: (steps: number) => void,
+  onEvent?: (e: SiftEvent) => void,
 ): EverettResult {
   const stats: EverettStats = {
     steps: 0,
@@ -278,6 +300,7 @@ export function everett(
   try {
     for (let depth = 0; depth <= maxDepth; depth++) {
       const tree = enumerateLabeled(false, depth, { n: 0 });
+      onEvent?.({ t: "depth", depth, space: spaceAtDepth(depth) });
       let survivors: Env[] = [new Map()];
       for (const [x, y] of examples) {
         const fuel = 4 * (x + 2) * (depth + 4) + y + 64;
@@ -286,6 +309,7 @@ export function everett(
           next.push(...check(tree, x, y, env, fuel, stats, budget, onProgress));
         }
         survivors = next;
+        onEvent?.({ t: "sieve", x, y, families: survivors.length });
         if (!survivors.length) break;
       }
       for (const env of survivors) {
@@ -301,6 +325,8 @@ export function everett(
         break;
       }
     }
+    if (best) onEvent?.({ t: "found", depth: stats.depthFound ?? 0 });
+    else onEvent?.({ t: "notfound" });
   } catch (e) {
     if (e instanceof BudgetExhausted) stats.budgetExhausted = true;
     else throw e;

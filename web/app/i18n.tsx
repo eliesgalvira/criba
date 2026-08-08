@@ -32,6 +32,12 @@ export interface Strings {
   addPair: string;
   editAsText: string;
   presets: Record<string, string>;
+  rpTitle: string;
+  rpSkip: string;
+  rpSize: string;
+  rpAtOnce: string;
+  rpFam: string;
+  rpNone: string;
   viewLoop: string;
   viewTrace: string;
   viewCases: string;
@@ -103,6 +109,12 @@ const STRINGS: Record<Lang, Strings> = {
       mod3: "resto ÷3",
       resta2: "resta 2",
     },
+    rpTitle: "la criba, repetida a ritmo humano — eventos reales",
+    rpSkip: "saltar",
+    rpSize: "programas de tamaño ≤",
+    rpAtOnce: "a la vez",
+    rpFam: "familias en pie",
+    rpNone: "nada sobrevive aquí — más hondo…",
     viewLoop: "instrucciones",
     viewTrace: "en marcha",
     viewCases: "por casos",
@@ -193,6 +205,12 @@ const STRINGS: Record<Lang, Strings> = {
       mod3: "mod 3",
       resta2: "minus 2",
     },
+    rpTitle: "the sift, replayed at human speed — real events",
+    rpSkip: "skip",
+    rpSize: "programs of size ≤",
+    rpAtOnce: "at once",
+    rpFam: "families standing",
+    rpNone: "nothing survives here — deeper…",
     viewLoop: "instructions",
     viewTrace: "running",
     viewCases: "by cases",

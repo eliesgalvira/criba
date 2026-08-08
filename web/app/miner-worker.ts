@@ -1,6 +1,6 @@
 // Worker del minador: Everett criba aquí, fuera del hilo de la página,
 // reportando sus pasos compartidos reales.
-import { everett } from "../../src/criba.ts";
+import { everett, type SiftEvent } from "../../src/criba.ts";
 import type { Example } from "../../src/peanito.ts";
 
 type WorkerScope = {
@@ -15,11 +15,13 @@ ctx.onmessage = (e) => {
     maxDepth: number;
     budget: number;
   };
+  const events: SiftEvent[] = [];
   const { prog, stats } = everett(
     examples,
     maxDepth,
     budget,
     (steps) => ctx.postMessage({ type: "progress", steps }),
+    (e) => events.push(e),
   );
-  ctx.postMessage({ type: "done", prog, stats });
+  ctx.postMessage({ type: "done", prog, stats, events });
 };

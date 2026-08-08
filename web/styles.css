@@ -906,3 +906,65 @@ a,
     animation-delay: 0s !important;
   }
 }
+
+/* ═══ la criba, repetida ═══ */
+.sift-replay .rp-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+}
+.rp-skip {
+  background: none;
+  border: 0;
+  color: var(--thread-dim);
+  font-family: "Solway", serif;
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+}
+.rp-skip:hover {
+  color: var(--mustard);
+}
+.rp-depth {
+  margin-top: 0.6rem;
+  font-family: "Solway", serif;
+  font-weight: 500;
+}
+.rp-depth b {
+  color: var(--mustard);
+}
+.rp-sieves {
+  list-style: none;
+  padding: 0;
+  margin-top: 0.5rem;
+  display: grid;
+  gap: 0.4rem;
+}
+.rp-sieves li {
+  display: grid;
+  grid-template-columns: 6.5rem 1fr auto;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 0.95rem;
+}
+.rp-pair {
+  font-family: "Solway", serif;
+  font-weight: 500;
+  color: var(--thread);
+}
+.rp-band {
+  height: 6px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--mustard) 0 8px,
+    transparent 8px 14px
+  );
+  transition: width 0.25s var(--ease-out);
+  justify-self: start;
+}
+.rp-none {
+  grid-template-columns: 1fr;
+  font-style: italic;
+  color: var(--thread-dim);
+}
