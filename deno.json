@@ -4,7 +4,8 @@
     "check": "deno check src/",
     "fmt": "deno fmt",
     "lint": "deno lint",
-    "bundle": "deno bundle --platform browser web/main.ts -o web/dist/main.js"
+    "bundle": "deno bundle --platform browser web/main.ts -o web/dist/main.js",
+    "design": "deno run --allow-net --allow-read jsr:@std/http/file-server web/design --port 4507"
   },
   "compilerOptions": {
     "strict": true,
