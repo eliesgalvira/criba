@@ -90,15 +90,15 @@ export function mountLoom(cv: HTMLCanvasElement, opts: LoomOpts = {}): () => voi
   let flash: LLink | null = null;
   let flashT = 0;
   function step() {
-    const l = findActive();
-    if (!l) {
-      if (nodes.length < (opts.mini ? 24 : opts.big ? 32 : 28)) {
-        opts.mini
-          ? seed(W() / 2 + rnd(-30, 30), rnd(H() * .15, H() * .85))
-          : seed(rnd(W() * .2, W() * .8), rnd(H() * .3, H() * .7));
-      }
-      return;
+    // reponer SIEMPRE que falte población, haya o no interacción en curso:
+    // tras una racha de aniquilaciones el lienzo no puede quedarse vacío
+    if (nodes.length < (opts.mini ? 24 : opts.big ? 32 : 28)) {
+      opts.mini
+        ? seed(W() / 2 + rnd(-30, 30), rnd(H() * .15, H() * .85))
+        : seed(rnd(W() * .2, W() * .8), rnd(H() * .3, H() * .7));
     }
+    const l = findActive();
+    if (!l) return;
     flash = l;
     flashT = 1;
     const { a, b } = l;
@@ -150,14 +150,17 @@ export function mountLoom(cv: HTMLCanvasElement, opts: LoomOpts = {}): () => voi
   function physics() {
     for (const n of nodes) {
       // mini (tira vertical): X firme para no desbordar la tira estrecha,
-      // Y suelto para que los racimos apilados no colapsen al centro
-      let fx = (W() / 2 - n.x) * (opts.mini ? 0.0016 : 0.0005),
-        fy = (H() / 2 - n.y) * (opts.mini ? 0.0002 : 0.001);
+      // Y suelto para que los racimos apilados no colapsen al centro.
+      // big: tirón firme en ambos ejes — la red ha de quedarse A LA VISTA
+      let fx = (W() / 2 - n.x) * (opts.mini ? 0.0016 : opts.big ? 0.0011 : 0.0005),
+        fy = (H() / 2 - n.y) * (opts.mini ? 0.0002 : opts.big ? 0.0011 : 0.001);
       for (const m of nodes) {
         if (m !== n) {
+          // repulsión ∝ S (no S²): con S² los muelles no la contienen y los
+          // anillos revientan hacia los bordes — visto en pantalla
           const dx = n.x - m.x, dy = n.y - m.y, d2 = dx * dx + dy * dy + 60;
-          fx += dx / d2 * 34 * S * S;
-          fy += dy / d2 * 34 * S * S;
+          fx += dx / d2 * 34 * S;
+          fy += dy / d2 * 34 * S;
         }
       }
       n.vx = (n.vx + fx) * 0.92;
@@ -167,15 +170,22 @@ export function mountLoom(cv: HTMLCanvasElement, opts: LoomOpts = {}): () => voi
       const dx = l.b.x - l.a.x,
         dy = l.b.y - l.a.y,
         d = Math.hypot(dx, dy) || 1,
-        f = (d - (opts.mini ? 62 : 115 * S)) * 0.002;
+        f = (d - (opts.mini ? 62 : 115 * S)) * (opts.big ? 0.0035 : 0.002);
       l.a.vx += dx / d * f;
       l.a.vy += dy / d * f;
       l.b.vx -= dx / d * f;
       l.b.vy -= dy / d * f;
     }
+    // valla dura: ningún nodo sale del lienzo — pase lo que pase con las
+    // fuerzas, la red se queda donde se ve
+    const pad = 30 * S;
     for (const n of nodes) {
       n.x += n.vx;
       n.y += n.vy;
+      if (n.x < pad) (n.x = pad), (n.vx = 0);
+      else if (n.x > W() - pad) (n.x = W() - pad), (n.vx = 0);
+      if (n.y < pad) (n.y = pad), (n.vy = 0);
+      else if (n.y > H() - pad) (n.y = H() - pad), (n.vy = 0);
     }
   }
   function thread(l: LLink, t: number) {
