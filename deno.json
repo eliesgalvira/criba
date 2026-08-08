@@ -1,10 +1,10 @@
 {
   "tasks": {
     "test": "deno test --allow-none src/",
-    "check": "deno check src/",
+    "check": "deno check src/ web/app/",
     "fmt": "deno fmt",
     "lint": "deno lint",
-    "bundle": "deno bundle --platform browser web/main.ts -o web/dist/main.js",
+    "bundle": "deno bundle --platform browser --minify web/app/main.tsx -o web/dist/main.js",
     "design": "deno run --allow-net --allow-read jsr:@std/http/file-server web/design --port 4507",
     "web": "deno task bundle && deno run --allow-net --allow-read jsr:@std/http/file-server web --port 4508"
   },
@@ -16,10 +16,21 @@
       "dom.iterable",
       "esnext",
       "deno.ns"
-    ]
+    ],
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
+    "jsxImportSourceTypes": "npm:@types/react@^19"
   },
   "fmt": {
     "lineWidth": 100,
     "indentWidth": 2
+  },
+  "imports": {
+    "react": "npm:react@^19.1.0",
+    "react-dom/client": "npm:react-dom@^19.1.0/client",
+    "@base-ui/react/number-field": "npm:@base-ui/react@^1.7.0/number-field",
+    "@base-ui/react/slider": "npm:@base-ui/react@^1.7.0/slider",
+    "@base-ui/react/toggle": "npm:@base-ui/react@^1.7.0/toggle",
+    "@base-ui/react/toggle-group": "npm:@base-ui/react@^1.7.0/toggle-group"
   }
 }
