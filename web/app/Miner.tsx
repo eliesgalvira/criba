@@ -26,13 +26,14 @@ type Outcome =
 const MINER_DEPTH = 5;
 const MINER_BUDGET = 50_000_000;
 
-/** presets tejibles: enseñan de un vistazo el terreno que el minador domina */
+/** reglas ya tejidas: pestañas que enseñan el terreno que el minador domina */
 const PRESETS: [key: string, pairs: [number, number][]][] = [
   ["doble", [[0, 0], [1, 2], [2, 4], [3, 6]]],
+  ["triple", [[0, 0], [1, 3], [2, 6], [3, 9]]],
   ["mitad", [[0, 0], [1, 0], [2, 1], [3, 1], [4, 2], [5, 2]]],
   ["mas3", [[0, 3], [1, 4], [2, 5]]],
+  ["resta2", [[0, 0], [1, 0], [2, 0], [3, 1], [4, 2], [5, 3]]],
   ["parimpar", [[0, 0], [1, 1], [2, 0], [3, 1], [4, 0]]],
-  ["triple", [[0, 0], [1, 3], [2, 6], [3, 9]]],
   ["mod3", [[0, 0], [1, 1], [2, 2], [3, 0], [4, 1], [5, 2], [6, 0]]],
 ];
 
@@ -88,6 +89,7 @@ export function Miner() {
     { id: 3, x: 3, y: 6 },
   ]);
   const [outcome, setOutcome] = useState<Outcome>({ kind: "idle" });
+  const [activeRule, setActiveRule] = useState<string | null>("doble");
   const workerRef = useRef<Worker | null>(null);
   const startRef = useRef(0);
 
@@ -98,8 +100,17 @@ export function Miner() {
   useEffect(() => stopWorker, []);
 
   // cambiar los ejemplos invalida el resultado: nada rancio en pantalla
+  // (y tejer lo tuyo despega la pestaña activa: la regla ya es tuya)
   const setPairs = (next: Pair[]) => {
     setPairsRaw(next);
+    setActiveRule(null);
+    stopWorker();
+    setOutcome({ kind: "idle" });
+  };
+
+  const loadRule = (key: string, ps: [number, number][]) => {
+    setPairsRaw(ps.map(([x, y]) => ({ id: nextId++, x, y })));
+    setActiveRule(key);
     stopWorker();
     setOutcome({ kind: "idle" });
   };
@@ -149,13 +160,14 @@ export function Miner() {
         <h2>{t.minerh2}</h2>
         <p className="intro">{t.minerIntro}</p>
         <p className="sub">{t.minersub}</p>
-        <div className="presets" role="group" aria-label="Funciones de ejemplo">
+        <div className="rule-tabs" role="group" aria-label="Reglas ya tejidas">
           {PRESETS.map(([key, ps]) => (
             <button
               type="button"
               key={key}
-              className="preset"
-              onClick={() => setPairs(ps.map(([x, y]) => ({ id: nextId++, x, y })))}
+              className="rule-tab"
+              aria-pressed={activeRule === key}
+              onClick={() => loadRule(key, ps)}
             >
               {t.presets[key as keyof typeof t.presets]}
             </button>

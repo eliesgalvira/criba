@@ -62,9 +62,9 @@ const STRINGS: Record<Lang, Strings> = {
     h1sub:
       "El telar de Jacquard fue la primera máquina programable, hace doscientos años. Esta página va de un paradigma que vuelve a computar así: tejiendo.",
     hint: "desliza",
-    minerh2: "Dale ejemplos. Recibe el programa.",
+    minerh2: "Piensa una regla, enlaza entradas con salidas — recibe el programa.",
     minerIntro:
-      "Tú das ejemplos de entrada y salida. La página encuentra sola el programa más corto que los cumple todos — probando todos los programas posibles a la vez. (Ese «a la vez» tiene nombre: superposición. El truco, más abajo.)",
+      "La página encuentra sola el programa más corto que cumple todos tus enlaces — probando todos los programas posibles a la vez. (Ese «a la vez» tiene nombre: superposición. El truco, más abajo.)",
     minersub: "Sin IA y sin trampa: lo que sale cumple tus ejemplos siempre, por construcción.",
     run: "Cribar el espacio de programas",
     running: "Cribando…",
@@ -89,6 +89,7 @@ const STRINGS: Record<Lang, Strings> = {
       parimpar: "¿par o impar?",
       triple: "el triple",
       mod3: "resto de ÷3",
+      resta2: "resta 2 (sin negativos)",
     },
     delPair: "quitar ejemplo",
     raceh2: "El truco: compartir el trabajo.",
@@ -138,9 +139,9 @@ const STRINGS: Record<Lang, Strings> = {
     h1sub:
       "The Jacquard loom was the first programmable machine, two hundred years ago. This page is about a paradigm that computes like that again: by weaving.",
     hint: "scroll",
-    minerh2: "Give it examples. Get the program.",
+    minerh2: "Think of a rule, link inputs to outputs — get the program.",
     minerIntro:
-      "You give input–output examples. The page finds, by itself, the shortest program that fits them all — trying every possible program at once. (That “at once” has a name: superposition. The trick, further down.)",
+      "The page finds, by itself, the shortest program that fits all your links — trying every possible program at once. (That “at once” has a name: superposition. The trick, further down.)",
     minersub: "No AI and no tricks: what comes out fits your examples always, by construction.",
     run: "Sift the space of programs",
     running: "Sifting…",
@@ -165,6 +166,7 @@ const STRINGS: Record<Lang, Strings> = {
       parimpar: "odd or even?",
       triple: "triple",
       mod3: "remainder ÷3",
+      resta2: "minus 2 (no negatives)",
     },
     delPair: "remove example",
     raceh2: "The trick: sharing the work.",
