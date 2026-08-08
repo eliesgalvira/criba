@@ -1,0 +1,6 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "curl -fsSL https://deno.land/install.sh | DENO_INSTALL=./.deno sh -s -- -y",
+  "buildCommand": "./.deno/bin/deno task bundle",
+  "outputDirectory": "web"
+}

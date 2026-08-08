@@ -1,0 +1,18 @@
+# CI: puerta verde en cada push — tipos, tests y que el bundle compile.
+# (El hosting lo hace Vercel desde su propia integración; aquí no se despliega.)
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - run: deno task check
+      - run: deno task test
+      - run: deno task bundle
