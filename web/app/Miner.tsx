@@ -6,8 +6,9 @@ import { everett } from "../../src/criba.ts";
 import { explain } from "../../src/explain.ts";
 import { run, show, size, type Term } from "../../src/peanito.ts";
 import { useT } from "./i18n.tsx";
+import { type ShorePair, Shores } from "./Shores.tsx";
 
-type Pair = { id: number; x: number | null; y: number | null };
+type Pair = ShorePair;
 
 type Outcome =
   | { kind: "idle" }
@@ -35,7 +36,7 @@ function PairField(props: {
       <span aria-hidden="true">f(</span>
       <NumberField.Root
         value={pair.x}
-        onValueChange={(x) => onChange({ ...pair, x })}
+        onValueChange={(x) => x !== null && onChange({ ...pair, x })}
         min={0}
         max={30}
         className="nf"
@@ -45,7 +46,7 @@ function PairField(props: {
       <span aria-hidden="true">)&nbsp;=</span>
       <NumberField.Root
         value={pair.y}
-        onValueChange={(y) => onChange({ ...pair, y })}
+        onValueChange={(y) => y !== null && onChange({ ...pair, y })}
         min={0}
         max={99}
         className="nf"
@@ -66,7 +67,7 @@ function PairField(props: {
 
 export function Miner() {
   const { lang, t } = useT();
-  const [pairs, setPairs] = useState<Pair[]>([
+  const [pairs, setPairsRaw] = useState<Pair[]>([
     { id: 0, x: 0, y: 0 },
     { id: 1, x: 1, y: 2 },
     { id: 2, x: 2, y: 4 },
@@ -75,10 +76,14 @@ export function Miner() {
   const [busy, setBusy] = useState(false);
   const [outcome, setOutcome] = useState<Outcome>({ kind: "idle" });
 
+  // cambiar los ejemplos invalida el resultado: nada rancio en pantalla
+  const setPairs = (next: Pair[]) => {
+    setPairsRaw(next);
+    setOutcome({ kind: "idle" });
+  };
+
   const sift = () => {
-    const examples = pairs
-      .filter((p): p is Pair & { x: number; y: number } => p.x !== null && p.y !== null)
-      .map((p) => [p.x, p.y] as [number, number]);
+    const examples = pairs.map((p) => [p.x, p.y] as [number, number]);
     if (!examples.length) return;
     setBusy(true);
     setTimeout(() => {
@@ -108,24 +113,37 @@ export function Miner() {
         <p className="intro">{t.minerIntro}</p>
         <p className="sub">{t.minersub}</p>
         <div className="bench">
-          <div className="pairs">
-            {pairs.map((p) => (
-              <PairField
-                key={p.id}
-                pair={p}
-                onChange={(np) => setPairs(pairs.map((q) => q.id === p.id ? np : q))}
-                onRemove={() => setPairs(pairs.filter((q) => q.id !== p.id))}
-                removeLabel={t.delPair}
-              />
-            ))}
-            <button
-              type="button"
-              className="pair pair-add"
-              onClick={() => setPairs([...pairs, { id: nextId++, x: null, y: null }])}
-            >
-              + {t.addPair}
-            </button>
-          </div>
+          <Shores
+            pairs={pairs}
+            onChange={setPairs}
+            ghost={outcome.kind === "found" ? (x) => run(outcome.prog, x, 100_000) : null}
+          />
+          <details className="text-editor">
+            <summary>{t.editAsText}</summary>
+            <div className="pairs">
+              {pairs.map((p) => (
+                <PairField
+                  key={p.id}
+                  pair={p}
+                  onChange={(np) => setPairs(pairs.map((q) => q.id === p.id ? np : q))}
+                  onRemove={() => setPairs(pairs.filter((q) => q.id !== p.id))}
+                  removeLabel={t.delPair}
+                />
+              ))}
+              <button
+                type="button"
+                className="pair pair-add"
+                onClick={() => {
+                  const used = new Set(pairs.map((q) => q.x));
+                  let x = 0;
+                  while (used.has(x)) x++;
+                  setPairs([...pairs, { id: nextId++, x, y: 0 }]);
+                }}
+              >
+                + {t.addPair}
+              </button>
+            </div>
+          </details>
           <button type="button" className="run" onClick={sift} disabled={busy}>
             {busy ? t.running : t.run}
           </button>

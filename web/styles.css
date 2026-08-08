@@ -624,3 +624,126 @@ a,
     transition: none;
   }
 }
+
+/* ═══ Dos orillas: la función como hilos tejidos ═══ */
+
+.shores {
+  display: block;
+  width: 100%;
+  height: auto;
+  padding: 1.2rem 0.6rem 0.4rem;
+  touch-action: none;
+  user-select: none;
+}
+.shores.holding {
+  cursor: grabbing;
+}
+.shores .rail {
+  fill: var(--seam);
+}
+.shores .slot {
+  cursor: pointer;
+}
+.shores .slot .hit {
+  fill: transparent;
+}
+.shores .slot text {
+  font-family: "Solway", serif;
+  font-weight: 700;
+  font-size: 21px;
+  fill: var(--thread);
+  text-anchor: middle;
+  transition: fill 0.15s var(--ease-out);
+}
+.shores .slot .eyelet {
+  fill: var(--thread-dim);
+}
+.shores .slot.in.used text {
+  fill: var(--mustard);
+}
+.shores .slot.in.armed text {
+  fill: var(--madder);
+}
+.shores .slot.in:hover text,
+.shores .slot.out.ready:hover text {
+  fill: var(--mustard);
+}
+.shores .slot.out.ready .eyelet {
+  fill: var(--mustard);
+}
+.shores .slot.extend text {
+  font-size: 17px;
+  font-weight: 400;
+  fill: var(--thread-dim);
+}
+.shores .slot.extend:hover text {
+  fill: var(--thread);
+}
+
+.shores .thread {
+  fill: none;
+  stroke: var(--mustard);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+.shores .twist {
+  fill: none;
+  stroke: oklch(0.92 0.06 90 / 0.7);
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-dasharray: 3.5 4.5;
+}
+.shores .woven.held .thread {
+  stroke: var(--madder);
+}
+.shores .thread.loose {
+  stroke: var(--madder);
+  stroke-dasharray: 7 6;
+}
+.shores .thread.ghost {
+  stroke: var(--thread-dim);
+  stroke-width: 1.7;
+  stroke-dasharray: 6 7;
+  opacity: 0.6;
+}
+.shores .grab {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 18;
+  cursor: grab;
+}
+.shores .shuttle {
+  fill: var(--mustard);
+  stroke: var(--indigo-deep);
+  stroke-width: 1.2;
+  cursor: grab;
+}
+.shores .woven.held .shuttle {
+  fill: var(--madder);
+  cursor: grabbing;
+}
+
+.text-editor {
+  border-top: 1px solid var(--seam);
+}
+.text-editor summary {
+  cursor: pointer;
+  padding: 0.55rem 1.2rem;
+  font-family: "Solway", serif;
+  font-size: 0.85rem;
+  color: var(--thread-dim);
+  list-style: none;
+}
+.text-editor summary::-webkit-details-marker {
+  display: none;
+}
+.text-editor summary:hover {
+  color: var(--thread);
+}
+.text-editor .pairs {
+  padding-top: 0.4rem;
+}
+.text-editor .pair {
+  font-size: 1.1rem;
+  padding: 0.35rem 0.6rem;
+}
