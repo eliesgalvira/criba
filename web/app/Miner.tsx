@@ -31,16 +31,14 @@ type SiftResult = { kind: "notfound" } | Found;
 type MineState =
   | { phase: "idle" }
   | { phase: "sifting"; steps: number; loaderOn: boolean; prev: SiftResult | null }
-  | { phase: "loom"; result: SiftResult; steps: number }
-  | { phase: "shown"; result: SiftResult };
+  | { phase: "shown"; result: SiftResult; steps: number };
 
 type MineAction =
   | { type: "reset" }
   | { type: "start" }
   | { type: "loader" }
   | { type: "progress"; steps: number }
-  | { type: "done"; result: SiftResult; steps: number; skipLoom: boolean }
-  | { type: "show" };
+  | { type: "done"; result: SiftResult; steps: number };
 
 function mineReducer(s: MineState, a: MineAction): MineState {
   switch (a.type) {
@@ -51,18 +49,14 @@ function mineReducer(s: MineState, a: MineAction): MineState {
         phase: "sifting",
         steps: 0,
         loaderOn: false,
-        prev: s.phase === "shown" || s.phase === "loom" ? s.result : null,
+        prev: s.phase === "shown" ? s.result : null,
       };
     case "loader":
       return s.phase === "sifting" ? { ...s, loaderOn: true } : s;
     case "progress":
       return s.phase === "sifting" ? { ...s, steps: a.steps } : s;
     case "done":
-      return a.skipLoom
-        ? { phase: "shown", result: a.result }
-        : { phase: "loom", result: a.result, steps: a.steps };
-    case "show":
-      return s.phase === "loom" ? { phase: "shown", result: s.result } : s;
+      return { phase: "shown", result: a.result, steps: a.steps };
   }
 }
 
@@ -126,7 +120,7 @@ function PairField(props: {
 /** mini-telar: la animación del hero, reutilizada como loader de la criba */
 function MiniLoom() {
   const ref = useRef<HTMLCanvasElement>(null);
-  useEffect(() => mountLoom(ref.current!), []);
+  useEffect(() => mountLoom(ref.current!, { mini: true }), []);
   return <canvas ref={ref} className="miniloom" aria-hidden="true" />;
 }
 
@@ -256,13 +250,7 @@ export function Miner() {
           verify: [maxX + 1, maxX + 2, maxX + 3].map((x) => [x, run(prog, x, 100_000)]),
         };
       }
-      dispatch({
-        type: "done",
-        result,
-        steps: msg.stats.steps,
-        // con reduced-motion no hay ventana de telar: directo al resultado
-        skipLoom: matchMedia("(prefers-reduced-motion: reduce)").matches,
-      });
+      dispatch({ type: "done", result, steps: msg.stats.steps });
     };
     w.postMessage({ examples, maxDepth: MINER_DEPTH, budget: MINER_BUDGET });
   };
@@ -328,92 +316,91 @@ export function Miner() {
           </button>
           <div className="out" aria-live="polite">
             {(() => {
-              const loomOn = (mine.phase === "sifting" && mine.loaderOn) ||
-                mine.phase === "loom";
+              const loaderOnly = mine.phase === "sifting" && mine.loaderOn;
+              const steps = mine.phase === "sifting" || mine.phase === "shown" ? mine.steps : 0;
+              const sideLoom = !loaderOnly && outcome.kind !== "idle";
               return (
-                <>
-                  {loomOn && (
-                    <div className="loom-window">
-                      <MiniLoom />
-                      <p className="meta loom-meta">
-                        <span>
-                          {(mine.phase === "sifting" || mine.phase === "loom" ? mine.steps : 0)
-                            .toLocaleString(lang)} {t.sharedSteps}…
-                        </span>
-                        {mine.phase === "loom" && (
-                          <button
-                            type="button"
-                            className="see-result"
-                            onClick={() => dispatch({ type: "show" })}
-                          >
-                            {t.seeResult} ↦
-                          </button>
-                        )}
-                      </p>
-                    </div>
-                  )}
-                  {!loomOn && outcome.kind === "idle" && <p className="meta">{t.outidle}</p>}
-                  {!loomOn && outcome.kind === "notfound" && (
-                    <p className="meta fail reveal">{t.notfound}</p>
-                  )}
-                  {!loomOn && outcome.kind === "found" && (
-                    <div className="reveal" key={show(outcome.prog)}>
-                      <div className="found-bar">
-                        <p className="found-head">{t.foundHead}</p>
-                        <ToggleGroup
-                          className="view-toggle"
-                          value={[view]}
-                          onValueChange={(v: unknown[]) => {
-                            const next = (v as RecipeView[])[0];
-                            if (next) {
-                              setView(next);
-                            }
-                          }}
-                        >
-                          <Toggle value="loop" className="view-tab">{t.viewLoop}</Toggle>
-                          <Toggle value="trace" className="view-tab">{t.viewTrace}</Toggle>
-                          <Toggle value="cases" className="view-tab">{t.viewCases}</Toggle>
-                          <Toggle value="patterns" className="view-tab">{t.viewPatterns}</Toggle>
-                        </ToggleGroup>
+                <div className={"out-grid" + (sideLoom ? " with-loom" : "")}>
+                  <div className="out-main">
+                    {loaderOnly && (
+                      <div className="loom-window">
+                        <MiniLoom />
+                        <p className="meta">
+                          {steps.toLocaleString(lang)} {t.sharedSteps}…
+                        </p>
                       </div>
-                      {view === "loop" && (
-                        <pre className="recipe">{explainLoop(outcome.prog, lang)}</pre>
-                      )}
-                      {view === "trace" && (
-                        <TraceView
-                          prog={outcome.prog}
-                          examples={pairs.map((p) => [p.x, p.y] as [number, number])}
-                        />
-                      )}
-                      {view === "cases" && (
-                        <pre className="recipe">{explain(outcome.prog, lang)}</pre>
-                      )}
-                      {view === "patterns" && (
-                        <>
-                          <pre className="recipe">{explainPatterns(outcome.prog, lang)}</pre>
-                          <p className="meta">{t.patternsNote}</p>
-                        </>
-                      )}
+                    )}
+                    {!loaderOnly && outcome.kind === "idle" && <p className="meta">{t.outidle}</p>}
+                    {!loaderOnly && outcome.kind === "notfound" && (
+                      <p className="meta fail reveal">{t.notfound}</p>
+                    )}
+                    {!loaderOnly && outcome.kind === "found" && (
+                      <div className="reveal" key={show(outcome.prog)}>
+                        <div className="found-bar">
+                          <p className="found-head">{t.foundHead}</p>
+                          <ToggleGroup
+                            className="view-toggle"
+                            value={[view]}
+                            onValueChange={(v: unknown[]) => {
+                              const next = (v as RecipeView[])[0];
+                              if (next) {
+                                setView(next);
+                              }
+                            }}
+                          >
+                            <Toggle value="loop" className="view-tab">{t.viewLoop}</Toggle>
+                            <Toggle value="trace" className="view-tab">{t.viewTrace}</Toggle>
+                            <Toggle value="cases" className="view-tab">{t.viewCases}</Toggle>
+                            <Toggle value="patterns" className="view-tab">{t.viewPatterns}</Toggle>
+                          </ToggleGroup>
+                        </div>
+                        {view === "loop" && (
+                          <pre className="recipe">{explainLoop(outcome.prog, lang)}</pre>
+                        )}
+                        {view === "trace" && (
+                          <TraceView
+                            prog={outcome.prog}
+                            examples={pairs.map((p) => [p.x, p.y] as [number, number])}
+                          />
+                        )}
+                        {view === "cases" && (
+                          <pre className="recipe">{explain(outcome.prog, lang)}</pre>
+                        )}
+                        {view === "patterns" && (
+                          <>
+                            <pre className="recipe">{explainPatterns(outcome.prog, lang)}</pre>
+                            <p className="meta">{t.patternsNote}</p>
+                          </>
+                        )}
+                        <p className="meta">
+                          {size(outcome.prog)} {t.pieces} —{" "}
+                          {outcome.proven ? t.foundProven : t.foundBest} · {t.foundIn}{" "}
+                          {outcome.ms.toFixed(0)} ms · {outcome.steps.toLocaleString(lang)}{" "}
+                          {t.sharedSteps}
+                        </p>
+                        <p className="verify">
+                          {t.verify} {outcome.verify.map(([x, y], i) => (
+                            <span key={x}>
+                              {i > 0 && " · "}f({x}) = <b>{y}</b>
+                            </span>
+                          ))}
+                        </p>
+                        <p className="raw">
+                          {t.rawIntro} <code>{show(outcome.prog)}</code>
+                          <span className="raw-legend">{t.rawLegend}</span>
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                  {sideLoom && (
+                    <aside className="out-loom" aria-hidden="true">
+                      <MiniLoom />
                       <p className="meta">
-                        {size(outcome.prog)} {t.pieces} —{" "}
-                        {outcome.proven ? t.foundProven : t.foundBest} · {t.foundIn}{" "}
-                        {outcome.ms.toFixed(0)} ms · {outcome.steps.toLocaleString(lang)}{" "}
-                        {t.sharedSteps}
+                        {steps.toLocaleString(lang)} {t.sharedSteps}
                       </p>
-                      <p className="verify">
-                        {t.verify} {outcome.verify.map(([x, y], i) => (
-                          <span key={x}>
-                            {i > 0 && " · "}f({x}) = <b>{y}</b>
-                          </span>
-                        ))}
-                      </p>
-                      <p className="raw">
-                        {t.rawIntro} <code>{show(outcome.prog)}</code>
-                        <span className="raw-legend">{t.rawLegend}</span>
-                      </p>
-                    </div>
+                    </aside>
                   )}
-                </>
+                </div>
               );
             })()}
           </div>

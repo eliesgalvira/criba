@@ -5,7 +5,13 @@
 type LNode = { k: string; x: number; y: number; vx: number; vy: number; ports: (LLink | null)[] };
 type LLink = { a: LNode; pa: number; b: LNode; pb: number };
 
-export function mountLoom(cv: HTMLCanvasElement): () => void {
+export interface LoomOpts {
+  /** lienzo pequeño: anillos y enlaces cortos y reposición temprana, para que
+   * la red se vea DENSA donde el hero usa distancias de pantalla completa */
+  mini?: boolean;
+}
+
+export function mountLoom(cv: HTMLCanvasElement, opts: LoomOpts = {}): () => void {
   const cx = cv.getContext("2d")!;
   const fit = () => {
     cv.width = cv.clientWidth * devicePixelRatio;
@@ -45,8 +51,8 @@ export function mountLoom(cv: HTMLCanvasElement): () => void {
       ring.push(
         addNode(
           kinds[Math.floor(rnd(0, kinds.length))]!,
-          cxx + Math.cos(a) * rnd(70, 180),
-          cyy + Math.sin(a) * rnd(50, 120),
+          cxx + Math.cos(a) * rnd(opts.mini ? 36 : 70, opts.mini ? 90 : 180),
+          cyy + Math.sin(a) * rnd(opts.mini ? 26 : 50, opts.mini ? 65 : 120),
         ),
       );
     }
@@ -82,7 +88,9 @@ export function mountLoom(cv: HTMLCanvasElement): () => void {
   function step() {
     const l = findActive();
     if (!l) {
-      if (nodes.length < 28) seed(rnd(W() * .2, W() * .8), rnd(H() * .3, H() * .7));
+      if (nodes.length < (opts.mini ? 20 : 28)) {
+        seed(rnd(W() * .2, W() * .8), rnd(H() * .3, H() * .7));
+      }
       return;
     }
     flash = l;
@@ -150,7 +158,7 @@ export function mountLoom(cv: HTMLCanvasElement): () => void {
       const dx = l.b.x - l.a.x,
         dy = l.b.y - l.a.y,
         d = Math.hypot(dx, dy) || 1,
-        f = (d - 115) * 0.002;
+        f = (d - (opts.mini ? 62 : 115)) * 0.002;
       l.a.vx += dx / d * f;
       l.a.vy += dy / d * f;
       l.b.vx -= dx / d * f;

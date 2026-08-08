@@ -865,28 +865,48 @@ a,
 .trace .recipe {
   margin-top: 0.5rem;
 }
-.loom-meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
+.out-grid.with-loom {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 230px;
+  gap: 1.5rem;
+  align-items: stretch;
 }
-.see-result {
-  background: none;
-  border: 1.5px solid var(--mustard);
-  color: var(--mustard);
-  font-family: "Solway", serif;
-  font-size: 0.88rem;
-  padding: 0.4rem 1rem;
-  cursor: pointer;
+/* el lienzo va ABSOLUTO dentro de su columna: su tamaño nunca empuja al
+   texto — cero CLS al cambiar de vista o al llegar resultados */
+.out-loom {
+  position: relative;
+  min-height: 280px;
+  border-left: 1px solid var(--seam);
 }
-@media (hover: hover) {
-  .see-result:hover {
-    background: var(--mustard);
-    color: var(--indigo-deep);
+.out-loom .miniloom {
+  position: absolute;
+  inset: 0 0 2.2rem 1.2rem;
+  width: auto;
+  height: auto;
+}
+.out-loom .meta {
+  position: absolute;
+  bottom: 0;
+  left: 1.2rem;
+  right: 0;
+}
+@media (max-width: 760px) {
+  .out-grid.with-loom {
+    grid-template-columns: 1fr;
+  }
+  .out-loom {
+    border-left: 0;
+    border-top: 1px solid var(--seam);
+    min-height: 230px;
+  }
+  .out-loom .miniloom {
+    inset: 1rem 0 2.2rem 0;
+  }
+  .out-loom .meta {
+    left: 0;
   }
 }
+
 .miniloom {
   display: block;
   width: 100%;
