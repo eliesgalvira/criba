@@ -2,6 +2,9 @@
    las primitivas Base UI. Los widgets son de la librería; la ropa es nuestra. */
 
 :root {
+  /* Grano de tela (técnica t3code): feTurbulence inline a opacidad baja,
+     aplicado POR SUPERFICIE sobre su background-color — nunca capa global. */
+  --grain: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
   --indigo: oklch(0.26 0.055 265);
   --indigo-deep: oklch(0.21 0.05 265);
   --thread: oklch(0.9 0.025 85);
@@ -19,7 +22,8 @@ html {
   scroll-behavior: smooth;
 }
 body {
-  background: var(--indigo);
+  background-color: var(--indigo);
+  background-image: var(--grain);
   color: var(--thread);
   font-family: "Alegreya", Georgia, serif;
   font-size: 1.1rem;
@@ -229,7 +233,8 @@ h2 {
 
 /* ——— minador ——— */
 .miner {
-  background: var(--indigo-deep);
+  background-color: var(--indigo-deep);
+  background-image: var(--grain);
   border-block: 1px solid var(--seam);
 }
 .bench {
@@ -580,7 +585,8 @@ a,
 .recipe {
   margin-top: 0.8rem;
   padding: 1rem 1.2rem;
-  background: var(--indigo);
+  background-color: var(--indigo);
+  background-image: var(--grain);
   border-left: 3px solid var(--mustard);
   font-family: "Solway", serif;
   font-weight: 400;
