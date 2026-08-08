@@ -51,8 +51,8 @@ export function mountLoom(cv: HTMLCanvasElement, opts: LoomOpts = {}): () => voi
       ring.push(
         addNode(
           kinds[Math.floor(rnd(0, kinds.length))]!,
-          cxx + Math.cos(a) * rnd(opts.mini ? 36 : 70, opts.mini ? 90 : 180),
-          cyy + Math.sin(a) * rnd(opts.mini ? 26 : 50, opts.mini ? 65 : 120),
+          cxx + Math.cos(a) * rnd(opts.mini ? 30 : 70, opts.mini ? 72 : 180),
+          cyy + Math.sin(a) * rnd(opts.mini ? 26 : 50, opts.mini ? 60 : 120),
         ),
       );
     }
@@ -88,8 +88,10 @@ export function mountLoom(cv: HTMLCanvasElement, opts: LoomOpts = {}): () => voi
   function step() {
     const l = findActive();
     if (!l) {
-      if (nodes.length < (opts.mini ? 20 : 28)) {
-        seed(rnd(W() * .2, W() * .8), rnd(H() * .3, H() * .7));
+      if (nodes.length < (opts.mini ? 24 : 28)) {
+        opts.mini
+          ? seed(W() / 2 + rnd(-30, 30), rnd(H() * .15, H() * .85))
+          : seed(rnd(W() * .2, W() * .8), rnd(H() * .3, H() * .7));
       }
       return;
     }
@@ -143,7 +145,10 @@ export function mountLoom(cv: HTMLCanvasElement, opts: LoomOpts = {}): () => voi
   }
   function physics() {
     for (const n of nodes) {
-      let fx = (W() / 2 - n.x) * 0.0005, fy = (H() / 2 - n.y) * 0.001;
+      // mini (tira vertical): X firme para no desbordar la tira estrecha,
+      // Y suelto para que los racimos apilados no colapsen al centro
+      let fx = (W() / 2 - n.x) * (opts.mini ? 0.0016 : 0.0005),
+        fy = (H() / 2 - n.y) * (opts.mini ? 0.0002 : 0.001);
       for (const m of nodes) {
         if (m !== n) {
           const dx = n.x - m.x, dy = n.y - m.y, d2 = dx * dx + dy * dy + 60;
@@ -225,8 +230,14 @@ export function mountLoom(cv: HTMLCanvasElement, opts: LoomOpts = {}): () => voi
       }
     }
   }
-  seed(W() * 0.35, H() * 0.45);
-  seed(W() * 0.68, H() * 0.5);
+  if (opts.mini) {
+    seed(W() / 2, H() * 0.22);
+    seed(W() / 2, H() * 0.5);
+    seed(W() / 2, H() * 0.78);
+  } else {
+    seed(W() * 0.35, H() * 0.45);
+    seed(W() * 0.68, H() * 0.5);
+  }
   if (reduced) {
     for (let i = 0; i < 200; i++) physics();
     draw(0);

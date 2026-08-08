@@ -865,45 +865,49 @@ a,
 .trace .recipe {
   margin-top: 0.5rem;
 }
-.out-grid.with-loom {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 230px;
-  gap: 1.5rem;
-  align-items: stretch;
-}
-/* el lienzo va ABSOLUTO dentro de su columna: su tamaño nunca empuja al
-   texto — cero CLS al cambiar de vista o al llegar resultados */
-.out-loom {
+/* ═══ el carril del telar: A LA DERECHA DE LA PÁGINA ═══
+   El banco mide 44rem dentro de un marco de 66rem: a su derecha queda página
+   vacía. El carril vive AHÍ, absoluto respecto a .out — fuera del flujo, así
+   que no roba ancho al programa ni puede empujar nada: cero CLS. */
+.out {
   position: relative;
-  min-height: 280px;
-  border-left: 1px solid var(--seam);
 }
-.out-loom .miniloom {
+.loom-rail {
   position: absolute;
-  inset: 0 0 2.2rem 1.2rem;
+  left: calc(100% + 3.4rem);
+  top: 0;
+  bottom: 0;
+  width: 17rem;
+}
+.loom-rail .miniloom {
+  position: absolute;
+  inset: 0 0 2.2rem 0;
   width: auto;
   height: auto;
+  margin: 0;
 }
-.out-loom .meta {
+.loom-rail .meta {
   position: absolute;
   bottom: 0;
-  left: 1.2rem;
+  left: 0;
   right: 0;
 }
-@media (max-width: 760px) {
-  .out-grid.with-loom {
-    grid-template-columns: 1fr;
-  }
-  .out-loom {
-    border-left: 0;
+/* sin margen de página suficiente: el telar pasa debajo del resultado */
+@media (max-width: 1120px) {
+  .loom-rail {
+    position: static;
+    width: auto;
+    margin-top: 1.4rem;
+    padding-top: 1rem;
     border-top: 1px solid var(--seam);
-    min-height: 230px;
   }
-  .out-loom .miniloom {
-    inset: 1rem 0 2.2rem 0;
+  .loom-rail .miniloom {
+    position: static;
+    width: 100%;
+    height: 210px;
   }
-  .out-loom .meta {
-    left: 0;
+  .loom-rail .meta {
+    position: static;
   }
 }
 
