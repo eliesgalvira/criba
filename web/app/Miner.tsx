@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { NumberField } from "@base-ui/react/number-field";
 import { everett } from "../../src/criba.ts";
+import { explain } from "../../src/explain.ts";
 import { run, show, size, type Term } from "../../src/peanito.ts";
 import { useT } from "./i18n.tsx";
 
@@ -104,6 +105,7 @@ export function Miner() {
     <section className="miner" id="miner">
       <div className="frame">
         <h2>{t.minerh2}</h2>
+        <p className="intro">{t.minerIntro}</p>
         <p className="sub">{t.minersub}</p>
         <div className="bench">
           <div className="pairs">
@@ -132,18 +134,24 @@ export function Miner() {
             {outcome.kind === "notfound" && <p className="meta fail">{t.notfound}</p>}
             {outcome.kind === "found" && (
               <>
-                <code>{show(outcome.prog)}</code>
+                <p className="found-head">{t.foundHead}</p>
+                <pre className="recipe">{explain(outcome.prog, lang)}</pre>
                 <p className="meta">
-                  {t.found} — {size(outcome.prog)} {t.nodes},{" "}
-                  {outcome.proven ? t.foundProven : t.foundBest} ·{" "}
-                  {outcome.steps.toLocaleString(lang)} {t.steps} · {outcome.ms.toFixed(0)} ms
+                  {size(outcome.prog)} {t.pieces} — {outcome.proven ? t.foundProven : t.foundBest} ·
+                  {" "}
+                  {t.foundIn} {outcome.ms.toFixed(0)} ms · {outcome.steps.toLocaleString(lang)}{" "}
+                  {t.sharedSteps}
                 </p>
                 <p className="verify">
                   {t.verify} {outcome.verify.map(([x, y], i) => (
                     <span key={x}>
-                      {i > 0 && " · "}f({x})=<b>{y}</b>
+                      {i > 0 && " · "}f({x}) = <b>{y}</b>
                     </span>
                   ))}
+                </p>
+                <p className="raw">
+                  {t.rawIntro} <code>{show(outcome.prog)}</code>
+                  <span className="raw-legend">{t.rawLegend}</span>
                 </p>
               </>
             )}

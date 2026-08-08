@@ -35,9 +35,11 @@ export function Race() {
       <div className="frame">
         <h2>{t.raceh2}</h2>
         <p className="lead">{t.racelead}</p>
+        <p className="race-note">{t.raceNote}</p>
         <div className="controls">
           <span className="nval">
             N = <b>{n}</b>
+            <span className="npasses">2^{n} = {(2 ** n).toLocaleString(lang)} {t.passes}</span>
           </span>
           <Slider.Root
             value={n}
@@ -63,7 +65,7 @@ export function Race() {
               {naive === null
                 ? "—"
                 : naive === "dnf"
-                ? `2^${n} · ${t.dnf}`
+                ? `${t.dnfA} ${(2 ** n).toLocaleString(lang)}+ ${t.dnfB}`
                 : naive.toLocaleString(lang)}
             </span>
             <span className="lbl">{t.naivelbl}</span>

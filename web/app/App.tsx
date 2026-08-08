@@ -46,7 +46,8 @@ function Hero() {
             <span className="hilo">{t.h1hilo}</span>
             {t.h1b}
           </h1>
-          <p>{t.h1sub}</p>
+          <p className="hero-explain">{t.heroExplain}</p>
+          <p className="hero-sub">{t.h1sub}</p>
           <a className="go" href="#miner" onClick={goMiner}>{t.cta}</a>
         </div>
       </div>
