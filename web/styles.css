@@ -750,8 +750,10 @@ a,
 /* ═══ pestañas de reglas sobre el banco ═══ */
 .rule-tabs {
   margin-top: 2.4rem;
+  max-width: 44rem; /* mismo ancho que .bench: las pestañas viven sobre él */
   display: flex;
   flex-wrap: wrap;
+  align-items: flex-end;
   gap: 0.45rem;
   position: relative;
   z-index: 1;
