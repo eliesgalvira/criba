@@ -1,6 +1,6 @@
 // Tests de Telar: paridad con el spike verificado (lab/spike-ic.js).
 import { assert, assertEquals } from "jsr:@std/assert";
-import { App, fusionDemo, Lam, naiveDemo, showIC, Telar, Var } from "./telar.ts";
+import { App, fusionDemo, Lam, naiveCost, naiveDemo, showIC, Telar, Var } from "./telar.ts";
 
 Deno.test("β básica: (λx.λt.(t x) λy.y) → λt.(t λy.y)", () => {
   const m = new Telar();
@@ -26,9 +26,14 @@ Deno.test("fusión: not^(2^N) correcto y en O(N) interacciones (paridad spike)",
 Deno.test("naive: completa con recuento exacto y sin desbordar la pila", () => {
   const ok = naiveDemo(8);
   assert(ok.complete && ok.betas === 768);
-  // regresión del stack overflow del worker (~N=13 con whnf recursivo)
+  // regresión del stack overflow (~N=13 con sustitución textual recursiva)
   const deep = naiveDemo(14);
-  assert(deep.complete && deep.betas === 3 * 2 ** 14);
+  assert(deep.complete && deep.betas === naiveCost(14));
+  // la proyección de la UI sale de la implementación medida
+  for (const n of [4, 6, 10]) {
+    const r = naiveDemo(n);
+    assert(r.complete && r.betas === naiveCost(n));
+  }
 });
 
 Deno.test("naive: al agotar presupuesto conserva el recuento (nada de «0+»)", () => {

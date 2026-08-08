@@ -221,14 +221,22 @@ export function fusionDemo(N: number): FusionResult {
 }
 
 /**
- * El mismo cómputo en λ-cálculo naive (una β cada vez), con presupuesto.
- * whnf ITERATIVO (pila explícita en heap): la profundidad de recursión de la
- * versión anterior crecía con 2^N y reventaba el stack del worker (~N=13).
- * El resultado siempre conserva el recuento de pasos, complete o no.
+ * El mismo cómputo en λ-cálculo naive: orden normal, una β cada vez, con
+ * presupuesto. Máquina de entornos (Krivine) en lugar de sustitución textual:
+ * la sustitución recursiva recorría la cadena cerrada entera de 2^N nodos en
+ * cada β (stack overflow desde ~N=13 y coste cuadrático); aquí cada β es
+ * extender un entorno, O(1), con pilas en heap. El recuento de β-pasos
+ * sobrevive siempre, complete o no.
  */
 export interface NaiveResult {
   betas: number;
   complete: boolean;
+}
+
+/** Coste total exacto del encargo not^(2^N) en este evaluador (medido y
+ * verificado por test); la UI lo usa para proyectar honestamente. */
+export function naiveCost(N: number): number {
+  return 3 * 2 ** N;
 }
 
 export function naiveDemo(
@@ -237,53 +245,65 @@ export function naiveDemo(
   onProgress?: (betas: number) => void,
 ): NaiveResult {
   type T = { t: "Var"; n: number } | { t: "Lam"; n: number; b: T } | { t: "App"; f: T; a: T };
+  type Env = { n: number; c: Clo; next: Env };
+  interface Clo {
+    t: T;
+    e: Env | null;
+  }
   const V = (n: number): T => ({ t: "Var", n });
   const L = (n: number, b: T): T => ({ t: "Lam", n, b });
   const A = (f: T, a: T): T => ({ t: "App", f, a });
   let betas = 0;
   class BudgetOut extends Error {}
-  const sub = (t: T, n: number, v: T): T => {
-    switch (t.t) {
-      case "Var":
-        return t.n === n ? v : t;
-      case "Lam":
-        return t.n === n ? t : L(t.n, sub(t.b, n, v));
-      case "App":
-        return A(sub(t.f, n, v), sub(t.a, n, v));
-    }
+  const look = (e: Env | null, n: number): Clo | null => {
+    for (let p = e; p; p = p.next) if (p.n === n) return p.c;
+    return null;
   };
-  const whnf = (t: T): T => {
-    const spine: { t: "App"; f: T; a: T }[] = [];
+  /** Reduce a forma normal débil de cabeza, consumiendo `spine`. */
+  const whnf = (t: T, e: Env | null, spine: Clo[]): { t: T; e: Env | null } => {
     for (;;) {
-      while (t.t === "App") {
-        spine.push(t);
+      if (t.t === "App") {
+        spine.push({ t: t.a, e });
         t = t.f;
+        continue;
       }
-      if (t.t === "Lam" && spine.length) {
-        const app = spine.pop()!;
+      if (t.t === "Lam") {
+        const arg = spine.pop();
+        if (!arg) return { t, e };
         betas++;
         if (betas > budget) throw new BudgetOut();
         if (onProgress && (betas & 131071) === 0) onProgress(betas);
-        t = sub(t.b, t.n, app.a);
-      } else break;
+        e = { n: t.n, c: arg, next: e as Env };
+        t = t.b;
+        continue;
+      }
+      const c = look(e, t.n);
+      if (!c) return { t, e };
+      t = c.t;
+      e = c.e;
     }
-    while (spine.length) t = A(t, spine.pop()!.a);
-    return t;
   };
-  const normal = (t: T): T => {
-    t = whnf(t);
-    if (t.t === "Lam") return L(t.n, normal(t.b));
-    if (t.t === "App") return A(normal(t.f), normal(t.a));
-    return t;
+  /** Normaliza del todo (bajo lambdas, con variables frescas). */
+  let freshVar = 1_000_000_000;
+  const normal = (t: T, e: Env | null): void => {
+    const spine: Clo[] = [];
+    const h = whnf(t, e, spine);
+    if (h.t.t === "Lam") {
+      const v = freshVar++;
+      normal(h.t.b, { n: h.t.n, c: { t: V(v), e: null }, next: h.e as Env });
+    } else {
+      for (const c of spine) normal(c.t, c.e);
+    }
   };
   const True = L(0, L(1, V(0)));
   const Not = L(2, L(3, L(4, A(A(V(2), V(4)), V(3)))));
   let term = True;
   for (let i = 0; i < 2 ** N; i++) term = A(Not, term);
   try {
-    normal(term);
+    normal(term, null);
     return { betas, complete: true };
-  } catch {
+  } catch (err) {
+    if (err instanceof BudgetOut) return { betas, complete: false };
     return { betas, complete: false };
   }
 }

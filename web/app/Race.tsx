@@ -7,7 +7,7 @@
 // vivo: la asimetría de tiempos se ve, no se cuenta.
 import { useEffect, useRef, useState } from "react";
 import { Slider } from "@base-ui/react/slider";
-import { fusionDemo } from "../../src/telar.ts";
+import { fusionDemo, naiveCost } from "../../src/telar.ts";
 import { useT } from "./i18n.tsx";
 
 type NaiveOutcome =
@@ -116,7 +116,7 @@ export function Race() {
               {race.status === "running" && <div className="weaving" aria-hidden="true" />}
               {race.status === "done" && race.naive.kind === "dnf" && (
                 <p className="note">
-                  {t.dnfNoteA} {fmt(3 * 2 ** race.n)} {t.dnfNoteB}
+                  {t.dnfNoteA} {fmt(naiveCost(race.n))} {t.dnfNoteB}
                 </p>
               )}
             </div>
