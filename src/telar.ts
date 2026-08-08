@@ -224,7 +224,11 @@ export function fusionDemo(N: number): FusionResult {
  * El mismo cómputo en λ-cálculo naive (una β cada vez), con presupuesto.
  * Devuelve null si lo agota — que es el punto.
  */
-export function naiveDemo(N: number, budget = 2_000_000): { betas: number } | null {
+export function naiveDemo(
+  N: number,
+  budget = 2_000_000,
+  onProgress?: (betas: number) => void,
+): { betas: number } | null {
   type T = { t: "Var"; n: number } | { t: "Lam"; n: number; b: T } | { t: "App"; f: T; a: T };
   const V = (n: number): T => ({ t: "Var", n });
   const L = (n: number, b: T): T => ({ t: "Lam", n, b });
@@ -247,6 +251,7 @@ export function naiveDemo(N: number, budget = 2_000_000): { betas: number } | nu
         const f = whnf(t.f);
         if (f.t === "Lam") {
           betas++;
+          if (onProgress && (betas & 131071) === 0) onProgress(betas);
           t = sub(f.b, f.n, t.a);
           continue;
         }

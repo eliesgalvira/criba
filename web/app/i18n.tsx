@@ -36,11 +36,12 @@ export interface Strings {
   racelead: string;
   raceNote: string;
   gorace: string;
+  goraceRunning: string;
   passes: string;
   naivelbl: string;
   iclbl: string;
-  dnfA: string;
-  dnfB: string;
+  dnfNoteA: string;
+  dnfNoteB: string;
   honh2: string;
   hon: readonly (readonly [string, string])[];
   foot1: string;
@@ -86,11 +87,12 @@ const STRINGS: Record<Lang, Strings> = {
     raceNote:
       "(Los expertos llaman a estos dos mundos «λ-cálculo» y «evaluación óptima de redes de interacción». Los nombres dan igual por ahora; la diferencia entre las dos columnas, no.)",
     gorace: "Hacerlo de verdad",
+    goraceRunning: "Tejiendo…",
     passes: "negaciones",
     naivelbl: "pasos, haciéndolo una a una (método clásico)",
     iclbl: "pasos, compartiendo el trabajo (el telar)",
-    dnfA: "se rinde: harían falta",
-    dnfB: "pasos",
+    dnfNoteA: "se rindió en este punto — acabar costaría",
+    dnfNoteB: "pasos",
     honh2: "Etiqueta: lo que esta tela no es",
     hon: [
       [
@@ -151,11 +153,12 @@ const STRINGS: Record<Lang, Strings> = {
     raceNote:
       "(Experts call these two worlds “λ-calculus” and “optimal evaluation of interaction nets”. The names don't matter yet; the difference between the two columns does.)",
     gorace: "Do it for real",
+    goraceRunning: "Weaving…",
     passes: "negations",
     naivelbl: "steps, doing it one by one (the classic way)",
     iclbl: "steps, sharing the work (the loom)",
-    dnfA: "gives up: it would take",
-    dnfB: "steps",
+    dnfNoteA: "it gave up at this point — finishing would cost",
+    dnfNoteB: "steps",
     honh2: "Garment tag: what this cloth is not",
     hon: [
       [

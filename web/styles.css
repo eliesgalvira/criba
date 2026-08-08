@@ -427,9 +427,45 @@ h2 {
   color: var(--mustard);
 }
 .cloth .lbl {
+  display: block;
+  margin-top: 0.35rem;
   font-style: italic;
   color: var(--thread-dim);
   font-size: 0.95rem;
+}
+.cloth .n small {
+  font-family: "Alegreya", serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 0.55em;
+  color: var(--thread-dim);
+}
+.cloth .note {
+  margin-top: 0.3rem;
+  font-size: 0.9rem;
+  font-style: italic;
+  color: var(--thread-dim);
+}
+.weaving {
+  height: 4px;
+  margin-block: 0.55rem 0.2rem;
+  max-width: 14rem;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--madder) 0 12px,
+    transparent 12px 24px
+  );
+  animation: weave-slide 0.7s linear infinite;
+}
+@keyframes weave-slide {
+  to {
+    background-position: 24px 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .weaving {
+    animation: none;
+  }
 }
 
 /* ——— honestidad ——— */

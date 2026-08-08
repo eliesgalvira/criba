@@ -4,7 +4,7 @@
     "check": "deno check src/ web/app/",
     "fmt": "deno fmt",
     "lint": "deno lint",
-    "bundle": "deno bundle --platform browser --minify web/app/main.tsx -o web/dist/main.js",
+    "bundle": "deno bundle --platform browser --minify web/app/main.tsx -o web/dist/main.js && deno bundle --platform browser --minify web/app/race-worker.ts -o web/dist/worker.js",
     "design": "deno run --allow-net --allow-read jsr:@std/http/file-server web/design --port 4507",
     "web": "deno task bundle && deno run --allow-net --allow-read jsr:@std/http/file-server web --port 4508"
   },
