@@ -1,6 +1,6 @@
 {
   "tasks": {
-    "test": "deno test --allow-none src/",
+    "test": "deno test src/",
     "check": "deno check src/ web/app/",
     "fmt": "deno fmt",
     "lint": "deno lint",
