@@ -47,6 +47,7 @@ export function Cpu() {
     chain: [t.cpuCap1head, t.cpuCap1],
     array: [t.cpuCap2head, t.cpuCap2],
     chase: [t.cpuCap3head, t.cpuCap3],
+    cells: [t.cpuCap4head, t.cpuCap4],
   };
   const [caphead, capbody] = cap[mode];
 
@@ -66,6 +67,7 @@ export function Cpu() {
           <Toggle value="chain" className="par-step">{t.cpuStep1}</Toggle>
           <Toggle value="array" className="par-step">{t.cpuStep2}</Toggle>
           <Toggle value="chase" className="par-step">{t.cpuStep3}</Toggle>
+          <Toggle value="cells" className="par-step">{t.cpuStep4}</Toggle>
         </ToggleGroup>
         <div className="par-stage">
           <canvas ref={canvasRef} className="par-canvas" aria-label={t.cpuh2} />

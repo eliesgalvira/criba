@@ -6,8 +6,10 @@
 //   chain  cadena de dependencias: todo en el núcleo, sin viajes, 100%
 //   array  lectura en orden: un viaje trae la fila entera, la apuesta acierta
 //   chase  caza de punteros: un viaje por dato, el núcleo espera
+//   cells  el sueño del telar: cada casilla es memoria Y máquina; el mismo
+//          grafo salta de vecina en vecina, un paso por ciclo, sin viajes
 
-export type CpuMode = "chain" | "array" | "chase";
+export type CpuMode = "chain" | "array" | "chase" | "cells";
 
 const MUSTARD = "oklch(0.78 0.12 85)";
 const MADDER = "oklch(0.62 0.17 28)";
@@ -44,6 +46,10 @@ export function mountCpu(
   let seq = 0;
   let target = 0; // celda de memoria en tránsito
   const touched = new Set<number>(); // celdas ya consumidas (modo array)
+  // modo cells: el paseante del grafo sobre la malla, con estela que se apaga
+  const CELL_COLS = 14, CELL_ROWS = 6;
+  let walker = Math.floor(CELL_COLS * CELL_ROWS / 2) + Math.floor(CELL_COLS / 2);
+  let trail: { i: number; age: number }[] = [];
 
   function reset() {
     ribbon = [];
@@ -54,11 +60,28 @@ export function mountCpu(
     seq = 0;
     target = 0;
     touched.clear();
+    walker = Math.floor(CELL_COLS * CELL_ROWS / 2) + Math.floor(CELL_COLS / 2);
+    trail = [];
   }
 
   // un tick de la máquina: devuelve 1 si el núcleo computó, 0 si esperó
   function tick(): number {
     if (mode === "chain") return 1;
+    if (mode === "cells") {
+      // el grafo salta a una casilla VECINA: en el modelo, toda interacción
+      // es local, así que cada ciclo computa; no existe el viaje
+      trail.push({ i: walker, age: 0 });
+      for (const t of trail) t.age++;
+      trail = trail.filter((t) => t.age < 14);
+      const c = walker % CELL_COLS, r = Math.floor(walker / CELL_COLS);
+      const opts: number[] = [];
+      if (c > 0) opts.push(walker - 1);
+      if (c < CELL_COLS - 1) opts.push(walker + 1);
+      if (r > 0) opts.push(walker - CELL_COLS);
+      if (r < CELL_ROWS - 1) opts.push(walker + CELL_COLS);
+      walker = opts[Math.floor(Math.random() * opts.length)]!;
+      return 1;
+    }
     if (travel > 0) {
       travel--;
       if (travel === 0) {
@@ -123,10 +146,51 @@ export function mountCpu(
     cx.globalAlpha = 1;
   }
 
+  // la malla del sueño: casillas que son memoria y máquina a la vez, con el
+  // rombo diminuto dentro de cada una diciéndolo
+  function drawCells() {
+    const W = cv.width, s = S();
+    const cell = Math.min(26 * s, W * 0.055);
+    const gap = 9 * s;
+    const gw = CELL_COLS * cell + (CELL_COLS - 1) * gap;
+    const gh = CELL_ROWS * cell + (CELL_ROWS - 1) * gap;
+    const x0 = (W - gw) / 2;
+    const y0 = coreY() - gh / 2;
+    const pos = (i: number): [number, number] => {
+      const c = i % CELL_COLS, r = Math.floor(i / CELL_COLS);
+      return [x0 + c * (cell + gap) + cell / 2, y0 + r * (cell + gap) + cell / 2];
+    };
+    for (let i = 0; i < CELL_COLS * CELL_ROWS; i++) {
+      const [x, y] = pos(i);
+      cx.lineWidth = 1.2 * s;
+      cx.strokeStyle = DIMCELL;
+      cx.strokeRect(x - cell / 2, y - cell / 2, cell, cell);
+      diamond(x, y, 3.2 * s, WARP, 1);
+    }
+    for (const t of trail) {
+      const [x, y] = pos(t.i);
+      const a = 1 - t.age / 14;
+      cx.globalAlpha = a * 0.45;
+      cx.fillStyle = MUSTARD;
+      cx.fillRect(x - cell / 2, y - cell / 2, cell, cell);
+      cx.globalAlpha = 1;
+    }
+    const [wx, wy] = pos(walker);
+    cx.fillStyle = MUSTARD;
+    cx.fillRect(wx - cell / 2, wy - cell / 2, cell, cell);
+    diamond(wx, wy, 5 * s, "oklch(0.21 0.05 265)", 1);
+  }
+
   function draw() {
     const W = cv.width, H = cv.height, s = S();
     cx.clearRect(0, 0, W, H);
     const working = ribbon.length > 0 && ribbon[ribbon.length - 1] === 1;
+
+    if (mode === "cells") {
+      drawCells();
+      drawRibbon();
+      return;
+    }
 
     // memoria: la rejilla lejana
     const cell = memSize();
@@ -179,8 +243,12 @@ export function mountCpu(
 
     // el núcleo: encendido cuando computa, apagado cuando espera
     diamond(coreX(), coreY(), 15 * s, working ? THREAD : WARP, 1);
+    drawRibbon();
+  }
 
-    // la tela de un carril, abajo
+  // la tela de un carril, abajo
+  function drawRibbon() {
+    const W = cv.width, H = cv.height, s = S();
     const laneY = H - ribbonH() / 2;
     cx.lineWidth = 1 * s;
     cx.strokeStyle = WARP;

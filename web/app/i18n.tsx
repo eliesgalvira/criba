@@ -99,6 +99,9 @@ export interface Strings {
   cpuCap2: string;
   cpuCap3head: string;
   cpuCap3: string;
+  cpuStep4: string;
+  cpuCap4head: string;
+  cpuCap4: string;
   cpuPctLabel: string;
   honh2: string;
   hon: readonly (readonly [string, string])[];
@@ -242,6 +245,10 @@ const STRINGS: Record<Lang, Strings> = {
     cpuCap3head: "La apuesta falla:",
     cpuCap3:
       "un grafo salta por la memoria sin orden. Cada salto, un viaje; la despensa no sirve; el núcleo espera. Recorrer grafos es el peor caso de la CPU. Y es justo lo que hace esta página al emular el telar.",
+    cpuStep4: "4 · Sin distancia",
+    cpuCap4head: "El sueño del telar:",
+    cpuCap4:
+      "¿y si cada casilla de memoria supiera computar? El dato no viaja: la máquina está donde está el dato, y el mismo grafo salta de vecina en vecina, un paso por ciclo. Este chip no existe todavía. Es lo que una red de interacciones le pide al silicio, y el fondo de este proyecto.",
     cpuPctLabel: "de los ciclos computando; el resto, esperando a la memoria",
     honh2: "Lo que este paradigma no es",
     hon: [
@@ -409,6 +416,10 @@ const STRINGS: Record<Lang, Strings> = {
     cpuCap3head: "The bet fails:",
     cpuCap3:
       "a graph jumps through memory without order. Every jump, a trip; the pantry is useless; the core waits. Walking graphs is the CPU's worst case. And it is exactly what this page does when it emulates the loom.",
+    cpuStep4: "4 · No distance",
+    cpuCap4head: "The loom's dream:",
+    cpuCap4:
+      "what if every memory cell could compute? Data never travels: the machine is where the data is, and the same graph hops neighbor to neighbor, one step per cycle. This chip does not exist yet. It is what an interaction net asks of silicon, and the undercurrent of this project.",
     cpuPctLabel: "of the cycles computing; the rest, waiting for memory",
     honh2: "What this paradigm is not",
     hon: [
