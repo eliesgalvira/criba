@@ -52,6 +52,7 @@ export function Parallelism() {
     grid: [t.parCap1head, t.parCap1],
     split: [t.parCap2head, t.parCap2],
     tree: [t.parCap3head, t.parCap3],
+    loom: [t.parCap4head, t.parCap4],
   };
   const [caphead, capbody] = cap[mode];
 
@@ -71,6 +72,7 @@ export function Parallelism() {
           <Toggle value="grid" className="par-step">{t.parStep1}</Toggle>
           <Toggle value="split" className="par-step">{t.parStep2}</Toggle>
           <Toggle value="tree" className="par-step">{t.parStep3}</Toggle>
+          <Toggle value="loom" className="par-step">{t.parStep4}</Toggle>
         </ToggleGroup>
         <div className="par-stage">
           <canvas ref={canvasRef} className="par-canvas" aria-label={t.parh2} />

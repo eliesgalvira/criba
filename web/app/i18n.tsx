@@ -64,12 +64,15 @@ export interface Strings {
   parStep1: string;
   parStep2: string;
   parStep3: string;
+  parStep4: string;
   parCap1head: string;
   parCap1: string;
   parCap2head: string;
   parCap2: string;
   parCap3head: string;
   parCap3: string;
+  parCap4head: string;
+  parCap4: string;
   parPctLabel: string;
   honh2: string;
   hon: readonly (readonly [string, string])[];
@@ -150,10 +153,11 @@ const STRINGS: Record<Lang, Strings> = {
     overC: "dobleces.",
     parh2: "Una GPU por dentro.",
     parIntro:
-      "Cada fila es uno de los 32 carriles de la máquina; cada columna que entra por la derecha, un ciclo de reloj. Celda encendida: ese carril trabajó. Hueco: parado. Dale al «si» y mira el porcentaje.",
+      "Cada fila es uno de los 32 carriles de la máquina; cada columna que entra por la derecha, un ciclo de reloj. Celda encendida: ese carril trabajó. Hueco: parado. Recorre los cuatro pasos mirando el porcentaje.",
     parStep1: "1 · Su terreno",
     parStep2: "2 · Un «si»",
     parStep3: "3 · Trabajo vivo",
+    parStep4: "4 · El telar",
     parCap1head: "El terreno de la GPU:",
     parCap1:
       "la misma operación sobre millones de datos. Tela cerrada, ciclo tras ciclo. Nada en el mundo hace esto mejor.",
@@ -162,7 +166,10 @@ const STRINGS: Record<Lang, Strings> = {
       "los 32 carriles van en formación, todos la misma instrucción a la vez. Si un «si» parte los datos en dos ramas, ejecuta una rama por pasada y la otra mitad del silicio espera. Pagas toda la máquina; trabaja la mitad.",
     parCap3head: "Y su límite:",
     parCap3:
-      "trabajo que nace y muere durante el propio cálculo, a rachas. La formación no puede rellenar huecos que no sabe dónde estarán. Repartir esto sobre la marcha es exactamente lo que hace el telar del fondo.",
+      "trabajo que nace y muere durante el propio cálculo. La GPU solo sabe avanzar por tandas en formación: lanza un lote, espera al más lento, hueco, y vuelta a empezar. Ningún carril puede tomar faena nueva a mitad de tanda.",
+    parCap4head: "Otra arquitectura:",
+    parCap4:
+      "el mismo trabajo, sin formación. Cada carril toma una tarea en cuanto existe, sobre la marcha. Esto una GPU no lo puede hacer; así reparte una red de interacciones, como el telar del fondo. Compara el porcentaje con el paso 3: esa diferencia es este proyecto.",
     parPctLabel: "del silicio trabajando, medido sobre la tela que ves",
     honh2: "Lo que este paradigma no es",
     hon: [
@@ -195,7 +202,7 @@ const STRINGS: Record<Lang, Strings> = {
     foot2a: "Nada de esto existiría sin ",
     foot2link: "HVM y Bend",
     foot2b:
-      ", el trabajo abierto de Victor Taelin, ni sin los interaction combinators de Yves Lafont (1997).",
+      ", el trabajo abierto de Victor Taelin y HOC, ni sin los interaction combinators de Yves Lafont (1997).",
   },
   en: {
     h1a: "To compute is to weave ",
@@ -267,10 +274,11 @@ const STRINGS: Record<Lang, Strings> = {
     overC: "foldings.",
     parh2: "Inside a GPU.",
     parIntro:
-      "Each row is one of the machine's 32 lanes; each column entering from the right, one clock cycle. Lit cell: that lane worked. Gap: idle. Hit the «if» and watch the percentage.",
+      "Each row is one of the machine's 32 lanes; each column entering from the right, one clock cycle. Lit cell: that lane worked. Gap: idle. Walk the four steps watching the percentage.",
     parStep1: "1 · Its home turf",
     parStep2: "2 · One «if»",
     parStep3: "3 · Living work",
+    parStep4: "4 · The loom",
     parCap1head: "The GPU's home turf:",
     parCap1:
       "the same operation over millions of data points. Closed cloth, cycle after cycle. Nothing in the world does this better.",
@@ -279,7 +287,10 @@ const STRINGS: Record<Lang, Strings> = {
       "the 32 lanes march in formation, all running the same instruction at once. If an «if» splits the data into two branches, it runs one branch per pass while the other half of the silicon waits. You pay for the whole machine; half of it works.",
     parCap3head: "And its limit:",
     parCap3:
-      "work that is born and dies during the computation itself, in bursts. The formation cannot fill gaps it cannot predict. Distributing this on the fly is exactly what the background loom does.",
+      "work that is born and dies during the computation itself. The GPU can only advance in formation, batch by batch: launch a lot, wait for the slowest, gap, start again. No lane can pick up new work mid-batch.",
+    parCap4head: "Another architecture:",
+    parCap4:
+      "the same work, without the formation. Each lane picks up a task the moment it exists, on the fly. A GPU cannot do this; this is how an interaction net distributes work, like the background loom. Compare the percentage with step 3: that difference is this project.",
     parPctLabel: "of the silicon working, measured over the cloth you see",
     honh2: "What this paradigm is not",
     hon: [
@@ -311,7 +322,8 @@ const STRINGS: Record<Lang, Strings> = {
     foot1: "Prototype: an outreach project about the Interaction Calculus.",
     foot2a: "None of this would exist without ",
     foot2link: "HVM and Bend",
-    foot2b: ", Victor Taelin's open work, or Yves Lafont's interaction combinators (1997).",
+    foot2b:
+      ", the open work of Victor Taelin and HOC, or Yves Lafont's interaction combinators (1997).",
   },
 };
 
