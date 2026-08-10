@@ -1,19 +1,28 @@
-// Sección «regular e irregular»: tres estampas ilustrativas sobre un mismo
-// lienzo, en el vocabulario del telar (rombos = máquinas, hilos = conexiones).
-// NO es cómputo real, y así lo dice el copy: enseña la FORMA del trabajo.
-//   rejilla  regular, la forma se conoce antes de empezar
-//   grieta   un «si» parte la rejilla en dos pasadas, media parada en cada una
-//   árbol    la forma nace del propio cálculo: crece y se poda sin patrón
+// Sección «regular e irregular»: la ocupación de una GPU como tela que sale
+// del telar. 32 carriles (filas), un ciclo de reloj por columna; celda
+// encendida = el carril trabajó ese ciclo, hueco = silicio parado. El
+// porcentaje es una medición real sobre las columnas dibujadas; la carga de
+// trabajo es sintética (simulador), y el copy no afirma otra cosa.
+//   grid   terreno de la GPU: 32 carriles llenos, tela cerrada
+//   split  un «si» parte los datos en dos ramas; una rama por pasada, 50%
+//   tree   tareas que nacen y mueren: rachas, rampas y sequías
 
 export type ParMode = "grid" | "split" | "tree";
 
-const THREAD = "oklch(0.86 0.03 85 / 0.85)";
-const DIM = "oklch(0.62 0.035 85 / 0.45)";
+const MUSTARD = "oklch(0.78 0.12 85)";
 const MADDER = "oklch(0.62 0.17 28)";
-const MUSTARD = "oklch(0.80 0.12 85)";
-const IDLE = "oklch(0.55 0.03 265 / 0.7)"; // contorno de la celda parada
+const WARP = "oklch(0.34 0.05 265)";
+const COMB = "oklch(0.9 0.025 85)";
 
-export function mountIrregular(cv: HTMLCanvasElement, getMode: () => ParMode): () => void {
+const LANES = 32;
+const TICK_MS = 80;
+const PCT_WINDOW = 120;
+
+export function mountIrregular(
+  cv: HTMLCanvasElement,
+  getMode: () => ParMode,
+  onPct: (pct: number) => void,
+): () => void {
   const cx = cv.getContext("2d")!;
   const fit = () => {
     cv.width = cv.clientWidth * devicePixelRatio;
@@ -22,322 +31,149 @@ export function mountIrregular(cv: HTMLCanvasElement, getMode: () => ParMode): (
   fit();
   addEventListener("resize", fit);
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  let alive = true;
 
-  const W = () => cv.width;
-  const H = () => cv.height;
-  const S = () => devicePixelRatio;
-  const rnd = (a: number, b: number) => a + Math.random() * (b - a);
+  let mode: ParMode = getMode();
+  let cols: Uint8Array[] = []; // por columna: 0 hueco, 1 mostaza, 2 rubia
+  let tick = 0;
 
-  function diamond(x: number, y: number, r: number, fill: string, alpha = 1) {
-    cx.globalAlpha = alpha;
-    cx.beginPath();
-    cx.moveTo(x, y - r);
-    cx.lineTo(x + r, y);
-    cx.lineTo(x, y + r);
-    cx.lineTo(x - r, y);
-    cx.closePath();
-    cx.fillStyle = fill;
-    cx.fill();
-    cx.globalAlpha = 1;
-  }
-  // los DATOS son cuadrados (una rejilla es un array); las MÁQUINAS, rombos,
-  // como en el telar del hero. El paso regular enseña literalmente el copy:
-  // rebanadas iguales con una máquina encima, y estampación a compás
-  function square(x: number, y: number, r: number, fill: string, alpha: number) {
-    cx.globalAlpha = alpha;
-    cx.fillStyle = fill;
-    cx.fillRect(x - r, y - r, r * 2, r * 2);
-    cx.globalAlpha = 1;
-  }
-  function squareOutline(x: number, y: number, r: number, stroke: string) {
-    cx.lineWidth = 1.3 * S();
-    cx.strokeStyle = stroke;
-    cx.strokeRect(x - r, y - r, r * 2, r * 2);
-  }
-
-  const SLICES = 4;
-  function gridCells() {
-    const pad = 34 * S();
-    const gap = 30 * S(); // el corte visible entre rebanadas
-    const headroom = 66 * S(); // sitio para las máquinas arriba
-    const sliceW = (W() - 2 * pad - (SLICES - 1) * gap) / SLICES;
-    const colsPer = Math.max(2, Math.min(4, Math.floor(sliceW / (46 * S()))));
-    const rows = Math.max(3, Math.min(5, Math.floor((H() - headroom - 30 * S()) / (52 * S()))));
-    const pitchX = sliceW / colsPer, pitchY = (H() - headroom - 26 * S()) / rows;
-    const cells: { x: number; y: number; slice: number; col: number; row: number }[] = [];
-    const centers: number[] = [];
-    for (let s = 0; s < SLICES; s++) {
-      const x0 = pad + s * (sliceW + gap);
-      centers.push(x0 + sliceW / 2);
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < colsPer; c++) {
-          cells.push({
-            x: x0 + pitchX * (c + 0.5),
-            y: headroom + pitchY * (r + 0.5),
-            slice: s,
-            col: s * colsPer + c,
-            row: r,
-          });
+  // el simulador del paso 3: una cola de tareas y 32 obreros, con
+  // DEPENDENCIAS. El cálculo alterna regímenes de expansión (cada tarea
+  // acabada engendra 1..3 hijas) y poda (casi ninguna), cada uno con su
+  // intensidad; la cola va capada a la frontera del árbol. Sin esto, el
+  // backlog alisa la ocupación al 100% y la irregularidad no se ve.
+  let queue = 1;
+  let boom = true;
+  let regimeLeft = 26;
+  let fert = 1.6;
+  const QCAP = 24;
+  const rem = new Array(LANES).fill(0);
+  function treeColumn(): Uint8Array {
+    if (--regimeLeft <= 0) {
+      boom = !boom;
+      regimeLeft = boom ? 16 + Math.floor(Math.random() * 22) : 14 + Math.floor(Math.random() * 18);
+      fert = boom ? 1.25 + Math.random() * 0.75 : 0.2 + Math.random() * 0.6;
+    }
+    const col = new Uint8Array(LANES);
+    let busy = 0;
+    for (let i = 0; i < LANES; i++) {
+      if (rem[i] > 0) {
+        rem[i]--;
+        col[i] = 1;
+        busy++;
+        if (rem[i] === 0) {
+          const k = Math.min(3, Math.floor(fert) + (Math.random() < fert % 1 ? 1 : 0));
+          queue = Math.min(QCAP, queue + k);
         }
+      } else if (queue > 0) {
+        queue--;
+        rem[i] = 2 + Math.floor(Math.random() * 5);
+        col[i] = 1;
+        busy++;
       }
     }
-    return { cells, centers };
+    // en expansión, la rama casi seca recibe empujón: las sequías se ven
+    // (todo pende de un par de carriles) pero no se eternizan
+    if (boom && busy < 4) queue = Math.min(QCAP, queue + 1);
+    if (queue === 0 && rem.every((x) => x === 0)) queue = 1;
+    return col;
   }
 
-  // envolvente de un «tac»: ataque instantáneo y caída suave dentro del compás
-  const beat = (t: number, period: number) => {
-    const local = (t % period) / period;
-    return Math.exp(-local * 3.4);
-  };
-
-  function drawGrid(t: number, split: boolean) {
-    const { cells, centers } = gridCells();
-    const r = 8 * S();
-    const period = 1150;
-    const env = reduced ? 1 : beat(t, period);
-    const parity = Math.floor(t / period) % 2;
-    // las máquinas: un rombo por rebanada, que baja al estampar y sube después
-    for (const mx of centers) {
-      diamond(mx, 24 * S() + env * 9 * S(), 9 * S(), THREAD, 0.9);
+  function makeColumn(): Uint8Array {
+    const col = new Uint8Array(LANES);
+    if (mode === "grid") {
+      col.fill(1);
+      return col;
     }
-    for (const c of cells) {
-      // rama estable de cada dato (pseudo-hash sin parpadeo entre fotogramas)
-      const branch = (c.col * 7 + c.row * 13) % 2;
-      squareOutline(c.x, c.y, r, IDLE);
-      if (!split) {
-        // toda la tanda se estampa a la vez y se destinta hasta el siguiente golpe
-        square(c.x, c.y, r, MUSTARD, env);
-      } else if (branch === parity || reduced && branch === 0) {
-        square(c.x, c.y, r, branch === 0 ? MUSTARD : MADDER, env);
+    if (mode === "split") {
+      const phase = Math.floor(tick / 14) % 2;
+      for (let i = 0; i < LANES; i++) {
+        const branch = 1 - (i % 2);
+        if (branch === phase) col[i] = branch === 0 ? 1 : 2;
       }
-      // si no: dato de la otra rama, parado (solo contorno)
+      return col;
     }
+    return treeColumn();
   }
 
-  // ─── el árbol: la forma la decide el propio cálculo ───
-  type TNode = {
-    id: number;
-    parent: number;
-    depth: number;
-    kids: number[];
-    settled: boolean; // ya decidió sus hijos (deja de ser frontera)
-    x: number;
-    y: number;
-    tx: number;
-    ty: number;
-    born: number;
-  };
-  let tnodes: TNode[] = [];
-  let tid = 0;
-  const byId = (id: number) => tnodes.find((n) => n.id === id)!;
-  const MAXN = 40, MAXDEPTH = 6;
-  // ramas podadas: se desvanecen en su sitio en vez de esfumarse de golpe,
-  // para que la muerte de una rama se LEA como acontecimiento
-  let dying: { x: number; y: number; px: number; py: number; at: number }[] = [];
-  const DIE_MS = 600;
-
-  function tSeed() {
-    tnodes = [];
-    tid = 0;
-    tnodes.push({
-      id: tid++,
-      parent: -1,
-      depth: 0,
-      kids: [],
-      settled: false,
-      x: W() / 2,
-      y: 40 * S(),
-      tx: W() / 2,
-      ty: 40 * S(),
-      born: 0,
-    });
-  }
-
-  function tPrune(t: number) {
-    // por encima del techo, corta el subárbol más profundo y antiguo y vuelve
-    // a crecer: el árbol respira en vez de desbordar
-    const deepest =
-      tnodes.filter((n) => n.id !== 0).sort((a, b) => b.depth - a.depth || a.born - b.born)[0];
-    if (!deepest) return;
-    const doomed = new Set<number>([deepest.id]);
-    let grew = true;
-    while (grew) {
-      grew = false;
-      for (const n of tnodes) {
-        if (n.parent >= 0 && doomed.has(n.parent) && !doomed.has(n.id)) {
-          doomed.add(n.id);
-          grew = true;
-        }
-      }
-    }
-    const p = tnodes.find((n) => n.id === deepest.parent);
-    if (p) {
-      p.kids = p.kids.filter((k) => k !== deepest.id);
-      p.settled = false; // el padre vuelve a ser frontera: el árbol rebrota
-    }
-    for (const n of tnodes) {
-      if (!doomed.has(n.id)) continue;
-      const par = n.id === deepest.id ? p : tnodes.find((m) => m.id === n.parent);
-      dying.push({ x: n.x, y: n.y, px: par?.x ?? n.x, py: par?.y ?? n.y, at: t });
-    }
-    tnodes = tnodes.filter((n) => !doomed.has(n.id));
-  }
-
-  function tGrow(t: number) {
-    const frontier = tnodes.filter((n) => !n.settled && n.kids.length === 0);
-    if (!frontier.length) {
-      // todo asentado: descose una hoja para que el árbol nunca se congele
-      tPrune(t);
-      return;
-    }
-    const node = frontier[Math.floor(rnd(0, frontier.length))]!;
-    node.settled = true;
-    if (node.depth >= MAXDEPTH || tnodes.length >= MAXN) return;
-    // cuántas ramas engendra: la «decisión» que ningún reparto previo conocía.
-    // con la población alta sesga a podar; baja, a estallar
-    const full = tnodes.length / MAXN;
-    const roll = Math.random();
-    let k = 0;
-    if (full < 0.45) k = roll < 0.15 ? 1 : roll < 0.6 ? 2 : 3;
-    else if (full < 0.75) k = roll < 0.35 ? 0 : roll < 0.75 ? 1 : 2;
-    else k = roll < 0.7 ? 0 : 1;
-    k = Math.min(k, MAXN - tnodes.length);
-    for (let i = 0; i < k; i++) {
-      const child: TNode = {
-        id: tid++,
-        parent: node.id,
-        depth: node.depth + 1,
-        kids: [],
-        settled: false,
-        x: node.x + rnd(-6, 6),
-        y: node.y + rnd(-6, 6),
-        tx: node.x,
-        ty: node.y,
-        born: t,
-      };
-      node.kids.push(child.id);
-      tnodes.push(child);
-    }
-    if (tnodes.length > MAXN) tPrune(t);
-  }
-
-  function tLayout() {
-    // árbol ordenado: las hojas ocupan ranuras horizontales consecutivas, cada
-    // padre se centra sobre sus hijos; la profundidad manda la vertical
-    const leaves: TNode[] = [];
-    let maxDepth = 0;
-    const visit = (n: TNode) => {
-      maxDepth = Math.max(maxDepth, n.depth);
-      if (!n.kids.length) leaves.push(n);
-      else n.kids.forEach((k) => visit(byId(k)));
-    };
-    const root = tnodes.find((n) => n.id === 0);
-    if (!root) return;
-    visit(root);
-    const pad = 46 * S();
-    const span = Math.max(1, leaves.length - 1);
-    leaves.forEach((lf, i) => {
-      lf.tx = leaves.length === 1 ? W() / 2 : pad + (i / span) * (W() - 2 * pad);
-    });
-    const rowH = maxDepth === 0 ? 0 : (H() - 78 * S()) / maxDepth;
-    const setX = (n: TNode): number => {
-      n.ty = 40 * S() + n.depth * rowH;
-      if (!n.kids.length) return n.tx;
-      const xs = n.kids.map((k) => setX(byId(k)));
-      n.tx = xs.reduce((a, b) => a + b, 0) / xs.length;
-      return n.tx;
-    };
-    setX(root);
-  }
-
-  function drawTree(t: number) {
-    tLayout();
-    const ease = reduced ? 1 : 0.12;
-    for (const n of tnodes) {
-      n.x += (n.tx - n.x) * ease;
-      n.y += (n.ty - n.y) * ease;
-    }
-    // hilos padre-hijo
-    cx.lineWidth = 1.6 * S();
-    cx.strokeStyle = DIM;
-    for (const n of tnodes) {
-      if (n.parent < 0) continue;
-      const p = tnodes.find((m) => m.id === n.parent);
-      if (!p) continue;
+  function draw() {
+    const W = cv.width, H = cv.height, S = devicePixelRatio;
+    cx.clearRect(0, 0, W, H);
+    const cw = 9 * S;
+    const laneH = H / LANES;
+    // los 32 carriles, siempre presentes: desnudos bajo los huecos
+    cx.lineWidth = 1 * S;
+    cx.strokeStyle = WARP;
+    for (let i = 0; i < LANES; i++) {
+      const y = laneH * (i + 0.5);
       cx.beginPath();
-      cx.moveTo(p.x, p.y);
-      cx.lineTo(n.x, n.y);
+      cx.moveTo(0, y);
+      cx.lineTo(W, y);
       cx.stroke();
     }
-    // ramas podadas: hilo y rombo se desvanecen en su sitio
-    dying = dying.filter((d) => t - d.at < DIE_MS);
-    for (const d of dying) {
-      const a = reduced ? 0 : 1 - (t - d.at) / DIE_MS;
-      cx.globalAlpha = a * 0.6;
-      cx.beginPath();
-      cx.moveTo(d.px, d.py);
-      cx.lineTo(d.x, d.y);
-      cx.stroke();
-      cx.globalAlpha = 1;
-      diamond(d.x, d.y, 8 * S() * a, THREAD, a * 0.85);
+    // la tela: la columna más nueva entra por la derecha
+    const n = cols.length;
+    for (let k = 0; k < n; k++) {
+      const x = W - 14 * S - (n - 1 - k) * cw;
+      if (x + cw < 0) continue;
+      const col = cols[k]!;
+      for (let i = 0; i < LANES; i++) {
+        if (!col[i]) continue;
+        cx.fillStyle = col[i] === 1 ? MUSTARD : MADDER;
+        // textura: alterna levemente la opacidad, como sarga
+        cx.globalAlpha = 0.78 + 0.22 * ((i + k) % 2);
+        cx.fillRect(x, laneH * i + 1.2 * S, cw - 1.2 * S, laneH - 2.4 * S);
+      }
     }
-    // nodos: frontera (trabajo disponible) en rubia; recién nacido en mostaza;
-    // asentado, tenue
-    for (const n of tnodes) {
-      const r = 8 * S();
-      const fresh = !reduced && t - n.born < 320;
-      const frontier = !n.settled && n.kids.length === 0;
-      if (fresh) diamond(n.x, n.y, r, MUSTARD, 1);
-      else if (frontier) diamond(n.x, n.y, r, MADDER, 1);
-      else diamond(n.x, n.y, r, THREAD, 0.85);
-    }
+    cx.globalAlpha = 1;
+    // el frente de avance
+    cx.fillStyle = COMB;
+    cx.fillRect(W - 8 * S, 0, 2.4 * S, H);
   }
 
-  tSeed();
-  let lastGrow = 0;
+  function reportPct() {
+    const last = cols.slice(-PCT_WINDOW);
+    let woven = 0;
+    for (const c of last) for (let i = 0; i < LANES; i++) if (c[i]) woven++;
+    onPct(last.length ? Math.round(100 * woven / (last.length * LANES)) : 0);
+  }
+
+  function reset() {
+    cols = [];
+    tick = 0;
+    queue = 1;
+    boom = true;
+    regimeLeft = 26;
+    fert = 1.6;
+    rem.fill(0);
+  }
+
+  function step() {
+    if (getMode() !== mode) {
+      mode = getMode();
+      reset();
+    }
+    tick++;
+    cols.push(makeColumn());
+    const maxCols = Math.ceil(cv.width / (9 * devicePixelRatio)) + 4;
+    while (cols.length > maxCols) cols.shift();
+    draw();
+    if (tick % 5 === 0) reportPct();
+  }
 
   if (reduced) {
-    // fotograma representativo por modo, sin bucle
-    const mode = getMode();
-    if (mode === "tree") {
-      for (let i = 0; i < 60; i++) tGrow(i * 100);
-      for (let i = 0; i < 40; i++) {
-        tLayout();
-        for (const n of tnodes) {
-          n.x = n.tx;
-          n.y = n.ty;
-        }
-      }
+    // fotograma representativo, sin bucle (remonta por paso desde React)
+    for (let i = 0; i < 260; i++) {
+      tick++;
+      cols.push(makeColumn());
     }
-    cx.clearRect(0, 0, W(), H());
-    if (mode === "tree") drawTree(1e9);
-    else drawGrid(0, mode === "split");
-    return () => {
-      alive = false;
-      removeEventListener("resize", fit);
-    };
+    draw();
+    reportPct();
+    return () => removeEventListener("resize", fit);
   }
 
-  const loop = (t: number) => {
-    if (!alive) return;
-    cx.clearRect(0, 0, W(), H());
-    const mode = getMode();
-    if (mode === "tree") {
-      if (t - lastGrow > 620) {
-        tGrow(t);
-        lastGrow = t;
-      }
-      drawTree(t);
-    } else {
-      drawGrid(t, mode === "split");
-    }
-    requestAnimationFrame(loop);
-  };
-  requestAnimationFrame(loop);
-
+  const interval = setInterval(step, TICK_MS);
   return () => {
-    alive = false;
+    clearInterval(interval);
     removeEventListener("resize", fit);
   };
 }

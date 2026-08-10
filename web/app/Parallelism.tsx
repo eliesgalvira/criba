@@ -1,6 +1,6 @@
-// Sección «regular e irregular»: un stepper de tres estampas sobre un lienzo
-// (irregular.ts). La maqueta es honesta y así lo dice el copy: enseña la FORMA
-// del trabajo, no ejecuta cómputo real como el minador o la carrera.
+// Sección «regular e irregular»: la ocupación de una GPU (irregular.ts) con
+// tres cargas de trabajo. El porcentaje es medición real sobre las columnas
+// dibujadas; la carga es un simulador, y el copy no afirma otra cosa.
 import { useEffect, useRef, useState } from "react";
 import { Toggle } from "@base-ui/react/toggle";
 import { ToggleGroup } from "@base-ui/react/toggle-group";
@@ -12,14 +12,15 @@ const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
 export function Parallelism() {
   const { t } = useT();
   const [mode, setMode] = useState<ParMode>("grid");
+  const [pct, setPct] = useState(100);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const modeRef = useRef<ParMode>(mode);
   modeRef.current = mode;
 
-  // sin reduced-motion, el lienzo se monta UNA vez y lee el modo por fotograma
-  // (cambiar de paso no reinicia el árbol). Con reduced-motion no hay bucle, así
-  // que remontamos por paso para repintar el fotograma estático correcto.
-  useEffect(() => mountIrregular(canvasRef.current!, () => modeRef.current), [
+  // sin reduced-motion el lienzo se monta UNA vez y lee el modo por fotograma;
+  // con reduced-motion no hay bucle, así que remonta por paso para repintar
+  // el fotograma estático correcto
+  useEffect(() => mountIrregular(canvasRef.current!, () => modeRef.current, setPct), [
     REDUCED ? mode : 0,
   ]);
 
@@ -29,12 +30,6 @@ export function Parallelism() {
     tree: [t.parCap3head, t.parCap3],
   };
   const [caphead, capbody] = cap[mode];
-  // cada paso enseña símbolos distintos: la leyenda acompaña al paso
-  const legend: Record<ParMode, typeof t.parLegendGrid> = {
-    grid: t.parLegendGrid,
-    split: t.parLegendSplit,
-    tree: t.parLegendTree,
-  };
 
   return (
     <section className="par" id="paralelismo">
@@ -56,14 +51,10 @@ export function Parallelism() {
         <div className="par-stage">
           <canvas ref={canvasRef} className="par-canvas" aria-label={t.parh2} />
         </div>
-        <ul className="par-legend">
-          {legend[mode].map(([cls, term, desc]) => (
-            <li key={term}>
-              <span className={"leg-swatch leg-" + cls} aria-hidden="true" />
-              <b>{term}</b>, {desc}
-            </li>
-          ))}
-        </ul>
+        <div className="par-meta">
+          <span className={"par-pct" + (pct < 70 ? " low" : "")}>{pct}%</span>
+          <span className="par-pct-label">{t.parPctLabel}</span>
+        </div>
         <p className="par-cap">
           <b>{caphead}</b> {capbody}
         </p>

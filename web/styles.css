@@ -653,56 +653,28 @@ a,
   width: 100%;
   height: 100%;
 }
-.par-legend {
+.par-meta {
   margin-top: 0.9rem;
-  list-style: none;
-  padding: 0;
   display: flex;
+  align-items: baseline;
+  gap: 1rem;
   flex-wrap: wrap;
-  gap: 0.4rem 1.4rem;
-  font-size: 0.86rem;
+}
+.par-pct {
+  font-family: "Solway", serif;
+  font-weight: 800;
+  font-size: 2.6rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--mustard);
+  min-width: 5.2ch;
+}
+.par-pct.low {
+  color: oklch(0.68 0.17 28);
+}
+.par-pct-label {
   color: var(--thread-dim);
-}
-.par-legend li {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-.par-legend b {
-  color: var(--thread);
-  font-weight: 500;
-}
-.leg-swatch {
-  width: 11px;
-  height: 11px;
-  transform: rotate(45deg);
-  flex: none;
-}
-.leg-madder {
-  background: var(--madder);
-}
-.leg-mustard {
-  background: var(--mustard);
-}
-.leg-thread {
-  background: var(--thread);
-  opacity: 0.85;
-}
-.leg-sq-mustard {
-  background: var(--mustard);
-  transform: none;
-}
-.leg-sq-madder {
-  background: var(--madder);
-  transform: none;
-}
-.leg-sq-hollow {
-  border: 1.4px solid var(--thread-dim);
-  transform: none;
-}
-.leg-fade {
-  background: var(--thread);
-  opacity: 0.3;
+  font-size: 0.95rem;
+  max-width: 34ch;
 }
 .par-cap {
   margin-top: 1.1rem;

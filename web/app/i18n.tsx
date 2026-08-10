@@ -70,9 +70,7 @@ export interface Strings {
   parCap2: string;
   parCap3head: string;
   parCap3: string;
-  parLegendGrid: readonly (readonly [string, string, string])[];
-  parLegendSplit: readonly (readonly [string, string, string])[];
-  parLegendTree: readonly (readonly [string, string, string])[];
+  parPctLabel: string;
   honh2: string;
   hon: readonly (readonly [string, string])[];
   foot1: string;
@@ -150,36 +148,22 @@ const STRINGS: Record<Lang, Strings> = {
     overB:
       "piezas, una por negación, más que todo su presupuesto. El telar escribe ese mismo encargo con",
     overC: "dobleces.",
-    parh2: "Regular e irregular: la forma del trabajo.",
+    parh2: "Una GPU por dentro.",
     parIntro:
-      "Repartir un cálculo entre muchos núcleos solo es fácil si sabes su forma antes de empezar. Ahí está la línea que separa lo que una GPU devora de lo que se le atraganta. Toca cada paso.",
-    parStep1: "1 · La rejilla",
-    parStep2: "2 · La grieta",
-    parStep3: "3 · El árbol",
-    parCap1head: "Paralelismo regular.",
+      "Cada fila es uno de los 32 carriles de la máquina; cada columna que entra por la derecha, un ciclo de reloj. Celda encendida: ese carril trabajó. Hueco: parado. Dale al «si» y mira el porcentaje.",
+    parStep1: "1 · Su terreno",
+    parStep2: "2 · Un «si»",
+    parStep3: "3 · Trabajo vivo",
+    parCap1head: "El terreno de la GPU:",
     parCap1:
-      "La misma operación sobre una rejilla de datos. Como la forma se conoce antes de empezar, la rejilla se corta en rebanadas iguales, una por máquina, y cada golpe estampa la tanda entera a la vez. Esto es lo que tu GPU hace de maravilla: millones de datos idénticos, al mismo compás.",
-    parCap2head: "Basta un «si» para partirla.",
+      "la misma operación sobre millones de datos. Tela cerrada, ciclo tras ciclo. Nada en el mundo hace esto mejor.",
+    parCap2head: "Su debilidad:",
     parCap2:
-      "Cuando cada dato elige su camino según su valor, las máquinas en formación cerrada no pueden estampar las dos ramas a la vez: una pasada para la rama A, otra para la B, con los datos de la otra rama parados. En una GPU esto llega a costar treinta veces más.",
-    parCap3head: "El árbol: paralelismo irregular.",
+      "los 32 carriles van en formación, todos la misma instrucción a la vez. Si un «si» parte los datos en dos ramas, ejecuta una rama por pasada y la otra mitad del silicio espera. Pagas toda la máquina; trabaja la mitad.",
+    parCap3head: "Y su límite:",
     parCap3:
-      "Llevado al extremo, el trabajo deja de ser una rejilla. Es un árbol que nace del propio cálculo: cada nodo decide sobre la marcha cuántas ramas engendra, unas mueren enseguida y otras estallan. Nadie sabe su forma ni su tamaño hasta desplegarlo. Aquí la rejilla se atasca, y aquí es donde vive el telar del fondo: teje el árbol según crece.",
-    parLegendGrid: [
-      ["thread", "máquina", "una por rebanada; baja al estampar"],
-      ["sq-mustard", "dato estampado", "toda la tanda de un golpe"],
-    ],
-    parLegendSplit: [
-      ["sq-mustard", "dato de la rama A", "se estampa en esta pasada"],
-      ["sq-madder", "dato de la rama B", "a la pasada siguiente"],
-      ["sq-hollow", "dato parado", "esperando el turno de su rama"],
-    ],
-    parLegendTree: [
-      ["madder", "frontera", "trabajo disponible ahora"],
-      ["mustard", "recién hecho", "acaba de decidir sus ramas"],
-      ["thread", "asentado", "ya decidió; sostiene el árbol"],
-      ["fade", "podado", "la rama muere y se descose"],
-    ],
+      "trabajo que nace y muere durante el propio cálculo, a rachas. La formación no puede rellenar huecos que no sabe dónde estarán. Repartir esto sobre la marcha es exactamente lo que hace el telar del fondo.",
+    parPctLabel: "del silicio trabajando, medido sobre la tela que ves",
     honh2: "Lo que este paradigma no es",
     hon: [
       [
@@ -204,7 +188,7 @@ const STRINGS: Record<Lang, Strings> = {
       ],
       [
         "El lienzo del fondo es una maqueta visual.",
-        " Los números de la criba y de la carrera, en cambio, salen de ejecuciones reales en tu navegador.",
+        " Los números de la criba y de la carrera salen de ejecuciones reales en tu navegador; el porcentaje de la GPU se mide de verdad, pero sobre una carga de trabajo simulada.",
       ],
     ],
     foot1: "Prototipo: un proyecto de divulgación sobre el Interaction Calculus.",
@@ -281,36 +265,22 @@ const STRINGS: Record<Lang, Strings> = {
     overB:
       "pieces, one per negation, more than its whole budget. The loom writes that same job with",
     overC: "foldings.",
-    parh2: "Regular and irregular: the shape of the work.",
+    parh2: "Inside a GPU.",
     parIntro:
-      "Splitting a computation across many cores is only easy if you know its shape before you start. That is the line between what a GPU devours and what jams it. Tap through each step.",
-    parStep1: "1 · The grid",
-    parStep2: "2 · The crack",
-    parStep3: "3 · The tree",
-    parCap1head: "Regular parallelism.",
+      "Each row is one of the machine's 32 lanes; each column entering from the right, one clock cycle. Lit cell: that lane worked. Gap: idle. Hit the «if» and watch the percentage.",
+    parStep1: "1 · Its home turf",
+    parStep2: "2 · One «if»",
+    parStep3: "3 · Living work",
+    parCap1head: "The GPU's home turf:",
     parCap1:
-      "The same operation over a grid of data. Since the shape is known before starting, the grid is cut into equal slices, one per machine, and every blow stamps the whole batch at once. This is what your GPU does beautifully: millions of identical data points, on the same beat.",
-    parCap2head: "One «if» is enough to crack it.",
+      "the same operation over millions of data points. Closed cloth, cycle after cycle. Nothing in the world does this better.",
+    parCap2head: "Its weakness:",
     parCap2:
-      "When each data point picks its path from its value, machines marching in lockstep cannot stamp both branches at once: one pass for branch A, another for branch B, with the other branch's data standing idle. On a GPU this can cost thirty times more.",
-    parCap3head: "The tree: irregular parallelism.",
+      "the 32 lanes march in formation, all running the same instruction at once. If an «if» splits the data into two branches, it runs one branch per pass while the other half of the silicon waits. You pay for the whole machine; half of it works.",
+    parCap3head: "And its limit:",
     parCap3:
-      "Taken to the extreme, the work stops being a grid. It is a tree born from the computation itself: every node decides on the fly how many branches it spawns, some die at once and others burst open. Nobody knows its shape or size until it unfolds. Here the grid jams, and here is where the background loom lives: it weaves the tree as it grows.",
-    parLegendGrid: [
-      ["thread", "machine", "one per slice; it drops as it stamps"],
-      ["sq-mustard", "stamped data", "the whole batch in one blow"],
-    ],
-    parLegendSplit: [
-      ["sq-mustard", "branch A data", "stamped on this pass"],
-      ["sq-madder", "branch B data", "on the next pass"],
-      ["sq-hollow", "idle data", "waiting for its branch's turn"],
-    ],
-    parLegendTree: [
-      ["madder", "frontier", "work available now"],
-      ["mustard", "just done", "just decided its branches"],
-      ["thread", "settled", "already decided; holds the tree up"],
-      ["fade", "pruned", "the branch dies and is unstitched"],
-    ],
+      "work that is born and dies during the computation itself, in bursts. The formation cannot fill gaps it cannot predict. Distributing this on the fly is exactly what the background loom does.",
+    parPctLabel: "of the silicon working, measured over the cloth you see",
     honh2: "What this paradigm is not",
     hon: [
       [
@@ -335,7 +305,7 @@ const STRINGS: Record<Lang, Strings> = {
       ],
       [
         "The background canvas is a visual mock.",
-        " The sieve and race numbers, though, come from real executions in your browser.",
+        " The sieve and race numbers come from real executions in your browser; the GPU percentage is genuinely measured, but over a simulated workload.",
       ],
     ],
     foot1: "Prototype: an outreach project about the Interaction Calculus.",
