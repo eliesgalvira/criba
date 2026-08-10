@@ -5,6 +5,7 @@ import { ToggleGroup } from "@base-ui/react/toggle-group";
 import { type Lang, LangContext, stringsFor, useT } from "./i18n.tsx";
 import { mountLoom } from "./loom.ts";
 import { Miner } from "./Miner.tsx";
+import { Parallelism } from "./Parallelism.tsx";
 import { Race } from "./Race.tsx";
 
 /** Cross-fade del cambio de idioma vía View Transition.
@@ -132,6 +133,7 @@ export function App() {
       <Hero />
       <Miner />
       <Race />
+      <Parallelism />
       <Honesty />
       <Footer />
     </LangContext.Provider>

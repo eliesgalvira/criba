@@ -605,6 +605,98 @@ a,
   color: var(--thread-dim);
   max-width: 62ch;
 }
+
+/* ——— regular e irregular: panel hundido, ritmo entre carrera y honestidad ——— */
+.par {
+  background-color: var(--indigo-deep);
+  background-image: var(--grain);
+  border-block: 1px solid var(--seam);
+}
+.par h2 {
+  max-width: 24ch;
+}
+.par-steps {
+  margin-top: 1.8rem;
+  display: inline-flex;
+}
+.par-step {
+  background: none;
+  border: 1px solid var(--seam);
+  color: var(--thread-dim);
+  font-family: "Solway", serif;
+  font-size: 0.9rem;
+  padding: 0.42rem 1rem;
+  cursor: pointer;
+}
+.par-step + .par-step {
+  border-left: 0;
+}
+.par-step[data-pressed] {
+  color: var(--indigo-deep);
+  background: var(--mustard);
+  border-color: var(--mustard);
+}
+@media (hover: hover) {
+  .par-step:hover:not([data-pressed]) {
+    color: var(--thread);
+  }
+}
+.par-stage {
+  margin-top: 1.2rem;
+  max-width: 50rem;
+  height: clamp(300px, 42vh, 460px);
+  background-color: var(--indigo);
+  border: 1px solid var(--seam);
+}
+.par-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.par-legend {
+  margin-top: 0.9rem;
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.4rem;
+  font-size: 0.86rem;
+  color: var(--thread-dim);
+}
+.par-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.par-legend b {
+  color: var(--thread);
+  font-weight: 500;
+}
+.leg-swatch {
+  width: 11px;
+  height: 11px;
+  transform: rotate(45deg);
+  flex: none;
+}
+.leg-0 {
+  background: var(--madder);
+}
+.leg-1 {
+  background: var(--mustard);
+}
+.leg-2 {
+  border: 1.4px solid var(--thread-dim);
+}
+.par-cap {
+  margin-top: 1.1rem;
+  max-width: 64ch;
+  line-height: 1.62;
+  text-wrap: pretty;
+}
+.par-cap b {
+  color: var(--mustard);
+  font-weight: 500;
+}
 .npasses {
   grid-column: 1 / -1;
   min-height: 1.4em;
@@ -874,102 +966,6 @@ a,
 .trace .recipe {
   margin-top: 0.5rem;
 }
-/* ═══ el telar en modal: overlay a casi pantalla completa — cero CLS ═══ */
-.loom-open {
-  margin-top: 0.9rem;
-  padding: 0.5rem 1.1rem;
-  font-family: "Solway", serif;
-  font-size: 0.9rem;
-  color: var(--thread);
-  background: transparent;
-  border: 1px solid var(--seam);
-  cursor: pointer;
-}
-.loom-open:hover,
-.loom-open:focus-visible {
-  border-color: var(--thread);
-  background: oklch(0.3 0.05 265 / 0.5);
-}
-/* escala z: cabecera fija 10 < fondo del modal 40 < modal 50 */
-.loomdlg-back {
-  position: fixed;
-  inset: 0;
-  z-index: 40;
-  background: oklch(0.13 0.045 265 / 0.75);
-}
-.loomdlg {
-  position: fixed;
-  inset: 3vh 3vw;
-  z-index: 50;
-  display: flex;
-  flex-direction: column;
-  background-color: var(--indigo-deep);
-  background-image: var(--grain);
-  border: 2px solid var(--thread);
-  padding: 1rem 1.25rem 0.9rem;
-  animation: loomdlg-in 0.25s var(--ease-out);
-}
-.loomdlg-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 1rem;
-  padding-bottom: 0.6rem;
-  border-bottom: 1px solid var(--seam);
-}
-.loomdlg-title {
-  font-family: "Solway", serif;
-  font-size: 1.15rem;
-  font-weight: 600;
-  margin: 0;
-}
-.loomdlg-close {
-  padding: 0.35rem 0.9rem;
-  font-family: "Solway", serif;
-  font-size: 0.85rem;
-  color: var(--thread);
-  background: transparent;
-  border: 1px solid var(--seam);
-  cursor: pointer;
-}
-.loomdlg-close:hover,
-.loomdlg-close:focus-visible {
-  border-color: var(--thread);
-  background: oklch(0.3 0.05 265 / 0.5);
-}
-/* el lienzo, absoluto dentro del escenario flexible: ocupa TODO el hueco */
-.loomdlg-stage {
-  position: relative;
-  flex: 1;
-  min-height: 0;
-}
-.bigloom {
-  position: absolute;
-  inset: 0;
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-.loomdlg-note {
-  padding-top: 0.6rem;
-  border-top: 1px solid var(--seam);
-  font-style: italic;
-  font-size: 0.9rem;
-  color: var(--thread-dim);
-  margin: 0;
-}
-@keyframes loomdlg-in {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .loomdlg {
-    animation: none;
-  }
-}
-
 .miniloom {
   display: block;
   width: 100%;

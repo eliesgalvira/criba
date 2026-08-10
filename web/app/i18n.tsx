@@ -26,10 +26,6 @@ export interface Strings {
   pieces: string;
   foundIn: string;
   sharedSteps: string;
-  showLoom: string;
-  loomTitle: string;
-  loomNote: string;
-  close: string;
   verify: string;
   rawIntro: string;
   rawLegend: string;
@@ -63,6 +59,18 @@ export interface Strings {
   overA: string;
   overB: string;
   overC: string;
+  parh2: string;
+  parIntro: string;
+  parStep1: string;
+  parStep2: string;
+  parStep3: string;
+  parCap1head: string;
+  parCap1: string;
+  parCap2head: string;
+  parCap2: string;
+  parCap3head: string;
+  parCap3: string;
+  parLegend: readonly (readonly [string, string])[];
   honh2: string;
   hon: readonly (readonly [string, string])[];
   foot1: string;
@@ -94,18 +102,13 @@ const STRINGS: Record<Lang, Strings> = {
     pieces: "piezas",
     foundIn: "encontrada en",
     sharedSteps: "pasos de trabajo, compartidos entre todos los candidatos",
-    showLoom: "Enseñar el telar tejiendo",
-    loomTitle: "El telar, cribando",
-    loomNote:
-      "boceto en movimiento del proceso; la versión fiel, paso a paso y ligada al programa, es el trabajo del mes",
-    close: "Cerrar",
     verify: "Y generaliza: mírala funcionar donde no diste ejemplos:",
     rawIntro: "Así se escribe en el idioma del telar:",
     rawLegend: "«0:» si es cero · «S» suma uno · «@» vuelve a empezar · «*» devuelve lo que quede",
     notfound:
       "Ningún programa, hasta donde exploramos, cumple esos ejemplos a la vez: o se contradicen, o piden algo que este mini-lenguaje no sabe decir (solo cuenta y repite). Antes que inventar, te lo dice.",
     addPair: "añadir ejemplo",
-    editAsText: "✎ como números",
+    editAsText: "con notación de función f(x) = y",
     presets: {
       doble: "doble",
       mitad: "mitad",
@@ -145,6 +148,26 @@ const STRINGS: Record<Lang, Strings> = {
     overB:
       "piezas, una por negación, más que todo su presupuesto. El telar escribe ese mismo encargo con",
     overC: "dobleces.",
+    parh2: "Regular e irregular: la forma del trabajo.",
+    parIntro:
+      "Repartir un cálculo entre muchos núcleos solo es fácil si sabes su forma antes de empezar. Ahí está la línea que separa lo que una GPU devora de lo que se le atraganta. Toca cada paso.",
+    parStep1: "1 · La rejilla",
+    parStep2: "2 · La grieta",
+    parStep3: "3 · El árbol",
+    parCap1head: "Paralelismo regular.",
+    parCap1:
+      "La misma operación sobre una rejilla de datos. Sabes cuántas celdas hay y que todas hacen lo mismo, así que la máquina las reparte en rebanadas iguales y las estampa de un golpe. Esto es lo que tu GPU hace de maravilla: millones de celdas idénticas, a la vez.",
+    parCap2head: "Basta un «si» para partirla.",
+    parCap2:
+      "Cuando cada celda elige su camino según su dato, una máquina en formación cerrada no puede hacer las dos ramas a la vez: las hace por turnos, con la mitad de las celdas paradas en cada pasada. En una GPU esto llega a costar treinta veces más.",
+    parCap3head: "El árbol: paralelismo irregular.",
+    parCap3:
+      "Llevado al extremo, el trabajo deja de ser una rejilla. Es un árbol que nace del propio cálculo: cada nodo decide sobre la marcha cuántas ramas engendra, unas mueren enseguida y otras estallan. Nadie sabe su forma ni su tamaño hasta desplegarlo. Aquí la rejilla se atasca, y aquí es donde vive el telar del fondo: teje el árbol según crece.",
+    parLegend: [
+      ["frontera", "trabajo disponible ahora"],
+      ["recién hecho", "acaba de reducirse"],
+      ["parado", "esperando su turno"],
+    ],
     honh2: "Lo que este paradigma no es",
     hon: [
       [
@@ -200,18 +223,13 @@ const STRINGS: Record<Lang, Strings> = {
     pieces: "pieces",
     foundIn: "found in",
     sharedSteps: "steps of work, shared across all candidates",
-    showLoom: "Show the loom weaving",
-    loomTitle: "The loom, sifting",
-    loomNote:
-      "a moving sketch of the process; the faithful, step-by-step version tied to the program is the month's work",
-    close: "Close",
     verify: "And it generalizes: watch it work where you gave no examples:",
     rawIntro: "This is how it is written in the loom's own language:",
     rawLegend: "“0:” if zero · “S” add one · “@” start over · “*” return what remains",
     notfound:
       "No program, as far as we explore, fits those examples at once: either they contradict each other, or they ask for something this mini-language cannot say (it only counts and repeats). Rather than invent, it tells you.",
     addPair: "add example",
-    editAsText: "✎ as numbers",
+    editAsText: "with function notation f(x) = y",
     presets: {
       doble: "double",
       mitad: "half",
@@ -251,6 +269,26 @@ const STRINGS: Record<Lang, Strings> = {
     overB:
       "pieces, one per negation, more than its whole budget. The loom writes that same job with",
     overC: "foldings.",
+    parh2: "Regular and irregular: the shape of the work.",
+    parIntro:
+      "Splitting a computation across many cores is only easy if you know its shape before you start. That is the line between what a GPU devours and what jams it. Tap through each step.",
+    parStep1: "1 · The grid",
+    parStep2: "2 · The crack",
+    parStep3: "3 · The tree",
+    parCap1head: "Regular parallelism.",
+    parCap1:
+      "The same operation over a grid of data. You know how many cells there are and that they all do the same thing, so the machine splits them into equal slices and stamps them in one blow. This is what your GPU does beautifully: millions of identical cells, all at once.",
+    parCap2head: "One «if» is enough to crack it.",
+    parCap2:
+      "When each cell picks its path from its data, a machine marching in lockstep cannot do both branches at once: it does them in turns, with half the cells idle on each pass. On a GPU this can cost thirty times more.",
+    parCap3head: "The tree: irregular parallelism.",
+    parCap3:
+      "Taken to the extreme, the work stops being a grid. It is a tree born from the computation itself: every node decides on the fly how many branches it spawns, some die at once and others burst open. Nobody knows its shape or size until it unfolds. Here the grid jams, and here is where the background loom lives: it weaves the tree as it grows.",
+    parLegend: [
+      ["frontier", "work available now"],
+      ["just done", "just reduced"],
+      ["idle", "waiting its turn"],
+    ],
     honh2: "What this paradigm is not",
     hon: [
       [
