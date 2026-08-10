@@ -10,8 +10,8 @@ superficie ES el índigo; la calidez la llevan los hilos y acentos, nunca el fon
 :root {
   --indigo: oklch(0.26 0.055 265); /* fondo principal (tela teñida) */
   --indigo-deep: oklch(0.21 0.05 265); /* secciones hundidas / paneles */
-  --thread: oklch(0.90 0.025 85); /* tinta principal (lino) — ≥7:1 sobre índigo */
-  --thread-dim: oklch(0.68 0.03 85); /* texto secundario — ≥3.5:1 */
+  --thread: oklch(0.90 0.025 85); /* tinta principal (lino), 11.6:1 sobre índigo */
+  --thread-dim: oklch(0.78 0.04 85); /* texto secundario, 7.8:1 (cursiva pequeña sobre oscuro pide margen) */
   --madder: oklch(0.58 0.16 28); /* rubia: acción, urgencia, lo "naive" */
   --mustard: oklch(0.78 0.12 85); /* mostaza: resultado, acierto, lo "IC" */
 }
