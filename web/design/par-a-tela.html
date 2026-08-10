@@ -58,9 +58,9 @@
     <div class="frame">
       <h1>A · La tela</h1>
       <p class="sub">
-        La ocupación del silicio, tejida. 32 hilos de urdimbre son 32 carriles de la máquina;
-        cada columna que sale del peine es un ciclo de reloj. Trama tejida: el carril trabajó.
-        Agujero: urdimbre desnuda, silicio parado.
+        Una radiografía de la máquina trabajando. Cada fila es uno de sus 32 carriles;
+        cada columna que entra por la derecha, un ciclo de reloj. Celda coloreada:
+        ese carril trabajó ese ciclo. Hueco: carril parado.
       </p>
       <div class="steps" role="group">
         <button class="step" data-mode="grid" aria-pressed="true">1 · La rejilla</button>
@@ -76,9 +76,9 @@
     </div>
     <script type="module">
       const CAPS = {
-        grid: "<b>Tela cerrada.</b> Trabajo regular: los 32 carriles tejen en cada ciclo, sin un solo agujero. Esto es una GPU haciendo lo suyo.",
-        split: "<b>Tela agujereada.</b> Un «si» parte los datos en dos ramas y la formación cerrada solo puede tejer una rama por pasada: la mitad de los carriles deja urdimbre desnuda. Cada agujero es silicio pagado que no trabaja.",
-        tree: "<b>Tela viva.</b> Trabajo irregular: las tareas nacen y mueren durante el cálculo, cada carril teje a rachas según le llega faena. El telar de verdad es el que consigue cerrar esta tela.",
+        grid: "<b>Trabajo regular.</b> Los 32 carriles trabajan en cada ciclo, sin un solo hueco. Esto es una GPU haciendo lo suyo.",
+        split: "<b>Un «si» lo parte.</b> Los datos se dividen en dos ramas y la máquina solo puede ejecutar una a la vez: la mitad de los carriles queda parada en cada pasada. Cada hueco es silicio pagado que no trabaja.",
+        tree: "<b>Trabajo irregular.</b> Las tareas nacen y mueren durante el propio cálculo: rachas en las que hay faena para todos y sequías en las que casi todo pende de un par de carriles. Ninguna máquina de formación cerrada rellena esto; hace falta una que reparta el trabajo sobre la marcha.",
       };
       const cv = document.getElementById("cv");
       const cx = cv.getContext("2d");
@@ -94,28 +94,48 @@
       let cols = []; // cada columna: Uint8Array(LANES); 0 agujero, 1 mostaza, 2 rubia
       let tick = 0;
 
-      // el simulador del árbol: una cola global de tareas y 32 obreros;
-      // cada tarea dura unos ciclos y al morir engendra 0..3 hijas
-      let queue = 6;
+      // el simulador del árbol: una cola de tareas y 32 obreros, con DEPENDENCIAS.
+      // El cálculo alterna regímenes: expansión (cada tarea acabada engendra
+      // 1..3 hijas) y poda (casi ninguna engendra). Sin esto, el backlog de
+      // tareas independientes alisa la ocupación al 100% y la irregularidad
+      // no se ve. La cola va capada: solo existe la frontera del árbol, no un
+      // almacén infinito de faena.
+      let queue = 1;
+      let boom = true;
+      let regimeLeft = 26;
+      let fert = 1.6; // hijas esperadas por tarea acabada, cambia por régimen
+      const QCAP = 24;
       const rem = new Array(LANES).fill(0);
       function treeColumn() {
+        if (--regimeLeft <= 0) {
+          boom = !boom;
+          regimeLeft = boom ? 16 + Math.floor(Math.random() * 22) : 14 + Math.floor(Math.random() * 18);
+          // cada régimen con su intensidad: brotes que apenas se sostienen,
+          // podas suaves que tardan en secar; de ahí las rampas intermedias
+          fert = boom ? 1.25 + Math.random() * 0.75 : 0.2 + Math.random() * 0.6;
+        }
         const col = new Uint8Array(LANES);
+        let busy = 0;
         for (let i = 0; i < LANES; i++) {
           if (rem[i] > 0) {
             rem[i]--;
             col[i] = 1;
+            busy++;
             if (rem[i] === 0) {
-              const r = Math.random();
-              queue += queue < 8 ? (r < 0.3 ? 3 : r < 0.75 ? 2 : 1)
-                : queue < 24 ? (r < 0.35 ? 0 : r < 0.8 ? 1 : 2)
-                : (r < 0.75 ? 0 : 1);
+              const k = Math.min(3, Math.floor(fert) + (Math.random() < fert % 1 ? 1 : 0));
+              queue = Math.min(QCAP, queue + k);
             }
           } else if (queue > 0) {
             queue--;
             rem[i] = 2 + Math.floor(Math.random() * 5);
             col[i] = 1;
+            busy++;
           }
         }
+        // en expansión, una rama casi seca recibe empujón: las sequías se ven
+        // (todo pende de un par de carriles) pero no se eternizan
+        if (boom && busy < 4) queue = Math.min(QCAP, queue + 1);
+        if (queue === 0 && rem.every((x) => x === 0)) queue = 1;
         return col;
       }
 
@@ -191,7 +211,7 @@
       }
 
       function reset() {
-        cols = []; tick = 0; queue = 6; rem.fill(0);
+        cols = []; tick = 0; queue = 1; boom = true; regimeLeft = 26; fert = 1.6; rem.fill(0);
         capEl.innerHTML = CAPS[mode];
         if (reduced) {
           for (let i = 0; i < 260; i++) { tick++; cols.push(makeColumn()); }
