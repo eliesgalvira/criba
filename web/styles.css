@@ -678,14 +678,22 @@ a,
   transform: rotate(45deg);
   flex: none;
 }
-.leg-0 {
+.leg-madder {
   background: var(--madder);
 }
-.leg-1 {
+.leg-mustard {
   background: var(--mustard);
 }
-.leg-2 {
+.leg-thread {
+  background: var(--thread);
+  opacity: 0.85;
+}
+.leg-hollow {
   border: 1.4px solid var(--thread-dim);
+}
+.leg-fade {
+  background: var(--thread);
+  opacity: 0.3;
 }
 .par-cap {
   margin-top: 1.1rem;

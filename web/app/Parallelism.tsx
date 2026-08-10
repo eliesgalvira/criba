@@ -29,6 +29,12 @@ export function Parallelism() {
     tree: [t.parCap3head, t.parCap3],
   };
   const [caphead, capbody] = cap[mode];
+  // cada paso enseña símbolos distintos: la leyenda acompaña al paso
+  const legend: Record<ParMode, typeof t.parLegendGrid> = {
+    grid: t.parLegendGrid,
+    split: t.parLegendSplit,
+    tree: t.parLegendTree,
+  };
 
   return (
     <section className="par" id="paralelismo">
@@ -51,10 +57,10 @@ export function Parallelism() {
           <canvas ref={canvasRef} className="par-canvas" aria-label={t.parh2} />
         </div>
         <ul className="par-legend">
-          {t.parLegend.map(([k, v], i) => (
-            <li key={k}>
-              <span className={"leg-swatch leg-" + i} aria-hidden="true" />
-              <b>{k}</b>, {v}
+          {legend[mode].map(([cls, term, desc]) => (
+            <li key={term}>
+              <span className={"leg-swatch leg-" + cls} aria-hidden="true" />
+              <b>{term}</b>, {desc}
             </li>
           ))}
         </ul>

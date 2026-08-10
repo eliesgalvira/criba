@@ -112,6 +112,10 @@ export function mountIrregular(cv: HTMLCanvasElement, getMode: () => ParMode): (
   let tid = 0;
   const byId = (id: number) => tnodes.find((n) => n.id === id)!;
   const MAXN = 40, MAXDEPTH = 6;
+  // ramas podadas: se desvanecen en su sitio en vez de esfumarse de golpe,
+  // para que la muerte de una rama se LEA como acontecimiento
+  let dying: { x: number; y: number; px: number; py: number; at: number }[] = [];
+  const DIE_MS = 600;
 
   function tSeed() {
     tnodes = [];
@@ -130,7 +134,7 @@ export function mountIrregular(cv: HTMLCanvasElement, getMode: () => ParMode): (
     });
   }
 
-  function tPrune() {
+  function tPrune(t: number) {
     // por encima del techo, corta el subárbol más profundo y antiguo y vuelve
     // a crecer: el árbol respira en vez de desbordar
     const deepest =
@@ -152,6 +156,11 @@ export function mountIrregular(cv: HTMLCanvasElement, getMode: () => ParMode): (
       p.kids = p.kids.filter((k) => k !== deepest.id);
       p.settled = false; // el padre vuelve a ser frontera: el árbol rebrota
     }
+    for (const n of tnodes) {
+      if (!doomed.has(n.id)) continue;
+      const par = n.id === deepest.id ? p : tnodes.find((m) => m.id === n.parent);
+      dying.push({ x: n.x, y: n.y, px: par?.x ?? n.x, py: par?.y ?? n.y, at: t });
+    }
     tnodes = tnodes.filter((n) => !doomed.has(n.id));
   }
 
@@ -159,7 +168,7 @@ export function mountIrregular(cv: HTMLCanvasElement, getMode: () => ParMode): (
     const frontier = tnodes.filter((n) => !n.settled && n.kids.length === 0);
     if (!frontier.length) {
       // todo asentado: descose una hoja para que el árbol nunca se congele
-      tPrune();
+      tPrune(t);
       return;
     }
     const node = frontier[Math.floor(rnd(0, frontier.length))]!;
@@ -190,7 +199,7 @@ export function mountIrregular(cv: HTMLCanvasElement, getMode: () => ParMode): (
       node.kids.push(child.id);
       tnodes.push(child);
     }
-    if (tnodes.length > MAXN) tPrune();
+    if (tnodes.length > MAXN) tPrune(t);
   }
 
   function tLayout() {
@@ -240,6 +249,18 @@ export function mountIrregular(cv: HTMLCanvasElement, getMode: () => ParMode): (
       cx.moveTo(p.x, p.y);
       cx.lineTo(n.x, n.y);
       cx.stroke();
+    }
+    // ramas podadas: hilo y rombo se desvanecen en su sitio
+    dying = dying.filter((d) => t - d.at < DIE_MS);
+    for (const d of dying) {
+      const a = reduced ? 0 : 1 - (t - d.at) / DIE_MS;
+      cx.globalAlpha = a * 0.6;
+      cx.beginPath();
+      cx.moveTo(d.px, d.py);
+      cx.lineTo(d.x, d.y);
+      cx.stroke();
+      cx.globalAlpha = 1;
+      diamond(d.x, d.y, 8 * S() * a, THREAD, a * 0.85);
     }
     // nodos: frontera (trabajo disponible) en rubia; recién nacido en mostaza;
     // asentado, tenue

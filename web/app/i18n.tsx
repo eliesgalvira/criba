@@ -70,7 +70,9 @@ export interface Strings {
   parCap2: string;
   parCap3head: string;
   parCap3: string;
-  parLegend: readonly (readonly [string, string])[];
+  parLegendGrid: readonly (readonly [string, string, string])[];
+  parLegendSplit: readonly (readonly [string, string, string])[];
+  parLegendTree: readonly (readonly [string, string, string])[];
   honh2: string;
   hon: readonly (readonly [string, string])[];
   foot1: string;
@@ -163,10 +165,19 @@ const STRINGS: Record<Lang, Strings> = {
     parCap3head: "El árbol: paralelismo irregular.",
     parCap3:
       "Llevado al extremo, el trabajo deja de ser una rejilla. Es un árbol que nace del propio cálculo: cada nodo decide sobre la marcha cuántas ramas engendra, unas mueren enseguida y otras estallan. Nadie sabe su forma ni su tamaño hasta desplegarlo. Aquí la rejilla se atasca, y aquí es donde vive el telar del fondo: teje el árbol según crece.",
-    parLegend: [
-      ["frontera", "trabajo disponible ahora"],
-      ["recién hecho", "acaba de reducirse"],
-      ["parado", "esperando su turno"],
+    parLegendGrid: [
+      ["mustard", "celda trabajando", "todas estampan a la vez, al mismo compás"],
+    ],
+    parLegendSplit: [
+      ["mustard", "rama A", "trabaja en esta pasada"],
+      ["madder", "rama B", "trabaja en la pasada siguiente"],
+      ["hollow", "parada", "esperando el turno de su rama"],
+    ],
+    parLegendTree: [
+      ["madder", "frontera", "trabajo disponible ahora"],
+      ["mustard", "recién hecho", "acaba de decidir sus ramas"],
+      ["thread", "asentado", "ya decidió; sostiene el árbol"],
+      ["fade", "podado", "la rama muere y se descose"],
     ],
     honh2: "Lo que este paradigma no es",
     hon: [
@@ -284,10 +295,19 @@ const STRINGS: Record<Lang, Strings> = {
     parCap3head: "The tree: irregular parallelism.",
     parCap3:
       "Taken to the extreme, the work stops being a grid. It is a tree born from the computation itself: every node decides on the fly how many branches it spawns, some die at once and others burst open. Nobody knows its shape or size until it unfolds. Here the grid jams, and here is where the background loom lives: it weaves the tree as it grows.",
-    parLegend: [
-      ["frontier", "work available now"],
-      ["just done", "just reduced"],
-      ["idle", "waiting its turn"],
+    parLegendGrid: [
+      ["mustard", "working cell", "all stamp at once, on the same beat"],
+    ],
+    parLegendSplit: [
+      ["mustard", "branch A", "works on this pass"],
+      ["madder", "branch B", "works on the next pass"],
+      ["hollow", "idle", "waiting for its branch's turn"],
+    ],
+    parLegendTree: [
+      ["madder", "frontier", "work available now"],
+      ["mustard", "just done", "just decided its branches"],
+      ["thread", "settled", "already decided; holds the tree up"],
+      ["fade", "pruned", "the branch dies and is unstitched"],
     ],
     honh2: "What this paradigm is not",
     hon: [
