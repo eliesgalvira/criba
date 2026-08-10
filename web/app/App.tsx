@@ -4,6 +4,7 @@ import { Toggle } from "@base-ui/react/toggle";
 import { ToggleGroup } from "@base-ui/react/toggle-group";
 import { type Lang, LangContext, stringsFor, useT } from "./i18n.tsx";
 import { mountLoom } from "./loom.ts";
+import { Cpu } from "./Cpu.tsx";
 import { Miner } from "./Miner.tsx";
 import { Parallelism } from "./Parallelism.tsx";
 import { Race } from "./Race.tsx";
@@ -136,6 +137,7 @@ export function App() {
       <Race />
       <ShapeOfWork />
       <Parallelism />
+      <Cpu />
       <Honesty />
       <Footer />
     </LangContext.Provider>

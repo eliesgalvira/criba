@@ -88,6 +88,18 @@ export interface Strings {
   parCap4head: string;
   parCap4: string;
   parPctLabel: string;
+  cpuh2: string;
+  cpuIntro: string;
+  cpuStep1: string;
+  cpuStep2: string;
+  cpuStep3: string;
+  cpuCap1head: string;
+  cpuCap1: string;
+  cpuCap2head: string;
+  cpuCap2: string;
+  cpuCap3head: string;
+  cpuCap3: string;
+  cpuPctLabel: string;
   honh2: string;
   hon: readonly (readonly [string, string])[];
   foot1: string;
@@ -215,6 +227,22 @@ const STRINGS: Record<Lang, Strings> = {
     parCap4:
       "el mismo trabajo, sin formación. Cada carril toma una tarea en cuanto existe, sobre la marcha. Esto una GPU no lo puede hacer; así reparte una red de interacciones, como el telar del fondo. Compara el porcentaje con el paso 3: esa diferencia es este proyecto.",
     parPctLabel: "del silicio trabajando, medido sobre la tela que ves",
+    cpuh2: "Y una CPU por dentro.",
+    cpuIntro:
+      "La otra máquina de tu ordenador. Un núcleo velocísimo (izquierda), la memoria lejos (derecha) y una despensa diminuta a su lado: la cache. Abajo, su tela de un solo carril: celda, ciclo computando; hueco, ciclo esperando.",
+    cpuStep1: "1 · La cadena",
+    cpuStep2: "2 · La memoria lejos",
+    cpuStep3: "3 · La caza de punteros",
+    cpuCap1head: "El terreno de la CPU:",
+    cpuCap1:
+      "una cadena de dependencias: cada paso necesita el anterior. Todo cabe en el núcleo. Sin viajes. Un paso por ciclo; nada lo hace más rápido.",
+    cpuCap2head: "El peaje:",
+    cpuCap2:
+      "los datos viven lejos y cada uno viaja. (Tiene nombre: el cuello de botella de von Neumann.) La CPU apuesta por la localidad: lees en orden, un solo viaje trae la fila entera a la despensa. La apuesta acierta.",
+    cpuCap3head: "La apuesta falla:",
+    cpuCap3:
+      "un grafo salta por la memoria sin orden. Cada salto, un viaje; la despensa no sirve; el núcleo espera. Recorrer grafos es el peor caso de la CPU. Y es justo lo que hace esta página al emular el telar.",
+    cpuPctLabel: "de los ciclos computando; el resto, esperando a la memoria",
     honh2: "Lo que este paradigma no es",
     hon: [
       [
@@ -239,7 +267,7 @@ const STRINGS: Record<Lang, Strings> = {
       ],
       [
         "El lienzo del fondo es una maqueta visual.",
-        " Los números de la criba y de la carrera salen de ejecuciones reales en tu navegador; el porcentaje de la GPU se mide de verdad, pero sobre una carga de trabajo simulada.",
+        " Los números de la criba y de la carrera salen de ejecuciones reales en tu navegador; los porcentajes de la GPU y de la CPU se miden de verdad, pero sobre cargas de trabajo simuladas.",
       ],
     ],
     foot1: "Prototipo: un proyecto de divulgación sobre el Interaction Calculus.",
@@ -366,6 +394,22 @@ const STRINGS: Record<Lang, Strings> = {
     parCap4:
       "the same work, without the formation. Each lane picks up a task the moment it exists, on the fly. A GPU cannot do this; this is how an interaction net distributes work, like the background loom. Compare the percentage with step 3: that difference is this project.",
     parPctLabel: "of the silicon working, measured over the cloth you see",
+    cpuh2: "And a CPU inside.",
+    cpuIntro:
+      "The other machine in your computer. One blazing core (left), memory far away (right), and a tiny pantry next to it: the cache. Below, its single-lane cloth: cell, cycle computing; gap, cycle waiting.",
+    cpuStep1: "1 · The chain",
+    cpuStep2: "2 · Memory far away",
+    cpuStep3: "3 · Pointer chasing",
+    cpuCap1head: "The CPU's home turf:",
+    cpuCap1:
+      "a chain of dependencies: every step needs the previous one. Everything fits in the core. No trips. One step per cycle; nothing does it faster.",
+    cpuCap2head: "The toll:",
+    cpuCap2:
+      "data lives far away and every datum travels. (It has a name: the von Neumann bottleneck.) The CPU bets on locality: read in order and a single trip brings the whole row into the pantry. The bet pays off.",
+    cpuCap3head: "The bet fails:",
+    cpuCap3:
+      "a graph jumps through memory without order. Every jump, a trip; the pantry is useless; the core waits. Walking graphs is the CPU's worst case. And it is exactly what this page does when it emulates the loom.",
+    cpuPctLabel: "of the cycles computing; the rest, waiting for memory",
     honh2: "What this paradigm is not",
     hon: [
       [
@@ -390,7 +434,7 @@ const STRINGS: Record<Lang, Strings> = {
       ],
       [
         "The background canvas is a visual mock.",
-        " The sieve and race numbers come from real executions in your browser; the GPU percentage is genuinely measured, but over a simulated workload.",
+        " The sieve and race numbers come from real executions in your browser; the GPU and CPU percentages are genuinely measured, but over simulated workloads.",
       ],
     ],
     foot1: "Prototype: an outreach project about the Interaction Calculus.",
