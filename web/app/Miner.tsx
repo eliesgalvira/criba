@@ -379,7 +379,7 @@ export function Miner() {
                         </>
                       )}
                       <p className="meta">
-                        {size(outcome.prog)} {t.pieces} —{" "}
+                        {size(outcome.prog)} {t.pieces} ·{" "}
                         {outcome.proven ? t.foundProven : t.foundBest} · {t.foundIn}{" "}
                         {outcome.ms.toFixed(0)} ms · {outcome.steps.toLocaleString(lang)}{" "}
                         {t.sharedSteps}

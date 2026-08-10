@@ -92,7 +92,13 @@ function Footer() {
     <footer>
       <div className="frame">
         <span>{t.foot1}</span>
-        <span>{t.foot2}</span>
+        <span>
+          {t.foot2a}
+          <a href="https://github.com/HigherOrderCO" target="_blank" rel="noreferrer">
+            {t.foot2link}
+          </a>
+          {t.foot2b}
+        </span>
       </div>
     </footer>
   );
