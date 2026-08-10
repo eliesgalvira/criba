@@ -4,9 +4,10 @@
     "check": "deno check src/ web/app/",
     "fmt": "deno fmt",
     "lint": "deno lint",
-    "bundle": "deno bundle --platform browser --minify web/app/main.tsx -o web/dist/main.js && deno bundle --platform browser --minify web/app/race-worker.ts -o web/dist/worker.js && deno bundle --platform browser --minify web/app/miner-worker.ts -o web/dist/miner-worker.js",
+    "bundle": "deno bundle --platform browser --minify --outdir web/dist web/app/main.tsx web/app/race-worker.ts web/app/miner-worker.ts",
     "design": "deno run --allow-net --allow-read jsr:@std/http/file-server web/design --port 4507",
-    "web": "deno task bundle && deno run --allow-net --allow-read jsr:@std/http/file-server web --port 4508"
+    "web": "deno task bundle && deno run --allow-net --allow-read jsr:@std/http/file-server web --port 4508",
+    "dev": "deno bundle --watch --platform browser --outdir web/dist web/app/main.tsx web/app/race-worker.ts web/app/miner-worker.ts & deno run --allow-net --allow-read jsr:@std/http/file-server web --port 4508"
   },
   "compilerOptions": {
     "strict": true,

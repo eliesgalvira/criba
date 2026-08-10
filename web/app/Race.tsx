@@ -53,7 +53,7 @@ export function Race() {
     // el telar ya ha terminado; el clásico empieza ahora, en su propio hilo
     setRace({ status: "running", n, ic: ic.interactions, icMs, naiveBetas: 0 });
     startRef.current = performance.now();
-    const w = new Worker("dist/worker.js", { type: "module" });
+    const w = new Worker("dist/race-worker.js", { type: "module" });
     workerRef.current = w;
     w.onmessage = (e: MessageEvent) => {
       // guardia de identidad: un mensaje tardío de una carrera muerta no toca
