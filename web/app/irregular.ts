@@ -22,6 +22,7 @@ export function mountIrregular(
   cv: HTMLCanvasElement,
   getMode: () => ParMode,
   onPct: (pct: number) => void,
+  isVisible: () => boolean = () => true,
 ): () => void {
   const cx = cv.getContext("2d")!;
   const fit = () => {
@@ -148,6 +149,8 @@ export function mountIrregular(
   }
 
   function step() {
+    // fuera de pantalla la tela se congela: no gasta y no avanza a escondidas
+    if (!isVisible()) return;
     if (getMode() !== mode) {
       mode = getMode();
       reset();

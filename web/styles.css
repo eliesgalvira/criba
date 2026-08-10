@@ -1,6 +1,26 @@
 /* «El Telar» — capa de arte (tokens, tipografía, layout, lienzo) y pieles de
    las primitivas Base UI. Los widgets son de la librería; la ropa es nuestra. */
 
+/* Fallbacks con métricas compensadas: mientras Solway/Alegreya descargan, el
+   serif local se estira/encoge a sus medidas (medidas reales contra Times) y
+   el intercambio de fuente no mueve el layout. */
+@font-face {
+  font-family: "Solway-fb";
+  src: local("Times New Roman"), local("Liberation Serif"), local("Georgia");
+  size-adjust: 119.8%;
+  ascent-override: 79.3%;
+  descent-override: 20.9%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Alegreya-fb";
+  src: local("Times New Roman"), local("Liberation Serif"), local("Georgia");
+  size-adjust: 98.1%;
+  ascent-override: 104%;
+  descent-override: 35.7%;
+  line-gap-override: 0%;
+}
+
 :root {
   /* Grano de tela (técnica t3code): feTurbulence inline a opacidad baja,
      aplicado POR SUPERFICIE sobre su background-color — nunca capa global. */
@@ -25,7 +45,7 @@ body {
   background-color: var(--indigo);
   background-image: var(--grain);
   color: var(--thread);
-  font-family: "Alegreya", Georgia, serif;
+  font-family: "Alegreya", "Alegreya-fb", serif;
   font-size: 1.1rem;
   line-height: 1.68;
 }
@@ -48,11 +68,13 @@ body {
   top: 1.1rem;
   right: 1.25rem;
   z-index: 10;
-  font-family: "Solway", serif;
+  font-family: "Solway", "Solway-fb", serif;
   font-size: 0.8rem;
 }
 .lang-toggle {
-  background: none;
+  /* fondo sólido: el selector flota sobre el lienzo del hero y sin él la
+     red se transparenta detrás del botón inactivo */
+  background: var(--indigo);
   border: 1px solid var(--thread-dim);
   color: var(--thread-dim);
   font: inherit;
@@ -106,7 +128,7 @@ header {
   padding: clamp(2rem, 6vh, 4rem) 1rem;
 }
 h1 {
-  font-family: "Solway", serif;
+  font-family: "Solway", "Solway-fb", serif;
   font-weight: 800;
   font-size: clamp(2.2rem, 5.8vw, 4.6rem);
   line-height: 1.08;
@@ -146,7 +168,7 @@ h1 .hilo {
   justify-items: center;
   gap: 0.4rem;
   color: var(--thread-dim);
-  font-family: "Solway", serif;
+  font-family: "Solway", "Solway-fb", serif;
   font-size: 0.78rem;
   transition: opacity 0.5s;
   pointer-events: none;
@@ -188,7 +210,7 @@ section {
   padding-block: var(--step);
 }
 h2 {
-  font-family: "Solway", serif;
+  font-family: "Solway", "Solway-fb", serif;
   font-weight: 700;
   font-size: clamp(1.8rem, 3.6vw, 2.7rem);
   text-wrap: balance;
@@ -221,7 +243,7 @@ h2 {
   padding: 0.55rem 0.9rem;
   border: 1.5px solid var(--thread-dim);
   font-size: 1.5rem;
-  font-family: "Solway", serif;
+  font-family: "Solway", "Solway-fb", serif;
   font-weight: 500;
 }
 .nf {
@@ -272,7 +294,7 @@ h2 {
   padding: 0.95rem;
   background: var(--madder);
   color: var(--thread);
-  font-family: "Solway", serif;
+  font-family: "Solway", "Solway-fb", serif;
   font-weight: 700;
   font-size: 1.08rem;
   border: 0;
@@ -288,7 +310,7 @@ h2 {
   min-height: 5.5rem;
 }
 .out code {
-  font-family: "Solway", serif;
+  font-family: "Solway", "Solway-fb", serif;
   font-weight: 500;
   font-size: 1.15rem;
   letter-spacing: 0.02em;
@@ -327,7 +349,7 @@ h2 {
   align-items: center;
   column-gap: 1.4rem;
   row-gap: 0.35rem;
-  font-family: "Solway", serif;
+  font-family: "Solway", "Solway-fb", serif;
 }
 .nval {
   font-weight: 800;
@@ -400,7 +422,7 @@ h2 {
   min-height: 2.9rem;
 }
 .cloth .n {
-  font-family: "Solway", serif;
+  font-family: "Solway", "Solway-fb", serif;
   font-weight: 800;
   font-size: 2rem;
   display: block;
@@ -419,7 +441,7 @@ h2 {
   font-size: 0.95rem;
 }
 .cloth .n small {
-  font-family: "Alegreya", serif;
+  font-family: "Alegreya", "Alegreya-fb", serif;
   font-style: italic;
   font-weight: 400;
   font-size: 0.55em;
@@ -566,7 +588,7 @@ a,
   text-wrap: pretty;
 }
 .found-head {
-  font-family: "Solway", serif;
+  font-family: "Solway", "Solway-fb", serif;
   font-weight: 500;
 }
 .recipe {
@@ -575,7 +597,7 @@ a,
   background-color: var(--indigo);
   background-image: var(--grain);
   border-left: 3px solid var(--mustard);
-  font-family: "Solway", serif;
+  font-family: "Solway", "Solway-fb", serif;
   font-weight: 400;
   font-size: 1.02rem;
   line-height: 1.7;
@@ -623,7 +645,7 @@ a,
   background: none;
   border: 1px solid var(--seam);
   color: var(--thread-dim);
-  font-family: "Solway", serif;
+  font-family: "Solway", "Solway-fb", serif;
   font-size: 0.9rem;
   padding: 0.42rem 1rem;
   cursor: pointer;
@@ -661,7 +683,7 @@ a,
   flex-wrap: wrap;
 }
 .par-pct {
-  font-family: "Solway", serif;
+  font-family: "Solway", "Solway-fb", serif;
   font-weight: 800;
   font-size: 2.6rem;
   font-variant-numeric: tabular-nums;
@@ -689,7 +711,7 @@ a,
 .npasses {
   grid-column: 1 / -1;
   min-height: 1.4em;
-  font-family: "Alegreya", serif;
+  font-family: "Alegreya", "Alegreya-fb", serif;
   font-style: italic;
   font-weight: 400;
   font-size: 0.86rem;
@@ -737,7 +759,7 @@ a,
   fill: transparent;
 }
 .shores .slot text {
-  font-family: "Solway", serif;
+  font-family: "Solway", "Solway-fb", serif;
   font-weight: 700;
   font-size: 21px;
   fill: var(--thread);
@@ -818,7 +840,7 @@ a,
 .text-editor summary {
   cursor: pointer;
   padding: 0.55rem 1.2rem;
-  font-family: "Solway", serif;
+  font-family: "Solway", "Solway-fb", serif;
   font-size: 0.85rem;
   color: var(--thread-dim);
   list-style: none;
@@ -854,7 +876,7 @@ a,
   border: 2px solid var(--seam);
   border-bottom: 0;
   color: var(--thread-dim);
-  font-family: "Solway", serif;
+  font-family: "Solway", "Solway-fb", serif;
   font-size: 0.92rem;
   padding: 0.42rem 1rem 0.55rem;
   cursor: pointer;
@@ -926,7 +948,7 @@ a,
   background: none;
   border: 1px solid var(--seam);
   color: var(--thread-dim);
-  font-family: "Solway", serif;
+  font-family: "Solway", "Solway-fb", serif;
   font-size: 0.78rem;
   padding: 0.22rem 0.7rem;
   cursor: pointer;
@@ -948,7 +970,7 @@ a,
 /* ═══ traza y mini-telar ═══ */
 .trace-head {
   margin-top: 0.8rem;
-  font-family: "Solway", serif;
+  font-family: "Solway", "Solway-fb", serif;
   font-weight: 500;
   font-size: 0.95rem;
 }

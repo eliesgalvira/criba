@@ -13,16 +13,40 @@ export function Parallelism() {
   const { t } = useT();
   const [mode, setMode] = useState<ParMode>("grid");
   const [pct, setPct] = useState(100);
+  const [started, setStarted] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const modeRef = useRef<ParMode>(mode);
   modeRef.current = mode;
+  const visibleRef = useRef(false);
+
+  // la tela no arranca hasta que la sección entra en pantalla (que el lector
+  // vea la primera columna salir), y se pausa cuando sale de vista
+  useEffect(() => {
+    const obs = new IntersectionObserver(
+      (entries) => {
+        const on = entries.some((e) => e.isIntersecting);
+        visibleRef.current = on;
+        if (on) setStarted(true);
+      },
+      { threshold: 0.25 },
+    );
+    obs.observe(sectionRef.current!);
+    return () => obs.disconnect();
+  }, []);
 
   // sin reduced-motion el lienzo se monta UNA vez y lee el modo por fotograma;
   // con reduced-motion no hay bucle, así que remonta por paso para repintar
   // el fotograma estático correcto
-  useEffect(() => mountIrregular(canvasRef.current!, () => modeRef.current, setPct), [
-    REDUCED ? mode : 0,
-  ]);
+  useEffect(() => {
+    if (!started) return;
+    return mountIrregular(
+      canvasRef.current!,
+      () => modeRef.current,
+      setPct,
+      () => visibleRef.current,
+    );
+  }, [started, REDUCED ? mode : 0]);
 
   const cap: Record<ParMode, [string, string]> = {
     grid: [t.parCap1head, t.parCap1],
@@ -32,7 +56,7 @@ export function Parallelism() {
   const [caphead, capbody] = cap[mode];
 
   return (
-    <section className="par" id="paralelismo">
+    <section className="par" id="paralelismo" ref={sectionRef}>
       <div className="frame">
         <h2>{t.parh2}</h2>
         <p className="intro">{t.parIntro}</p>
