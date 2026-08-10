@@ -41,31 +41,48 @@ export function mountIrregular(cv: HTMLCanvasElement, getMode: () => ParMode): (
     cx.fill();
     cx.globalAlpha = 1;
   }
-  function hollow(x: number, y: number, r: number, stroke: string) {
-    cx.beginPath();
-    cx.moveTo(x, y - r);
-    cx.lineTo(x + r, y);
-    cx.lineTo(x, y + r);
-    cx.lineTo(x - r, y);
-    cx.closePath();
-    cx.lineWidth = 1.4 * S();
+  // los DATOS son cuadrados (una rejilla es un array); las MÁQUINAS, rombos,
+  // como en el telar del hero. El paso regular enseña literalmente el copy:
+  // rebanadas iguales con una máquina encima, y estampación a compás
+  function square(x: number, y: number, r: number, fill: string, alpha: number) {
+    cx.globalAlpha = alpha;
+    cx.fillStyle = fill;
+    cx.fillRect(x - r, y - r, r * 2, r * 2);
+    cx.globalAlpha = 1;
+  }
+  function squareOutline(x: number, y: number, r: number, stroke: string) {
+    cx.lineWidth = 1.3 * S();
     cx.strokeStyle = stroke;
-    cx.stroke();
+    cx.strokeRect(x - r, y - r, r * 2, r * 2);
   }
 
-  // rejilla de celdas (posiciones + geometría), recalculada por fotograma:
-  // barata y siempre encaja el lienzo actual
+  const SLICES = 4;
   function gridCells() {
-    const cols = Math.max(6, Math.min(11, Math.floor(W() / S() / 74)));
-    const rows = Math.max(3, Math.min(6, Math.floor(H() / S() / 74)));
-    const dx = W() / (cols + 1), dy = H() / (rows + 1);
-    const cells: { x: number; y: number; col: number; row: number }[] = [];
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        cells.push({ x: dx * (c + 1), y: dy * (r + 1), col: c, row: r });
+    const pad = 34 * S();
+    const gap = 30 * S(); // el corte visible entre rebanadas
+    const headroom = 66 * S(); // sitio para las máquinas arriba
+    const sliceW = (W() - 2 * pad - (SLICES - 1) * gap) / SLICES;
+    const colsPer = Math.max(2, Math.min(4, Math.floor(sliceW / (46 * S()))));
+    const rows = Math.max(3, Math.min(5, Math.floor((H() - headroom - 30 * S()) / (52 * S()))));
+    const pitchX = sliceW / colsPer, pitchY = (H() - headroom - 26 * S()) / rows;
+    const cells: { x: number; y: number; slice: number; col: number; row: number }[] = [];
+    const centers: number[] = [];
+    for (let s = 0; s < SLICES; s++) {
+      const x0 = pad + s * (sliceW + gap);
+      centers.push(x0 + sliceW / 2);
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < colsPer; c++) {
+          cells.push({
+            x: x0 + pitchX * (c + 0.5),
+            y: headroom + pitchY * (r + 0.5),
+            slice: s,
+            col: s * colsPer + c,
+            row: r,
+          });
+        }
       }
     }
-    return cells;
+    return { cells, centers };
   }
 
   // envolvente de un «tac»: ataque instantáneo y caída suave dentro del compás
@@ -75,23 +92,26 @@ export function mountIrregular(cv: HTMLCanvasElement, getMode: () => ParMode): (
   };
 
   function drawGrid(t: number, split: boolean) {
-    const cells = gridCells();
-    const r = 9 * S();
+    const { cells, centers } = gridCells();
+    const r = 8 * S();
     const period = 1150;
     const env = reduced ? 1 : beat(t, period);
     const parity = Math.floor(t / period) % 2;
+    // las máquinas: un rombo por rebanada, que baja al estampar y sube después
+    for (const mx of centers) {
+      diamond(mx, 24 * S() + env * 9 * S(), 9 * S(), THREAD, 0.9);
+    }
     for (const c of cells) {
-      // lado estable de cada celda (pseudo-hash sin parpadeo entre fotogramas)
-      const side = (c.col * 7 + c.row * 13) % 2;
+      // rama estable de cada dato (pseudo-hash sin parpadeo entre fotogramas)
+      const branch = (c.col * 7 + c.row * 13) % 2;
+      squareOutline(c.x, c.y, r, IDLE);
       if (!split) {
-        diamond(c.x, c.y, r, MUSTARD, 0.34 + 0.66 * env);
-      } else if (side === parity || reduced && side === 0) {
-        // la pasada de este compás: esta mitad trabaja
-        diamond(c.x, c.y, r, side === 0 ? MUSTARD : MADDER, 0.34 + 0.66 * env);
-      } else {
-        // la otra mitad: parada, esperando su turno
-        hollow(c.x, c.y, r, IDLE);
+        // toda la tanda se estampa a la vez y se destinta hasta el siguiente golpe
+        square(c.x, c.y, r, MUSTARD, env);
+      } else if (branch === parity || reduced && branch === 0) {
+        square(c.x, c.y, r, branch === 0 ? MUSTARD : MADDER, env);
       }
+      // si no: dato de la otra rama, parado (solo contorno)
     }
   }
 

@@ -158,20 +158,21 @@ const STRINGS: Record<Lang, Strings> = {
     parStep3: "3 · El árbol",
     parCap1head: "Paralelismo regular.",
     parCap1:
-      "La misma operación sobre una rejilla de datos. Sabes cuántas celdas hay y que todas hacen lo mismo, así que la máquina las reparte en rebanadas iguales y las estampa de un golpe. Esto es lo que tu GPU hace de maravilla: millones de celdas idénticas, a la vez.",
+      "La misma operación sobre una rejilla de datos. Como la forma se conoce antes de empezar, la rejilla se corta en rebanadas iguales, una por máquina, y cada golpe estampa la tanda entera a la vez. Esto es lo que tu GPU hace de maravilla: millones de datos idénticos, al mismo compás.",
     parCap2head: "Basta un «si» para partirla.",
     parCap2:
-      "Cuando cada celda elige su camino según su dato, una máquina en formación cerrada no puede hacer las dos ramas a la vez: las hace por turnos, con la mitad de las celdas paradas en cada pasada. En una GPU esto llega a costar treinta veces más.",
+      "Cuando cada dato elige su camino según su valor, las máquinas en formación cerrada no pueden estampar las dos ramas a la vez: una pasada para la rama A, otra para la B, con los datos de la otra rama parados. En una GPU esto llega a costar treinta veces más.",
     parCap3head: "El árbol: paralelismo irregular.",
     parCap3:
       "Llevado al extremo, el trabajo deja de ser una rejilla. Es un árbol que nace del propio cálculo: cada nodo decide sobre la marcha cuántas ramas engendra, unas mueren enseguida y otras estallan. Nadie sabe su forma ni su tamaño hasta desplegarlo. Aquí la rejilla se atasca, y aquí es donde vive el telar del fondo: teje el árbol según crece.",
     parLegendGrid: [
-      ["mustard", "celda trabajando", "todas estampan a la vez, al mismo compás"],
+      ["thread", "máquina", "una por rebanada; baja al estampar"],
+      ["sq-mustard", "dato estampado", "toda la tanda de un golpe"],
     ],
     parLegendSplit: [
-      ["mustard", "rama A", "trabaja en esta pasada"],
-      ["madder", "rama B", "trabaja en la pasada siguiente"],
-      ["hollow", "parada", "esperando el turno de su rama"],
+      ["sq-mustard", "dato de la rama A", "se estampa en esta pasada"],
+      ["sq-madder", "dato de la rama B", "a la pasada siguiente"],
+      ["sq-hollow", "dato parado", "esperando el turno de su rama"],
     ],
     parLegendTree: [
       ["madder", "frontera", "trabajo disponible ahora"],
@@ -288,20 +289,21 @@ const STRINGS: Record<Lang, Strings> = {
     parStep3: "3 · The tree",
     parCap1head: "Regular parallelism.",
     parCap1:
-      "The same operation over a grid of data. You know how many cells there are and that they all do the same thing, so the machine splits them into equal slices and stamps them in one blow. This is what your GPU does beautifully: millions of identical cells, all at once.",
+      "The same operation over a grid of data. Since the shape is known before starting, the grid is cut into equal slices, one per machine, and every blow stamps the whole batch at once. This is what your GPU does beautifully: millions of identical data points, on the same beat.",
     parCap2head: "One «if» is enough to crack it.",
     parCap2:
-      "When each cell picks its path from its data, a machine marching in lockstep cannot do both branches at once: it does them in turns, with half the cells idle on each pass. On a GPU this can cost thirty times more.",
+      "When each data point picks its path from its value, machines marching in lockstep cannot stamp both branches at once: one pass for branch A, another for branch B, with the other branch's data standing idle. On a GPU this can cost thirty times more.",
     parCap3head: "The tree: irregular parallelism.",
     parCap3:
       "Taken to the extreme, the work stops being a grid. It is a tree born from the computation itself: every node decides on the fly how many branches it spawns, some die at once and others burst open. Nobody knows its shape or size until it unfolds. Here the grid jams, and here is where the background loom lives: it weaves the tree as it grows.",
     parLegendGrid: [
-      ["mustard", "working cell", "all stamp at once, on the same beat"],
+      ["thread", "machine", "one per slice; it drops as it stamps"],
+      ["sq-mustard", "stamped data", "the whole batch in one blow"],
     ],
     parLegendSplit: [
-      ["mustard", "branch A", "works on this pass"],
-      ["madder", "branch B", "works on the next pass"],
-      ["hollow", "idle", "waiting for its branch's turn"],
+      ["sq-mustard", "branch A data", "stamped on this pass"],
+      ["sq-madder", "branch B data", "on the next pass"],
+      ["sq-hollow", "idle data", "waiting for its branch's turn"],
     ],
     parLegendTree: [
       ["madder", "frontier", "work available now"],

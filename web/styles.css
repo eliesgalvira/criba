@@ -688,8 +688,17 @@ a,
   background: var(--thread);
   opacity: 0.85;
 }
-.leg-hollow {
+.leg-sq-mustard {
+  background: var(--mustard);
+  transform: none;
+}
+.leg-sq-madder {
+  background: var(--madder);
+  transform: none;
+}
+.leg-sq-hollow {
   border: 1.4px solid var(--thread-dim);
+  transform: none;
 }
 .leg-fade {
   background: var(--thread);
