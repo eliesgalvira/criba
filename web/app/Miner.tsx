@@ -1,7 +1,6 @@
 // El minador (Everett) — todos los controles son primitivas de Base UI;
 // la piel viene de los tokens del Telar en styles.css.
 import { useEffect, useReducer, useRef, useState } from "react";
-import { Dialog } from "@base-ui/react/dialog";
 import { NumberField } from "@base-ui/react/number-field";
 import { Toggle } from "@base-ui/react/toggle";
 import { ToggleGroup } from "@base-ui/react/toggle-group";
@@ -123,13 +122,6 @@ function MiniLoom() {
   const ref = useRef<HTMLCanvasElement>(null);
   useEffect(() => mountLoom(ref.current!, { mini: true }), []);
   return <canvas ref={ref} className="miniloom" aria-hidden="true" />;
-}
-
-/** el telar a tamaño modal: el proceso de criba en grande, a ritmo vivo */
-function BigLoom() {
-  const ref = useRef<HTMLCanvasElement>(null);
-  useEffect(() => mountLoom(ref.current!, { big: true }), []);
-  return <canvas ref={ref} className="bigloom" aria-hidden="true" />;
 }
 
 type RecipeView = "loop" | "trace" | "cases" | "patterns";
@@ -288,7 +280,7 @@ export function Miner() {
             onChange={setPairs}
             ghost={outcome.kind === "found" ? (x) => run(outcome.prog, x, 100_000) : null}
           />
-          <details className="text-editor">
+          <details className="text-editor" open>
             <summary>{t.editAsText}</summary>
             <div className="pairs">
               {pairs.map((p) => (
@@ -384,24 +376,6 @@ export function Miner() {
                         {outcome.ms.toFixed(0)} ms · {outcome.steps.toLocaleString(lang)}{" "}
                         {t.sharedSteps}
                       </p>
-                      <Dialog.Root>
-                        <Dialog.Trigger className="loom-open">{t.showLoom}</Dialog.Trigger>
-                        <Dialog.Portal>
-                          <Dialog.Backdrop className="loomdlg-back" />
-                          <Dialog.Popup className="loomdlg">
-                            <div className="loomdlg-head">
-                              <Dialog.Title className="loomdlg-title">{t.loomTitle}</Dialog.Title>
-                              <Dialog.Close className="loomdlg-close">{t.close}</Dialog.Close>
-                            </div>
-                            <div className="loomdlg-stage">
-                              <BigLoom />
-                            </div>
-                            <p className="meta loomdlg-note">
-                              {outcome.steps.toLocaleString(lang)} {t.sharedSteps} · {t.loomNote}
-                            </p>
-                          </Dialog.Popup>
-                        </Dialog.Portal>
-                      </Dialog.Root>
                       <p className="verify">
                         {t.verify} {outcome.verify.map(([x, y], i) => (
                           <span key={x}>
