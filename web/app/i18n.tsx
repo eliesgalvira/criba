@@ -59,6 +59,20 @@ export interface Strings {
   overA: string;
   overB: string;
   overC: string;
+  shapeh2: string;
+  shapeIntro: string;
+  shapeStep1: string;
+  shapeStep2: string;
+  shapeStep3: string;
+  shapeCap1head: string;
+  shapeCap1: string;
+  shapeCap2head: string;
+  shapeCap2: string;
+  shapeCap3head: string;
+  shapeCap3: string;
+  shapeLegendGrid: readonly (readonly [string, string, string])[];
+  shapeLegendSplit: readonly (readonly [string, string, string])[];
+  shapeLegendTree: readonly (readonly [string, string, string])[];
   parh2: string;
   parIntro: string;
   parStep1: string;
@@ -151,6 +165,36 @@ const STRINGS: Record<Lang, Strings> = {
     overB:
       "piezas, una por negación, más que todo su presupuesto. El telar escribe ese mismo encargo con",
     overC: "dobleces.",
+    shapeh2: "Regular e irregular: la forma del trabajo.",
+    shapeIntro:
+      "Repartir un cálculo entre muchos núcleos solo es fácil si sabes su forma antes de empezar. Ahí está la línea que separa lo que una GPU devora de lo que se le atraganta. Toca cada paso.",
+    shapeStep1: "1 · La rejilla",
+    shapeStep2: "2 · La grieta",
+    shapeStep3: "3 · El árbol",
+    shapeCap1head: "Paralelismo regular.",
+    shapeCap1:
+      "La misma operación sobre una rejilla de datos. Como la forma se conoce antes de empezar, la rejilla se corta en rebanadas iguales, una por máquina, y cada golpe estampa la tanda entera a la vez. Esto es lo que tu GPU hace de maravilla: millones de datos idénticos, al mismo compás.",
+    shapeCap2head: "Basta un «si» para partirla.",
+    shapeCap2:
+      "Cuando cada dato elige su camino según su valor, las máquinas en formación cerrada no pueden estampar las dos ramas a la vez: una pasada para la rama A, otra para la B, con los datos de la otra rama parados. En una GPU esto llega a costar treinta veces más.",
+    shapeCap3head: "El árbol: paralelismo irregular.",
+    shapeCap3:
+      "Llevado al extremo, el trabajo deja de ser una rejilla. Es un árbol que nace del propio cálculo: cada nodo decide sobre la marcha cuántas ramas engendra, unas mueren enseguida y otras estallan. Nadie sabe su forma ni su tamaño hasta desplegarlo. Aquí la rejilla se atasca, y de esto vive el telar del fondo: teje el árbol según crece.",
+    shapeLegendGrid: [
+      ["thread", "máquina", "una por rebanada; baja al estampar"],
+      ["sq-mustard", "dato estampado", "toda la tanda de un golpe"],
+    ],
+    shapeLegendSplit: [
+      ["sq-mustard", "dato de la rama A", "se estampa en esta pasada"],
+      ["sq-madder", "dato de la rama B", "a la pasada siguiente"],
+      ["sq-hollow", "dato parado", "esperando el turno de su rama"],
+    ],
+    shapeLegendTree: [
+      ["madder", "frontera", "trabajo disponible ahora"],
+      ["mustard", "recién hecho", "acaba de decidir sus ramas"],
+      ["thread", "asentado", "ya decidió; sostiene el árbol"],
+      ["fade", "podado", "la rama muere y se descose"],
+    ],
     parh2: "Una GPU por dentro.",
     parIntro:
       "Cada fila es uno de los 32 carriles de la máquina; cada columna que entra por la derecha, un ciclo de reloj. Celda encendida: ese carril trabajó. Hueco: parado. Recorre los cuatro pasos mirando el porcentaje.",
@@ -272,6 +316,36 @@ const STRINGS: Record<Lang, Strings> = {
     overB:
       "pieces, one per negation, more than its whole budget. The loom writes that same job with",
     overC: "foldings.",
+    shapeh2: "Regular and irregular: the shape of the work.",
+    shapeIntro:
+      "Splitting a computation across many cores is only easy if you know its shape before you start. That is the line between what a GPU devours and what jams it. Tap through each step.",
+    shapeStep1: "1 · The grid",
+    shapeStep2: "2 · The crack",
+    shapeStep3: "3 · The tree",
+    shapeCap1head: "Regular parallelism.",
+    shapeCap1:
+      "The same operation over a grid of data. Since the shape is known before starting, the grid is cut into equal slices, one per machine, and every blow stamps the whole batch at once. This is what your GPU does beautifully: millions of identical data points, on the same beat.",
+    shapeCap2head: "One «if» is enough to crack it.",
+    shapeCap2:
+      "When each data point picks its path from its value, machines marching in lockstep cannot stamp both branches at once: one pass for branch A, another for branch B, with the other branch's data standing idle. On a GPU this can cost thirty times more.",
+    shapeCap3head: "The tree: irregular parallelism.",
+    shapeCap3:
+      "Taken to the extreme, the work stops being a grid. It is a tree born from the computation itself: every node decides on the fly how many branches it spawns, some die at once and others burst open. Nobody knows its shape or size until it unfolds. Here the grid jams, and this is what the background loom lives on: it weaves the tree as it grows.",
+    shapeLegendGrid: [
+      ["thread", "machine", "one per slice; it drops as it stamps"],
+      ["sq-mustard", "stamped data", "the whole batch in one blow"],
+    ],
+    shapeLegendSplit: [
+      ["sq-mustard", "branch A data", "stamped on this pass"],
+      ["sq-madder", "branch B data", "on the next pass"],
+      ["sq-hollow", "idle data", "waiting for its branch's turn"],
+    ],
+    shapeLegendTree: [
+      ["madder", "frontier", "work available now"],
+      ["mustard", "just done", "just decided its branches"],
+      ["thread", "settled", "already decided; holds the tree up"],
+      ["fade", "pruned", "the branch dies and is unstitched"],
+    ],
     parh2: "Inside a GPU.",
     parIntro:
       "Each row is one of the machine's 32 lanes; each column entering from the right, one clock cycle. Lit cell: that lane worked. Gap: idle. Walk the four steps watching the percentage.",

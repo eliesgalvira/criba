@@ -57,7 +57,7 @@ export function Parallelism() {
   const [caphead, capbody] = cap[mode];
 
   return (
-    <section className="par" id="paralelismo" ref={sectionRef}>
+    <section className="par" id="gpu" ref={sectionRef}>
       <div className="frame">
         <h2>{t.parh2}</h2>
         <p className="intro">{t.parIntro}</p>

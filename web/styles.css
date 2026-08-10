@@ -628,11 +628,19 @@ a,
   max-width: 62ch;
 }
 
-/* ——— regular e irregular: panel hundido, ritmo entre carrera y honestidad ——— */
+/* ——— regular e irregular + GPU: la primera hundida, la segunda al aire,
+   para que dos paneles seguidos no se fundan en uno ——— */
 .par {
   background-color: var(--indigo-deep);
   background-image: var(--grain);
   border-block: 1px solid var(--seam);
+}
+#gpu {
+  background: none;
+  border-block: 0;
+}
+#gpu .par-stage {
+  background-color: var(--indigo-deep);
 }
 .par h2 {
   max-width: 24ch;
@@ -674,6 +682,57 @@ a,
   display: block;
   width: 100%;
   height: 100%;
+}
+.par-legend {
+  margin-top: 0.9rem;
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.4rem;
+  font-size: 0.86rem;
+  color: var(--thread-dim);
+}
+.par-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.par-legend b {
+  color: var(--thread);
+  font-weight: 500;
+}
+.leg-swatch {
+  width: 11px;
+  height: 11px;
+  transform: rotate(45deg);
+  flex: none;
+}
+.leg-madder {
+  background: var(--madder);
+}
+.leg-mustard {
+  background: var(--mustard);
+}
+.leg-thread {
+  background: var(--thread);
+  opacity: 0.85;
+}
+.leg-sq-mustard {
+  background: var(--mustard);
+  transform: none;
+}
+.leg-sq-madder {
+  background: var(--madder);
+  transform: none;
+}
+.leg-sq-hollow {
+  border: 1.4px solid var(--thread-dim);
+  transform: none;
+}
+.leg-fade {
+  background: var(--thread);
+  opacity: 0.3;
 }
 .par-meta {
   margin-top: 0.9rem;

@@ -7,6 +7,7 @@ import { mountLoom } from "./loom.ts";
 import { Miner } from "./Miner.tsx";
 import { Parallelism } from "./Parallelism.tsx";
 import { Race } from "./Race.tsx";
+import { ShapeOfWork } from "./Shape.tsx";
 
 /** Cross-fade del cambio de idioma vía View Transition.
  *
@@ -133,6 +134,7 @@ export function App() {
       <Hero />
       <Miner />
       <Race />
+      <ShapeOfWork />
       <Parallelism />
       <Honesty />
       <Footer />
