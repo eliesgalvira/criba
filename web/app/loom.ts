@@ -87,6 +87,25 @@ export function mountLoom(cv: HTMLCanvasElement, opts: LoomOpts = {}): () => voi
       x.a === n ? { n: x.b, p: x.pb } : { n: x.a, p: x.pa }
     );
   const findActive = () => links.find((l) => l.pa === 0 && l.pb === 0) ?? null;
+  // chispa: sin ella la red muere en silencio. Cada anillo nace con UN par
+  // activo; las reducciones los consumen y la conmutación engorda la red, así
+  // que a los ~20 s quedaba población de sobra (nadie siembra) y cero pares
+  // activos (nadie reduce): quietud perpetua, visto en pantalla. Recombinar
+  // dos principales libres teje el siguiente par. Con la red poblada de más,
+  // el par se fuerza del mismo tipo: su aniquilación la devuelve al tamaño
+  // de crucero.
+  const spark = (): boolean => {
+    const free = nodes.filter((n) => !n.ports[0]);
+    if (free.length < 2) return false;
+    const a = free[Math.floor(rnd(0, free.length))]!;
+    const crowded = nodes.length > (opts.mini ? 34 : 44);
+    let pool = free.filter((n) => n !== a && (!crowded || n.k === a.k));
+    if (!pool.length) pool = free.filter((n) => n !== a);
+    pool.sort((p, q) => Math.hypot(p.x - a.x, p.y - a.y) - Math.hypot(q.x - a.x, q.y - a.y));
+    const b = pool[Math.floor(rnd(0, Math.min(3, pool.length)))]!;
+    connect(a, 0, b, 0);
+    return true;
+  };
   let flash: LLink | null = null;
   let flashT = 0;
   function step() {
@@ -100,8 +119,23 @@ export function mountLoom(cv: HTMLCanvasElement, opts: LoomOpts = {}): () => voi
         ? seed(W() / 2 + rnd(-30, 30), rnd(H() * .15, H() * .85))
         : seed(rnd(W() * .2, W() * .8), rnd(H() * .3, H() * .7));
     }
-    const l = findActive();
-    if (!l) return;
+    let l = findActive();
+    if (!l) {
+      if (!spark()) {
+        // ni pares activos ni principales libres: único caso restante de
+        // muerte; un anillo nuevo trae su par y la chispa vuelve a operar
+        opts.mini
+          ? seed(W() / 2 + rnd(-30, 30), rnd(H() * .15, H() * .85))
+          : seed(rnd(W() * .2, W() * .8), rnd(H() * .3, H() * .7));
+        return;
+      }
+      l = findActive();
+      if (!l) return;
+    }
+    // par recién tejido y aún estirado: dejar que los muelles acerquen los
+    // extremos antes de reducir, que la fusión a distancia teletransporta
+    // masa al punto medio y rompe la ilusión física
+    if (Math.hypot(l.b.x - l.a.x, l.b.y - l.a.y) > (opts.mini ? 150 : 280 * S)) return;
     flash = l;
     flashT = 1;
     const { a, b } = l;
@@ -148,6 +182,8 @@ export function mountLoom(cv: HTMLCanvasElement, opts: LoomOpts = {}): () => voi
         });
       }
       flash = null;
+      // cuentakilómetros para poder verificar desde fuera que la red sigue viva
+      cv.dataset.itx = String(Number(cv.dataset.itx ?? 0) + 1);
     }, reduced ? 0 : opts.big ? 380 : 520);
   }
   function physics() {
@@ -175,7 +211,11 @@ export function mountLoom(cv: HTMLCanvasElement, opts: LoomOpts = {}): () => voi
       const dx = l.b.x - l.a.x,
         dy = l.b.y - l.a.y,
         d = Math.hypot(dx, dy) || 1,
-        f = (d - (opts.mini ? 62 : 115 * S)) * (opts.big ? 0.0035 : 0.002);
+        // el par activo tira 3x: es el hilo en tensión a punto de fusionarse,
+        // y sin este empujón se queda flotando por encima del umbral de
+        // reducción durante varios ticks (visto con la sonda de depuración)
+        f = (d - (opts.mini ? 62 : 115 * S)) * (opts.big ? 0.0035 : 0.002) *
+          (l.pa === 0 && l.pb === 0 ? 3 : 1);
       l.a.vx += dx / d * f;
       l.a.vy += dy / d * f;
       l.b.vx -= dx / d * f;
@@ -267,6 +307,7 @@ export function mountLoom(cv: HTMLCanvasElement, opts: LoomOpts = {}): () => voi
     draw(0);
     return () => {
       alive = false;
+      removeEventListener("resize", fit);
     };
   }
   const interval = setInterval(step, opts.big ? 950 : 1500);
@@ -280,5 +321,6 @@ export function mountLoom(cv: HTMLCanvasElement, opts: LoomOpts = {}): () => voi
   return () => {
     alive = false;
     clearInterval(interval);
+    removeEventListener("resize", fit);
   };
 }
