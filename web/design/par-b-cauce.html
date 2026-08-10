@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Paralelismo B · El cauce (los datos como agua)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400;0,500;1,400&family=Solway:wght@400;500;700;800&display=swap"
+      rel="stylesheet">
+    <style>
+    :root {
+      --indigo: oklch(0.26 0.055 265);
+      --indigo-deep: oklch(0.21 0.05 265);
+      --thread: oklch(0.9 0.025 85);
+      --thread-dim: oklch(0.78 0.04 85);
+      --madder: oklch(0.58 0.16 28);
+      --mustard: oklch(0.78 0.12 85);
+      --seam: oklch(0.36 0.05 265);
+    }
+    * { margin: 0; box-sizing: border-box; }
+    body {
+      background: var(--indigo);
+      color: var(--thread);
+      font-family: "Alegreya", serif;
+      font-size: 1.05rem;
+      line-height: 1.6;
+      min-height: 100vh;
+      padding: clamp(1.5rem, 5vh, 4rem) clamp(1.25rem, 5vw, 3rem);
+    }
+    .frame { max-width: 62rem; margin-inline: auto; }
+    h1 { font-family: "Solway", serif; font-weight: 700; font-size: clamp(1.6rem, 3.4vw, 2.4rem); }
+    .sub { font-style: italic; color: var(--thread-dim); margin-top: 0.3rem; }
+    .steps { margin-top: 1.6rem; display: inline-flex; }
+    .step {
+      background: none; border: 1px solid var(--seam); color: var(--thread-dim);
+      font-family: "Solway", serif; font-size: 0.9rem; padding: 0.42rem 1rem; cursor: pointer;
+    }
+    .step + .step { border-left: 0; }
+    .step[aria-pressed="true"] { color: var(--indigo-deep); background: var(--mustard); border-color: var(--mustard); }
+    .stage { margin-top: 1.1rem; border: 1px solid var(--seam); background: var(--indigo-deep); }
+    canvas { display: block; width: 100%; height: clamp(300px, 44vh, 440px); }
+    .meta { margin-top: 0.9rem; display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap; }
+    .flow {
+      font-family: "Solway", serif; font-weight: 800; font-size: 2.6rem;
+      font-variant-numeric: tabular-nums; color: var(--mustard); min-width: 4.5ch;
+    }
+    .flow.low { color: var(--madder); }
+    .metalabel { color: var(--thread-dim); font-size: 0.95rem; max-width: 34ch; }
+    .cap { margin-top: 0.9rem; max-width: 64ch; }
+    .cap b { color: var(--mustard); font-weight: 500; }
+    </style>
+  </head>
+  <body>
+    <div class="frame">
+      <h1>B · El cauce</h1>
+      <p class="sub">
+        Los datos son agua y la máquina, un sistema de riego. Lo que importa es el caudal:
+        cuántos datos salen por el otro extremo cada segundo.
+      </p>
+      <div class="steps" role="group">
+        <button class="step" data-mode="grid" aria-pressed="true">1 · Las acequias</button>
+        <button class="step" data-mode="split" aria-pressed="false">2 · La compuerta</button>
+        <button class="step" data-mode="tree" aria-pressed="false">3 · El delta</button>
+      </div>
+      <div class="stage"><canvas id="cv"></canvas></div>
+      <div class="meta">
+        <span class="flow" id="flow">0</span>
+        <span class="metalabel">datos por segundo cruzando la salida, medidos ahora mismo</span>
+      </div>
+      <p class="cap" id="cap"></p>
+    </div>
+    <script type="module">
+      const CAPS = {
+        grid: "<b>Acequias paralelas.</b> Trabajo regular: cada dato tiene su canal recto y nadie se cruza con nadie. El agua corre a caudal máximo; así riega una GPU.",
+        split: "<b>La compuerta.</b> Un «si» parte el cauce en dos ramas, pero la máquina en formación solo puede abrir una a la vez. Mira el atasco crecer ante la rama cerrada: el caudal cae a la mitad sin que el agua tenga la culpa.",
+        tree: "<b>El delta.</b> Trabajo irregular: el cauce se ramifica según el terreno que el propio cálculo descubre, brazos que se abren y brazos que se secan. Ningún reparto fijo de acequias puede regar esto; hace falta un cauce que se reorganice solo.",
+      };
+      const cv = document.getElementById("cv");
+      const cx = cv.getContext("2d");
+      const flowEl = document.getElementById("flow");
+      const capEl = document.getElementById("cap");
+      const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const MUSTARD = "oklch(0.82 0.12 85)";
+      const MADDER = "oklch(0.66 0.17 28)";
+      const CHANNEL = "oklch(0.33 0.05 265)";
+      const DRY = "oklch(0.29 0.03 265)";
+
+      let mode = "grid";
+      const W = () => cv.width, H = () => cv.height, S = () => devicePixelRatio;
+      function fit() {
+        cv.width = cv.clientWidth * devicePixelRatio;
+        cv.height = cv.clientHeight * devicePixelRatio;
+      }
+      fit();
+      addEventListener("resize", fit);
+
+      let particles = [];
+      let exits = []; // timestamps de salida, para el caudal real
+      let gatePhase = 0; // 0: rama A abierta; 1: rama B
+      let stalled = [0, 0]; // cola acumulada por rama ante la compuerta
+
+      // el delta: árbol binario de 3 niveles, 8 bocas; cada boca puede secarse
+      const leavesAlive = new Array(8).fill(true);
+      function deltaY(level, idx) {
+        const n = 1 << level;
+        return H() * (idx + 0.5) / n;
+      }
+      function deltaX(level) {
+        return W() * (0.08 + 0.84 * level / 3);
+      }
+
+      function spawn(now) {
+        const s = S();
+        if (mode === "grid") {
+          const lane = Math.floor(Math.random() * 4);
+          particles.push({ x: -6 * s, lane, branch: 0, v: (6.5 + Math.random() * 1.5) * s, born: now });
+        } else if (mode === "split") {
+          const branch = Math.random() < 0.5 ? 0 : 1;
+          particles.push({ x: -6 * s, lane: 0, branch, v: (6.5 + Math.random() * 1.5) * s, born: now, held: false });
+        } else {
+          particles.push({ x: deltaX(0), y: deltaY(0, 0), path: [0], v: (5.5 + Math.random() * 1.5) * s, born: now, dead: 0 });
+        }
+      }
+
+      function drawChannel(x1, y1, x2, y2, style, wpx) {
+        cx.strokeStyle = style;
+        cx.lineWidth = wpx;
+        cx.lineCap = "round";
+        cx.beginPath(); cx.moveTo(x1, y1); cx.lineTo(x2, y2); cx.stroke();
+      }
+      function dot(x, y, r, color, alpha = 1) {
+        cx.globalAlpha = alpha;
+        cx.fillStyle = color;
+        cx.beginPath(); cx.arc(x, y, r, 0, 7); cx.fill();
+        cx.globalAlpha = 1;
+      }
+
+      function stepGrid(now) {
+        const s = S();
+        for (let i = 0; i < 4; i++) drawChannel(0, H() * (i + 0.5) / 4, W(), H() * (i + 0.5) / 4, CHANNEL, 14 * s);
+        for (const p of particles) {
+          p.x += p.v;
+          if (p.x > W()) { p.gone = true; exits.push(now); continue; }
+          dot(p.x, H() * (p.lane + 0.5) / 4, 4 * s, MUSTARD, 0.95);
+        }
+      }
+
+      function stepSplit(now) {
+        const s = S();
+        const fx = W() * 0.52, midY = H() / 2;
+        const endY = [H() * 0.26, H() * 0.74];
+        // cauce principal y las dos ramas; la cerrada, en seco
+        drawChannel(0, midY, fx, midY, CHANNEL, 16 * s);
+        drawChannel(fx, midY, W(), endY[0], gatePhase === 0 ? CHANNEL : DRY, 13 * s);
+        drawChannel(fx, midY, W(), endY[1], gatePhase === 1 ? CHANNEL : DRY, 13 * s);
+        // la compuerta: barra sobre la rama cerrada
+        const closed = 1 - gatePhase;
+        const ang = Math.atan2(endY[closed] - midY, W() - fx);
+        cx.save();
+        cx.translate(fx + 26 * s * Math.cos(ang), midY + 26 * s * Math.sin(ang));
+        cx.rotate(ang + Math.PI / 2);
+        cx.fillStyle = "oklch(0.9 0.025 85)";
+        cx.fillRect(-2 * s, -11 * s, 4 * s, 22 * s);
+        cx.restore();
+        stalled = [0, 0];
+        // primero las paradas, para que la cola se apile en orden de llegada
+        const held = particles.filter((p) => p.branch !== gatePhase && p.x > fx - W() * 0.3);
+        held.sort((a, b) => b.x - a.x);
+        held.forEach((p, i) => { p.holdX = fx - 12 * s - i * 11 * s; });
+        for (const p of particles) {
+          const mine = p.branch === gatePhase;
+          if (p.x < fx) {
+            const cap = mine ? Infinity : (p.holdX ?? fx - 12 * s);
+            p.x = Math.min(p.x + p.v, cap);
+            if (!mine && p.x >= cap - 0.5) stalled[p.branch]++;
+            dot(p.x, midY, 4 * s, p.branch === 0 ? MUSTARD : MADDER, 0.95);
+          } else {
+            p.x += p.v;
+            const u = (p.x - fx) / (W() - fx);
+            if (u >= 1) { p.gone = true; exits.push(now); continue; }
+            dot(p.x, midY + (endY[p.branch] - midY) * u, 4 * s, p.branch === 0 ? MUSTARD : MADDER, 0.95);
+          }
+        }
+      }
+
+      function stepTree(now) {
+        const s = S();
+        // canales del delta: nivel a nivel; un brazo está vivo si conduce a alguna boca viva
+        for (let level = 0; level < 3; level++) {
+          const n = 1 << level;
+          for (let i = 0; i < n; i++) {
+            for (const child of [0, 1]) {
+              const ci = i * 2 + child;
+              const leavesOf = (lv, ix) => {
+                const span = 8 >> lv;
+                return leavesAlive.slice(ix * span, (ix + 1) * span).some(Boolean);
+              };
+              const alive = leavesOf(level + 1, ci);
+              drawChannel(
+                deltaX(level), deltaY(level, i),
+                deltaX(level + 1), deltaY(level + 1, ci),
+                alive ? CHANNEL : DRY, (12 - level * 3) * s,
+              );
+            }
+          }
+        }
+        for (const p of particles) {
+          if (p.dead) {
+            p.dead += 0.06;
+            if (p.dead > 1) { p.gone = true; continue; }
+            dot(p.x, p.y, 4 * s * (1 - p.dead), MUSTARD, 1 - p.dead);
+            continue;
+          }
+          const level = p.path.length - 1;
+          const idx = p.path[level];
+          if (level === 3) {
+            p.x += p.v;
+            if (p.x > W()) { p.gone = true; exits.push(now); continue; }
+            dot(p.x, deltaY(3, idx), 4 * s, MUSTARD, 0.95);
+            continue;
+          }
+          const x2 = deltaX(level + 1);
+          if (p.x >= x2) {
+            // la bifurcación: elige un brazo vivo; si no queda ninguno, se seca
+            const kids = [idx * 2, idx * 2 + 1];
+            const span = 8 >> (level + 1);
+            const aliveKids = kids.filter((k) =>
+              leavesAlive.slice(k * span, (k + 1) * span).some(Boolean)
+            );
+            if (!aliveKids.length) { p.dead = 0.01; continue; }
+            p.path.push(aliveKids[Math.floor(Math.random() * aliveKids.length)]);
+            continue;
+          }
+          const x1 = deltaX(level);
+          const u = (p.x - x1) / (x2 - x1);
+          const y1 = deltaY(level, idx);
+          // avanza hacia el punto medio de sus posibles destinos
+          const yTarget = (deltaY(level + 1, idx * 2) + deltaY(level + 1, idx * 2 + 1)) / 2;
+          p.x += p.v;
+          p.y = y1 + (yTarget - y1) * Math.min(1, u);
+          dot(p.x, p.y, 4 * s, MUSTARD, 0.95);
+        }
+      }
+
+      let lastSpawn = 0, lastGate = 0, lastLeaf = 0;
+      function loop(now) {
+        cx.clearRect(0, 0, W(), H());
+        if (now - lastSpawn > (mode === "grid" ? 55 : mode === "split" ? 75 : 90)) {
+          spawn(now); lastSpawn = now;
+        }
+        if (mode === "split" && now - lastGate > 1700) { gatePhase = 1 - gatePhase; lastGate = now; }
+        if (mode === "tree" && now - lastLeaf > 1500) {
+          // el terreno cambia: una boca se seca o revive, sin dejar el delta sin bocas
+          const i = Math.floor(Math.random() * 8);
+          const aliveCount = leavesAlive.filter(Boolean).length;
+          if (leavesAlive[i] && aliveCount > 2) leavesAlive[i] = false;
+          else leavesAlive[i] = true;
+          lastLeaf = now;
+        }
+        if (mode === "grid") stepGrid(now);
+        else if (mode === "split") stepSplit(now);
+        else stepTree(now);
+        particles = particles.filter((p) => !p.gone);
+        exits = exits.filter((t) => now - t < 2000);
+        flowEl.textContent = String(Math.round(exits.length / 2));
+        flowEl.classList.toggle("low", exits.length / 2 < 8);
+      }
+
+      function reset() {
+        particles = []; exits = []; gatePhase = 0; stalled = [0, 0];
+        leavesAlive.fill(true);
+        capEl.innerHTML = CAPS[mode];
+        if (reduced) {
+          // fotograma representativo: se simulan unos segundos sin animar
+          let t = 0;
+          for (let i = 0; i < 400; i++) {
+            t += 16;
+            cx.clearRect(0, 0, W(), H());
+            if (t - lastSpawn > 60) { spawn(t); lastSpawn = t; }
+            if (mode === "split" && t - lastGate > 1700) { gatePhase = 1 - gatePhase; lastGate = t; }
+            if (mode === "grid") stepGrid(t); else if (mode === "split") stepSplit(t); else stepTree(t);
+            particles = particles.filter((p) => !p.gone);
+          }
+          exits = [];
+        }
+      }
+
+      document.querySelectorAll(".step").forEach((b) => {
+        b.addEventListener("click", () => {
+          document.querySelectorAll(".step").forEach((x) => x.setAttribute("aria-pressed", "false"));
+          b.setAttribute("aria-pressed", "true");
+          mode = b.dataset.mode;
+          reset();
+        });
+      });
+
+      reset();
+      if (!reduced) setInterval(() => loop(performance.now()), 16);
+    </script>
+  </body>
+</html>
