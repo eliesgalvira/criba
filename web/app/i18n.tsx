@@ -105,6 +105,13 @@ export interface Strings {
   cpuCap4head: string;
   cpuCap4: string;
   cpuPctLabel: string;
+  opth2: string;
+  optIntro: string;
+  optInH: string;
+  optIn: string;
+  optOutH: string;
+  optOut: string;
+  optClose: string;
   teoh2: string;
   teoIntro: string;
   teoTryBtn: string;
@@ -274,6 +281,17 @@ const STRINGS: Record<Lang, Strings> = {
     cpuCap4:
       "¿y si cada casilla de memoria supiera computar? El dato no viaja: la máquina está donde está el dato, y el mismo grafo salta de vecina en vecina, un paso por ciclo. Este chip no existe todavía. Es lo que una red de interacciones le pide al silicio, y el fondo de este proyecto.",
     cpuPctLabel: "de los ciclos computando; el resto, esperando a la memoria",
+    opth2: "El truco tiene teorema.",
+    optIntro:
+      "Lo que acabas de ver arriba no es una argucia de esta demo. En 1990 Lamping demostró que compartir todo el trabajo repetido solo se consigue reescribiendo grafos, porque a cualquier evaluador que trabaje sobre el texto del programa se le puede construir un caso donde duplica trabajo sin remedio. En 1997 Lafont llevó la idea al límite con los Interaction Combinators, y la clave de su resultado es una asimetría entre traducir hacia dentro y traducir hacia fuera.",
+    optInH: "Hacia dentro no se paga.",
+    optIn:
+      "Una máquina de Turing o un programa clásico se traducen a redes de interacción conservando su coste y destapando el paralelismo que llevaban dentro.",
+    optOutH: "Hacia fuera sí.",
+    optOut:
+      "Sacar una red de interacción a un modelo secuencial obliga a elegir entre duplicar trabajo compartido o renunciar al paralelismo.",
+    optClose:
+      "Esa asimetría es lo que significa «teóricamente óptimo». No dice que este paradigma sea el más rápido hoy, la etiqueta del final cuenta justo lo contrario, sino que aquí el coste de un cómputo es único, ya que el orden no lo cambia y ninguna traducción lo abarata. La máquina de Turing garantiza qué se puede computar, pero no cuánto cuesta computarlo; los combinators garantizan las dos cosas a la vez.",
     teoh2: "De ejemplos a teoremas",
     teoIntro:
       "Los ejemplos son una promesa pequeña, porque atan puntos sueltos y no la función entera. Pide f(1) = 2 y f(5) = 8 y sale un programa que cumple ambos pero no acaba nunca con los pares, ya que ahí nadie le pidió nada. Si añades f(0) = 1, ese programa deja de sobrevivir a la criba. Cada ejemplo es una malla más fina.",
@@ -476,6 +494,17 @@ const STRINGS: Record<Lang, Strings> = {
     cpuCap4:
       "what if every memory cell could compute? Data never travels: the machine is where the data is, and the same graph hops neighbor to neighbor, one step per cycle. This chip does not exist yet. It is what an interaction net asks of silicon, and the undercurrent of this project.",
     cpuPctLabel: "of the cycles computing; the rest, waiting for memory",
+    opth2: "The trick has a theorem.",
+    optIntro:
+      "What you just saw above is no sleight of hand by this demo. In 1990 Lamping proved that sharing all repeated work can only be achieved by rewriting graphs, because any evaluator working on the program's text can be handed a case where it duplicates work with no way out. In 1997 Lafont took the idea to its limit with the Interaction Combinators, and the key to his result is an asymmetry between translating inward and translating outward.",
+    optInH: "Inward costs nothing.",
+    optIn:
+      "A Turing machine or a classical program translates into interaction nets keeping its cost and uncovering the parallelism it carried inside.",
+    optOutH: "Outward does cost.",
+    optOut:
+      "Taking an interaction net out to a sequential model forces a choice between duplicating shared work or giving up the parallelism.",
+    optClose:
+      "That asymmetry is what «theoretically optimal» means. It does not say this paradigm is the fastest today, the label at the end says quite the opposite, but that here the cost of a computation is unique, since the order cannot change it and no translation can make it cheaper. The Turing machine guarantees what can be computed, but not what computing it costs; the combinators guarantee both at once.",
     teoh2: "From examples to theorems",
     teoIntro:
       "Examples are a small promise, because they pin down single points and not the whole function. Ask for f(1) = 2 and f(5) = 8 and out comes a program that satisfies both but never finishes on even numbers, since nobody asked for anything there. If you add f(0) = 1, that program no longer survives the sieve. Each example is a finer mesh.",
