@@ -27,6 +27,8 @@ export interface Strings {
   foundIn: string;
   sharedSteps: string;
   verify: string;
+  verifyPartial: string;
+  diverges: string;
   rawIntro: string;
   rawLegend: string;
   notfound: string;
@@ -135,6 +137,9 @@ const STRINGS: Record<Lang, Strings> = {
     foundIn: "encontrada en",
     sharedSteps: "pasos de trabajo, compartidos entre todos los candidatos",
     verify: "Y generaliza: mírala funcionar donde no diste ejemplos:",
+    verifyPartial:
+      "Ojo: solo prometió cumplir tus ejemplos. Fuera de ellos hace lo que quiere:",
+    diverges: "no acaba nunca",
     rawIntro: "Así se escribe en el idioma del telar:",
     rawLegend: "«0:» si es cero · «S» suma uno · «@» vuelve a empezar · «*» devuelve lo que quede",
     notfound:
@@ -306,6 +311,9 @@ const STRINGS: Record<Lang, Strings> = {
     foundIn: "found in",
     sharedSteps: "steps of work, shared across all candidates",
     verify: "And it generalizes: watch it work where you gave no examples:",
+    verifyPartial:
+      "Careful: it only promised to satisfy your examples. Beyond them, it does as it pleases:",
+    diverges: "never stops",
     rawIntro: "This is how it is written in the loom's own language:",
     rawLegend: "“0:” if zero · “S” add one · “@” start over · “*” return what remains",
     notfound:

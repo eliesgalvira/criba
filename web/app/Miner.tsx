@@ -377,9 +377,10 @@ export function Miner() {
                         {t.sharedSteps}
                       </p>
                       <p className="verify">
-                        {t.verify} {outcome.verify.map(([x, y], i) => (
+                        {outcome.verify.some(([, y]) => y === null) ? t.verifyPartial : t.verify}{" "}
+                        {outcome.verify.map(([x, y], i) => (
                           <span key={x}>
-                            {i > 0 && " · "}f({x}) = <b>{y}</b>
+                            {i > 0 && " · "}f({x}) = <b>{y ?? t.diverges}</b>
                           </span>
                         ))}
                       </p>
