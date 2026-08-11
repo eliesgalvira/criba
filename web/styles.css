@@ -1077,3 +1077,83 @@ a,
     animation-delay: 0s !important;
   }
 }
+
+/* ═══ De ejemplos a teoremas ═══ */
+
+.teo .frame {
+  max-width: 46rem;
+}
+.teo p {
+  margin-top: 1.1rem;
+  text-wrap: pretty;
+}
+.teo .intro {
+  margin-top: 1.4rem;
+}
+.teo-try {
+  margin-top: 0.8rem;
+}
+.teo-load {
+  color: var(--thread-dim);
+  border: 1.5px dashed var(--thread-dim);
+  cursor: pointer;
+  background: none;
+  font: inherit;
+  font-size: 1rem;
+  padding: 0.35rem 1.1rem;
+}
+.teo-load:hover,
+.teo-load:focus-visible {
+  color: var(--mustard);
+  border-color: var(--mustard);
+}
+.teo-ladder {
+  list-style: none;
+  padding: 0;
+  margin-top: 0.5rem;
+}
+.teo-ladder li {
+  padding-block: 0.7rem;
+}
+.teo-ladder li + li {
+  border-top: 1px solid var(--seam);
+}
+.teo-ladder b {
+  font-weight: 700;
+  color: var(--mustard);
+  font-family: "Solway", "Solway-fb", serif;
+}
+.teo-decl {
+  color: var(--thread-dim);
+  font-style: italic;
+  font-size: 0.95rem;
+}
+.teo-duel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 1.4rem;
+}
+.teo-duel > div {
+  border: 1px solid var(--seam);
+  padding: 1.1rem 1.3rem;
+}
+.teo-duel .llm {
+  border-left: 3px solid var(--madder);
+}
+.teo-duel .spec {
+  border-left: 3px solid var(--mustard);
+}
+.teo-duel h3 {
+  font-family: "Solway", "Solway-fb", serif;
+  font-size: 1.02rem;
+}
+.teo-duel p {
+  margin-top: 0.4rem;
+  font-size: 0.98rem;
+}
+@media (max-width: 40rem) {
+  .teo-duel {
+    grid-template-columns: 1fr;
+  }
+}

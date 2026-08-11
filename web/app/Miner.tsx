@@ -214,6 +214,22 @@ export function Miner() {
     dispatch({ type: "reset" });
   };
 
+  // la sección «De ejemplos a teoremas» carga aquí sus ejemplos por evento
+  useEffect(() => {
+    const onLoad = (e: Event) => {
+      const exs = (e as CustomEvent<[number, number][]>).detail;
+      if (!exs?.length) return;
+      setPairsRaw(exs.map(([x, y]) => ({ id: nextId++, x, y })));
+      setActiveRule(null);
+      workerRef.current?.terminate();
+      workerRef.current = null;
+      dispatch({ type: "reset" });
+      document.getElementById("miner")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+    addEventListener("criba:cargar", onLoad);
+    return () => removeEventListener("criba:cargar", onLoad);
+  }, []);
+
   const busy = isSifting;
 
   const sift = () => {

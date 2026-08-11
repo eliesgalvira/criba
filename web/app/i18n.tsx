@@ -105,6 +105,25 @@ export interface Strings {
   cpuCap4head: string;
   cpuCap4: string;
   cpuPctLabel: string;
+  teoh2: string;
+  teoIntro: string;
+  teoTryBtn: string;
+  teoHow: string;
+  teoLadderIntro: string;
+  teoL1h: string;
+  teoL1: string;
+  teoL2h: string;
+  teoL2: string;
+  teoL3h: string;
+  teoL3: string;
+  teoRoom: string;
+  teoDecl: string;
+  teoSupgen: string;
+  teoDuelLlmH: string;
+  teoDuelLlm: string;
+  teoDuelSpecH: string;
+  teoDuelSpec: string;
+  teoPerfect: string;
   honh2: string;
   hon: readonly (readonly [string, string])[];
   foot1: string;
@@ -255,6 +274,34 @@ const STRINGS: Record<Lang, Strings> = {
     cpuCap4:
       "¿y si cada casilla de memoria supiera computar? El dato no viaja: la máquina está donde está el dato, y el mismo grafo salta de vecina en vecina, un paso por ciclo. Este chip no existe todavía. Es lo que una red de interacciones le pide al silicio, y el fondo de este proyecto.",
     cpuPctLabel: "de los ciclos computando; el resto, esperando a la memoria",
+    teoh2: "De ejemplos a teoremas",
+    teoIntro:
+      "Los ejemplos son una promesa pequeña, porque atan puntos sueltos y no la función entera. Pide f(1) = 2 y f(5) = 8 y sale un programa que cumple ambos pero no acaba nunca con los pares, ya que ahí nadie le pidió nada. Si añades f(0) = 1, ese programa deja de sobrevivir a la criba. Cada ejemplo es una malla más fina.",
+    teoTryBtn: "cargar f(1) = 2, f(5) = 8 en el minador",
+    teoHow:
+      "Por dentro no hay magia. El minador no prueba programas de uno en uno, sino que construye un solo árbol donde están todos los programas posibles del mini-lenguaje a la vez, con los trozos que comparten guardados una sola vez. Cada ejemplo se ejecuta una única vez sobre ese árbol entero, y donde el resultado no cuadra se poda la rama completa, llevándose de golpe a la familia entera de programas que dependía de ella. Lo que sobrevive a todos los ejemplos se desempaqueta y se queda el más pequeño.",
+    teoLadderIntro:
+      "¿Y si se pudiera pedir más que puntos? Una demostración matemática es un unit test sobre infinitos inputs. La misma promesa viene en tres tamaños:",
+    teoL1h: "Un caso.",
+    teoL1: "sumar(2, 3) = 5. Garantiza un punto.",
+    teoL2h: "Una propiedad.",
+    teoL2: "sumar(x, y) = sumar(y, x), comprobada sobre mil pares al azar. Garantiza mil puntos.",
+    teoL3h: "Un teorema.",
+    teoL3:
+      "para todo x e y, sumar(x, y) = sumar(y, x), con su demostración. Garantiza todos los puntos que existirán jamás, por argumento, no por repetición.",
+    teoRoom:
+      "La idea aterriza en software real con un ejemplo de Taelin, un juego con una sala cerrada. Le dices al asistente que nadie debe entrar sin la llave, el asistente escribe esa frase como un teorema sobre todos los estados posibles del juego, y el compilador no acepta código sin una demostración de que ningún estado lo viola. Si meses después alguien añade un movimiento que atraviesa paredes, el compilador lo rechaza por sí solo, porque la demostración antigua ya no cubre el juego nuevo.",
+    teoDecl:
+      "Nada de este peldaño corre en esta página, porque Peanito no tiene tipos ni verificador. Es lo que hace Bend2, el lenguaje de Taelin, que verifica con el mismo algoritmo que Lean.",
+    teoSupgen:
+      "Y el minador que tocaste es la otra mitad de esa historia. Apuntado a ejemplos mina programas, y apuntado a un teorema mina demostraciones, porque una demostración también es un programa que se puede cribar. Así funciona SupGen, el buscador de Taelin, que superpone los candidatos, los criba contra la restricción y saca primero los más cortos. Cuando una IA se atasca en un paso de una demostración, llama a un minador así como quien llama a la calculadora.",
+    teoDuelLlmH: "Código de un LLM",
+    teoDuelLlm: "Generado por probabilidad, verificado por nadie. La garantía eres tú, leyéndotelo.",
+    teoDuelSpecH: "Código con spec",
+    teoDuelSpec:
+      "Tú mantienes la spec, cien veces más corta que el código. La IA genera código y demostración, y el verificador no se deja engañar.",
+    teoPerfect:
+      "Con todas las piezas juntas se puede decir código perfecto, siempre respecto a la spec. Si la spec pide lo que no querías, el teorema demostrado no te salva, así que esa responsabilidad se queda contigo.",
     honh2: "Lo que este paradigma no es",
     hon: [
       [
@@ -279,7 +326,7 @@ const STRINGS: Record<Lang, Strings> = {
       ],
       [
         "El lienzo del fondo es una maqueta visual.",
-        " Los números de la criba y de la carrera salen de ejecuciones reales en tu navegador; los porcentajes de la GPU y de la CPU se miden de verdad, pero sobre cargas de trabajo simuladas.",
+        " Los números de la criba y de la carrera salen de ejecuciones reales en tu navegador; los porcentajes de la GPU y de la CPU se miden de verdad, pero sobre cargas de trabajo simuladas. La sección de teoremas cuenta lo que hacen Bend2 y SupGen fuera de esta página: aquí no corre ningún verificador.",
       ],
     ],
     foot1: "Prototipo: un proyecto de divulgación sobre el Interaction Calculus.",
@@ -429,6 +476,34 @@ const STRINGS: Record<Lang, Strings> = {
     cpuCap4:
       "what if every memory cell could compute? Data never travels: the machine is where the data is, and the same graph hops neighbor to neighbor, one step per cycle. This chip does not exist yet. It is what an interaction net asks of silicon, and the undercurrent of this project.",
     cpuPctLabel: "of the cycles computing; the rest, waiting for memory",
+    teoh2: "From examples to theorems",
+    teoIntro:
+      "Examples are a small promise, because they pin down single points and not the whole function. Ask for f(1) = 2 and f(5) = 8 and out comes a program that satisfies both but never finishes on even numbers, since nobody asked for anything there. If you add f(0) = 1, that program no longer survives the sieve. Each example is a finer mesh.",
+    teoTryBtn: "load f(1) = 2, f(5) = 8 into the miner",
+    teoHow:
+      "No magic inside. The miner does not try programs one at a time, but builds a single tree holding every possible program of the mini-language at once, with shared pieces stored only once. Each example runs a single time over that whole tree, and wherever the result does not match, the whole branch is pruned, taking down the entire family of programs that depended on it. Whatever survives every example gets unpacked and the smallest one stays.",
+    teoLadderIntro:
+      "What if you could ask for more than points? A mathematical proof is a unit test over infinitely many inputs. The same promise comes in three sizes:",
+    teoL1h: "A case.",
+    teoL1: "add(2, 3) = 5. Guarantees one point.",
+    teoL2h: "A property.",
+    teoL2: "add(x, y) = add(y, x), checked over a thousand random pairs. Guarantees a thousand points.",
+    teoL3h: "A theorem.",
+    teoL3:
+      "for every x and y, add(x, y) = add(y, x), with its proof. Guarantees every point that will ever exist, by argument, not by repetition.",
+    teoRoom:
+      "The idea lands in real software through an example from Taelin, a game with a locked room. You tell the assistant that nobody should enter without the key, the assistant writes that sentence as a theorem over every possible game state, and the compiler accepts no code without a proof that no state violates it. If months later someone adds a move that walks through walls, the compiler rejects it on its own, because the old proof no longer covers the new game.",
+    teoDecl:
+      "None of this rung runs on this page, because Peanito has no types and no checker. It is what Bend2, Taelin's language, does, verifying with the same algorithm as Lean.",
+    teoSupgen:
+      "And the miner you just touched is the other half of that story. Aimed at examples it mines programs, and aimed at a theorem it mines proofs, because a proof is also a program you can sift. That is how SupGen, Taelin's searcher, works, superposing the candidates, sifting them against the constraint and surfacing the shortest first. When an AI gets stuck on a step of a proof, it calls a miner like this the way you reach for a calculator.",
+    teoDuelLlmH: "Code from an LLM",
+    teoDuelLlm: "Generated by probability, verified by nobody. The guarantee is you, reading it.",
+    teoDuelSpecH: "Code with a spec",
+    teoDuelSpec:
+      "You maintain the spec, a hundred times shorter than the code. The AI generates code and proof, and the checker cannot be fooled.",
+    teoPerfect:
+      "With all the pieces in place you can say perfect code, always with respect to the spec. If the spec asks for what you did not want, the proven theorem will not save you, so that responsibility stays with you.",
     honh2: "What this paradigm is not",
     hon: [
       [
@@ -453,7 +528,7 @@ const STRINGS: Record<Lang, Strings> = {
       ],
       [
         "The background canvas is a visual mock.",
-        " The sieve and race numbers come from real executions in your browser; the GPU and CPU percentages are genuinely measured, but over simulated workloads.",
+        " The sieve and race numbers come from real executions in your browser; the GPU and CPU percentages are genuinely measured, but over simulated workloads. The theorems section tells what Bend2 and SupGen do beyond this page: no checker runs here.",
       ],
     ],
     foot1: "Prototype: an outreach project about the Interaction Calculus.",

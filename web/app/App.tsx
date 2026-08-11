@@ -9,6 +9,7 @@ import { Miner } from "./Miner.tsx";
 import { Parallelism } from "./Parallelism.tsx";
 import { Race } from "./Race.tsx";
 import { ShapeOfWork } from "./Shape.tsx";
+import { Theorems } from "./Theorems.tsx";
 
 /** Cross-fade del cambio de idioma vía View Transition.
  *
@@ -138,6 +139,7 @@ export function App() {
       <ShapeOfWork />
       <Parallelism />
       <Cpu />
+      <Theorems />
       <Honesty />
       <Footer />
     </LangContext.Provider>
