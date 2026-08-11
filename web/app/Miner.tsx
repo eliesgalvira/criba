@@ -24,10 +24,10 @@ type Found = {
 };
 type SiftResult = { kind: "notfound" } | Found;
 
-/** El ciclo de la criba como máquina de estados — una fase cada vez:
- *  idle → sifting → loom (el telar, a ritmo del usuario) → shown.
- *  En sifting, `prev` mantiene el resultado anterior en pantalla
- *  (stale-while-sifting); el loader solo entra pasados 400 ms. */
+/** El ciclo de la criba como máquina de estados, una fase cada vez:
+ *  idle → sifting → shown. En sifting, `prev` mantiene el resultado
+ *  anterior en pantalla (stale-while-sifting); el mini-telar solo
+ *  entra pasados 800 ms. */
 type MineState =
   | { phase: "idle" }
   | { phase: "sifting"; steps: number; loaderOn: boolean; prev: SiftResult | null }
