@@ -197,7 +197,7 @@ const STRINGS: Record<Lang, Strings> = {
     delPair: "quitar ejemplo",
     raceh2: "Doblar en vez de repasar.",
     racelead:
-      "El encargo es absurdo a propósito, negar una afirmación 2^N veces seguidas. La forma clásica de computar, la de casi todo el software que usas, hace el trabajo de cada negación, una a una. El paradigma del telar se da cuenta de que casi todas las pasadas son idénticas y las teje una sola vez. Mueve N y compara. Los dos contadores salen de ejecuciones reales en tu navegador.",
+      "Vamos a medir la diferencia con un encargo absurdo a propósito, negar una afirmación 2^N veces seguidas. La forma clásica de computar, la de casi todo el software que usas, hace el trabajo de cada negación, una a una. El paradigma del telar se da cuenta de que casi todas las pasadas son idénticas y las teje una sola vez. Mueve N y compara. Los dos contadores salen de ejecuciones reales en tu navegador.",
     raceNote:
       "(Los expertos llaman a estos dos mundos «λ-cálculo» y «evaluación óptima de redes de interacción». Los nombres dan igual por ahora; la diferencia entre las dos columnas, no. Al método clásico le damos un presupuesto de paciencia de 10 millones de pasos, y si lo agota se rinde y te dice cuánto le faltaba.)",
     gorace: "Hacerlo de verdad",
@@ -243,7 +243,7 @@ const STRINGS: Record<Lang, Strings> = {
     ],
     parh2: "Una GPU por dentro.",
     parIntro:
-      "Cada fila es uno de los 32 carriles de la máquina; cada columna que entra por la derecha, un ciclo de reloj. Celda encendida: ese carril trabajó. Hueco: parado. Recorre los cuatro pasos mirando el porcentaje.",
+      "La línea de antes, ahora medida sobre el silicio. Cada fila es uno de los 32 carriles de la máquina; cada columna que entra por la derecha, un ciclo de reloj. Celda encendida: ese carril trabajó. Hueco: parado. Recorre los cuatro pasos mirando el porcentaje.",
     parStep1: "1 · Su terreno",
     parStep2: "2 · Un «si»",
     parStep3: "3 · Trabajo vivo",
@@ -410,7 +410,7 @@ const STRINGS: Record<Lang, Strings> = {
     delPair: "remove example",
     raceh2: "Folding instead of retracing.",
     racelead:
-      "The job is absurd on purpose, negate a statement 2^N times in a row. The classic way of computing, the one behind almost all the software you use, does the work of each negation, one by one. The loom paradigm notices that almost every pass is identical and weaves it once. Move N and compare. Both counters come from real executions in your browser.",
+      "Let's measure the difference with a job that is absurd on purpose, negating a statement 2^N times in a row. The classic way of computing, the one behind almost all the software you use, does the work of each negation, one by one. The loom paradigm notices that almost every pass is identical and weaves it once. Move N and compare. Both counters come from real executions in your browser.",
     raceNote:
       "(Experts call these two worlds “λ-calculus” and “optimal evaluation of interaction nets”. The names don't matter yet; the difference between the two columns does. We give the classic method a patience budget of 10 million steps, and if it runs out it gives up and tells you how much was left.)",
     gorace: "Do it for real",
@@ -456,7 +456,7 @@ const STRINGS: Record<Lang, Strings> = {
     ],
     parh2: "Inside a GPU.",
     parIntro:
-      "Each row is one of the machine's 32 lanes; each column entering from the right, one clock cycle. Lit cell: that lane worked. Gap: idle. Walk the four steps watching the percentage.",
+      "The line from before, now measured on silicon. Each row is one of the machine's 32 lanes; each column entering from the right, one clock cycle. Lit cell: that lane worked. Gap: idle. Walk the four steps watching the percentage.",
     parStep1: "1 · Its home turf",
     parStep2: "2 · One «if»",
     parStep3: "3 · Living work",
