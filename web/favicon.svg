@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- La criba como embudo: candidatos arriba, el programa que sobrevive abajo -->
+  <rect width="64" height="64" rx="12" fill="#212845"/>
+  <!-- candidatos entrando -->
+  <circle cx="21" cy="11" r="3" fill="#c9c0a8"/>
+  <circle cx="32" cy="8" r="3" fill="#c9c0a8"/>
+  <circle cx="43" cy="11" r="3" fill="#c9c0a8"/>
+  <!-- el embudo -->
+  <path d="M11 19 H53 L36 36 V48 H28 V36 Z" fill="none" stroke="#eae3d1" stroke-width="4" stroke-linejoin="round"/>
+  <!-- el mínimo que cumple, cayendo -->
+  <circle cx="32" cy="56" r="3.5" fill="#e3be6b"/>
+</svg>
