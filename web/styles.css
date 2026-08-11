@@ -70,6 +70,27 @@ body {
   z-index: 10;
   font-family: "Solway", "Solway-fb", serif;
   font-size: 0.8rem;
+  display: flex;
+  align-items: stretch;
+  gap: 0.6rem;
+}
+.lang .gh {
+  /* misma chapa que el selector: fondo sólido para flotar sobre el lienzo */
+  display: inline-flex;
+  align-items: center;
+  background: var(--indigo);
+  border: 1px solid var(--thread-dim);
+  color: var(--thread-dim);
+  padding-inline: 0.5rem;
+}
+.lang .gh:hover,
+.lang .gh:focus-visible {
+  color: var(--mustard);
+  border-color: var(--mustard);
+}
+.lang .gh:focus-visible {
+  outline: 2px solid var(--mustard);
+  outline-offset: 2px;
 }
 .lang-toggle {
   /* fondo sólido: el selector flota sobre el lienzo del hero y sin él la
