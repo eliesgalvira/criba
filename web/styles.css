@@ -1057,20 +1057,6 @@ a,
 .trace .recipe {
   margin-top: 0.5rem;
 }
-.miniloom {
-  display: block;
-  width: 100%;
-  height: 200px;
-  margin-bottom: 0.4rem;
-  /* monta solo cuando la criba supera 400 ms (lógica en Miner); entra suave */
-  animation: miniloom-appear 0.25s var(--ease-out);
-}
-@keyframes miniloom-appear {
-  from {
-    opacity: 0;
-  }
-}
-
 /* ═══ la llegada del resultado ═══ */
 .reveal {
   animation: rise-in 0.3s var(--ease-out) both;

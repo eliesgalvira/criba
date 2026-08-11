@@ -9,7 +9,6 @@ import { explain, explainLoop, explainPatterns } from "../../src/explain.ts";
 import { run, show, size, type Term } from "../../src/peanito.ts";
 import { pickTraceInput, trace } from "../../src/trace.ts";
 import { useT } from "./i18n.tsx";
-import { mountLoom } from "./loom.ts";
 import { type ShorePair, Shores } from "./Shores.tsx";
 
 type Pair = ShorePair;
@@ -26,17 +25,15 @@ type SiftResult = { kind: "notfound" } | Found;
 
 /** El ciclo de la criba como máquina de estados, una fase cada vez:
  *  idle → sifting → shown. En sifting, `prev` mantiene el resultado
- *  anterior en pantalla (stale-while-sifting); el mini-telar solo
- *  entra pasados 800 ms. */
+ *  anterior en pantalla (stale-while-sifting). */
 type MineState =
   | { phase: "idle" }
-  | { phase: "sifting"; steps: number; loaderOn: boolean; prev: SiftResult | null }
+  | { phase: "sifting"; steps: number; prev: SiftResult | null }
   | { phase: "shown"; result: SiftResult; steps: number };
 
 type MineAction =
   | { type: "reset" }
   | { type: "start" }
-  | { type: "loader" }
   | { type: "progress"; steps: number }
   | { type: "done"; result: SiftResult; steps: number };
 
@@ -48,11 +45,8 @@ function mineReducer(s: MineState, a: MineAction): MineState {
       return {
         phase: "sifting",
         steps: 0,
-        loaderOn: false,
         prev: s.phase === "shown" ? s.result : null,
       };
-    case "loader":
-      return s.phase === "sifting" ? { ...s, loaderOn: true } : s;
     case "progress":
       return s.phase === "sifting" ? { ...s, steps: a.steps } : s;
     case "done":
@@ -117,13 +111,6 @@ function PairField(props: {
   );
 }
 
-/** mini-telar: la animación del hero, reutilizada como loader de la criba */
-function MiniLoom() {
-  const ref = useRef<HTMLCanvasElement>(null);
-  useEffect(() => mountLoom(ref.current!, { mini: true }), []);
-  return <canvas ref={ref} className="miniloom" aria-hidden="true" />;
-}
-
 type RecipeView = "loop" | "trace" | "cases" | "patterns";
 
 function TraceView({ prog, examples }: { prog: Term; examples: [number, number][] }) {
@@ -184,13 +171,6 @@ export function Miner() {
   useEffect(() => stopWorker, []);
 
   const isSifting = mine.phase === "sifting";
-  useEffect(() => {
-    if (!isSifting) return;
-    // 800 ms: por debajo caben el arranque del worker y las cribas normales,
-    // y un loader que aparece justo antes del resultado es solo un destello
-    const id = setTimeout(() => dispatch({ type: "loader" }), 800);
-    return () => clearTimeout(id);
-  }, [isSifting]);
 
   // lo que se enseña: el resultado mostrado — o el previo, durante una criba
   // rápida (stale-while-sifting: cero flashes de layout)
@@ -334,23 +314,13 @@ export function Miner() {
           </button>
           <div className="out" aria-live="polite">
             {(() => {
-              const loaderOnly = mine.phase === "sifting" && mine.loaderOn;
-              const steps = mine.phase === "sifting" || mine.phase === "shown" ? mine.steps : 0;
               return (
                 <>
-                  {loaderOnly && (
-                    <div className="loom-window">
-                      <MiniLoom />
-                      <p className="meta">
-                        {steps.toLocaleString(lang)} {t.sharedSteps}…
-                      </p>
-                    </div>
-                  )}
-                  {!loaderOnly && outcome.kind === "idle" && <p className="meta">{t.outidle}</p>}
-                  {!loaderOnly && outcome.kind === "notfound" && (
+                  {outcome.kind === "idle" && <p className="meta">{t.outidle}</p>}
+                  {outcome.kind === "notfound" && (
                     <p className="meta fail reveal">{t.notfound}</p>
                   )}
-                  {!loaderOnly && outcome.kind === "found" && (
+                  {outcome.kind === "found" && (
                     <div className="reveal" key={show(outcome.prog)}>
                       <div className="found-bar">
                         <p className="found-head">{t.foundHead}</p>
