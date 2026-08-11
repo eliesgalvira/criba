@@ -173,7 +173,7 @@ export function Miner() {
   ]);
   const [mine, dispatch] = useReducer(mineReducer, { phase: "idle" });
   const [activeRule, setActiveRule] = useState<string | null>("doble");
-  const [view, setView] = useState<RecipeView>("loop");
+  const [view, setView] = useState<RecipeView>("cases");
   const workerRef = useRef<Worker | null>(null);
   const startRef = useRef(0);
 
