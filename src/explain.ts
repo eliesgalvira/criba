@@ -235,8 +235,8 @@ const LWORDS: Record<"es" | "en", LWords> = {
 };
 
 /** La acción de una hoja: qué sumar y si parar o repetir. */
-function leafAction(t: Term, d: number, isZero: boolean, w: LWords): string {
-  let k = 0;
+function leafAction(t: Term, d: number, isZero: boolean, w: LWords, carry = 0): string {
+  let k = carry;
   let inner: Term = t;
   while (inner.t === "Suc") {
     k++;
@@ -266,19 +266,31 @@ function leafAction(t: Term, d: number, isZero: boolean, w: LWords): string {
   return parts.join(` ${w.and} `);
 }
 
-function lrender(t: Term, d: number, isZero: boolean, w: LWords): string[] {
-  if (isZero && t.t === "Mat") return lrender(t.zero, d, true, w);
-  if (t.t !== "Mat") return [leafAction(t, d, isZero, w)];
-  const lines: string[] = [`${w.eq(d)} → ${lrender(t.zero, d, true, w).join("; ")}`];
-  if (t.succ.t === "Mat") lines.push(...lrender(t.succ, d + 1, false, w));
-  else lines.push(`${w.ge(d + 1)} → ${lrender(t.succ, d + 1, false, w).join("; ")}`);
+function lrender(t: Term, d: number, isZero: boolean, w: LWords, carry = 0): string[] {
+  // sucesores delante de un match se suman en cada pasada por sus casos:
+  // Suc^k(Mat(z, s)) reparte «suma k» a las dos ramas como acarreo
+  let k = carry;
+  let u: Term = t;
+  while (u.t === "Suc") {
+    k++;
+    u = u.body;
+  }
+  if (u.t !== "Mat") return [leafAction(t, d, isZero, w, carry)];
+  if (isZero) return lrender(u.zero, d, true, w, k);
+  const lines: string[] = [`${w.eq(d)} → ${lrender(u.zero, d, true, w, k).join("; ")}`];
+  let s: Term = u.succ;
+  while (s.t === "Suc") s = s.body;
+  if (s.t === "Mat") lines.push(...lrender(u.succ, d + 1, false, w, k));
+  else lines.push(`${w.ge(d + 1)} → ${lrender(u.succ, d + 1, false, w, k).join("; ")}`);
   return lines;
 }
 
 /** Pseudocódigo sin recursión: bucle de apuntar y repetir. */
 export function explainLoop(term: Term, lang: "es" | "en"): string {
   const w = LWORDS[lang];
-  if (term.t !== "Mat") {
+  let core: Term = term;
+  while (core.t === "Suc") core = core.body;
+  if (core.t !== "Mat") {
     // sin casos no hay bucle: es una fórmula directa
     const a = leafAction(term, 0, false, w);
     if (a === w.stop) return w.resultIs("0");

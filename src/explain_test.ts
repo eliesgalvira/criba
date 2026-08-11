@@ -100,6 +100,20 @@ al pararte, el resultado es el total`,
   );
 });
 
+Deno.test("explainLoop: 2n+1, match dentro de un sucesor (regresión «hoja inesperada»)", () => {
+  // el mínimo para f(0)=1, f(1)=3, f(3)=7 es (S {0:* | S:(S @)}): el Suc
+  // exterior reparte «suma 1» a todos los casos como acarreo
+  const prog = Suc(Mat(Ret, Suc(Rec)));
+  assertEquals(
+    explainLoop(prog, "es"),
+    `empieza: total = 0, y toma tu n
+repite (el total no se borra entre vueltas):
+  si n = 0 → suma 1 al total y párate
+  si n ≥ 1 → suma 2 al total y vuelve arriba con n = n − 1
+al pararte, el resultado es el total`,
+  );
+});
+
 Deno.test("explainLoop: identidad y constante, fórmula directa", () => {
   assertEquals(explainLoop(Ret, "es"), "el resultado es n, tal cual");
   assertEquals(explainLoop(Suc(Suc(Zero)), "es"), "el resultado es 2, tal cual");
