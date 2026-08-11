@@ -145,14 +145,14 @@ const STRINGS: Record<Lang, Strings> = {
     h1hilo: "hilos",
     h1b: " que se recombinan.",
     heroExplain:
-      "En la animación del fondo, cada rombo es una máquina diminuta y cada hilo, una conexión. Cuando dos máquinas se tocan, se transforman según unas pocas reglas fijas, y de millones de esos toques sale cualquier cálculo que puedas imaginar.",
+      "En la animación del fondo, cada rombo es una máquina diminuta y cada hilo, una conexión. Cuando dos máquinas se tocan, se transforman según unas pocas reglas fijas, y de millones de esos toques sale cualquier cálculo.",
     h1sub:
-      "El telar de Jacquard fue la primera máquina programable, hace doscientos años. Esta página va de un paradigma que vuelve a computar así: tejiendo.",
+      "El telar de Jacquard fue la primera máquina programable, hace doscientos años. Esta página va de un paradigma que vuelve a computar tejiendo.",
     hint: "desliza",
     minerh2: "Piensa una regla, enlaza entradas con salidas y recibe el programa.",
     minerIntro:
-      "La página encuentra sola el programa más corto que cumple todos tus enlaces, probando todos los programas posibles a la vez. (Ese «a la vez» tiene nombre: superposición. El truco, más abajo.)",
-    minersub: "Sin IA y sin trampa: lo que sale cumple tus ejemplos siempre, por construcción.",
+      "La página encuentra sola el programa más corto que cumple todos tus enlaces, probando todos los programas posibles a la vez. (Ese «a la vez» se llama superposición. Por qué siempre funciona, más abajo.)",
+    minersub: "Sin IA y sin trampa, lo que sale cumple tus ejemplos siempre, por construcción.",
     run: "Cribar el espacio de programas",
     running: "Cribando…",
     outidle: "Estos ejemplos dicen «el doble». Púlsalo, o inventa tu propia función.",
@@ -195,11 +195,11 @@ const STRINGS: Record<Lang, Strings> = {
     trTotal: "total",
     trJotted: "lo apuntado",
     delPair: "quitar ejemplo",
-    raceh2: "El truco: compartir el trabajo.",
+    raceh2: "Doblar en vez de repasar.",
     racelead:
-      "Un encargo deliberadamente absurdo: negar una afirmación 2^N veces seguidas. La forma clásica de computar, la de casi todo el software que usas, hace el trabajo de cada negación, una a una. El paradigma del telar se da cuenta de que casi todas las pasadas son idénticas… y las teje una sola vez. Mueve N y compara. Los dos contadores salen de ejecuciones reales, en tu navegador, ahora.",
+      "El encargo es absurdo a propósito, negar una afirmación 2^N veces seguidas. La forma clásica de computar, la de casi todo el software que usas, hace el trabajo de cada negación, una a una. El paradigma del telar se da cuenta de que casi todas las pasadas son idénticas y las teje una sola vez. Mueve N y compara. Los dos contadores salen de ejecuciones reales en tu navegador.",
     raceNote:
-      "(Los expertos llaman a estos dos mundos «λ-cálculo» y «evaluación óptima de redes de interacción». Los nombres dan igual por ahora; la diferencia entre las dos columnas, no. Al método clásico le damos un presupuesto de paciencia de 10 millones de pasos: si lo agota, se rinde y te dice cuánto le faltaba.)",
+      "(Los expertos llaman a estos dos mundos «λ-cálculo» y «evaluación óptima de redes de interacción». Los nombres dan igual por ahora; la diferencia entre las dos columnas, no. Al método clásico le damos un presupuesto de paciencia de 10 millones de pasos, y si lo agota se rinde y te dice cuánto le faltaba.)",
     gorace: "Hacerlo de verdad",
     goraceRunning: "Tejiendo…",
     passes: "negaciones",
@@ -211,7 +211,7 @@ const STRINGS: Record<Lang, Strings> = {
     overB:
       "piezas, una por negación, más que todo su presupuesto. El telar escribe ese mismo encargo con",
     overC: "dobleces.",
-    shapeh2: "Regular e irregular: la forma del trabajo.",
+    shapeh2: "La forma del trabajo.",
     shapeIntro:
       "Repartir un cálculo entre muchos núcleos solo es fácil si sabes su forma antes de empezar. Ahí está la línea que separa lo que una GPU devora de lo que se le atraganta. Toca cada paso.",
     shapeStep1: "1 · La rejilla",
@@ -269,7 +269,7 @@ const STRINGS: Record<Lang, Strings> = {
     cpuStep3: "3 · La caza de punteros",
     cpuCap1head: "El terreno de la CPU:",
     cpuCap1:
-      "una cadena de dependencias: cada paso necesita el anterior. Todo cabe en el núcleo. Sin viajes. Un paso por ciclo; nada lo hace más rápido.",
+      "la cadena de dependencias, cada paso necesita el anterior. Todo cabe en el núcleo. Sin viajes. Un paso por ciclo; nada lo hace más rápido.",
     cpuCap2head: "El peaje:",
     cpuCap2:
       "los datos viven lejos y cada uno viaja. (Tiene nombre: el cuello de botella de von Neumann.) La CPU apuesta por la localidad: lees en orden, un solo viaje trae la fila entera a la despensa. La apuesta acierta.",
@@ -281,9 +281,9 @@ const STRINGS: Record<Lang, Strings> = {
     cpuCap4:
       "¿y si cada casilla de memoria supiera computar? El dato no viaja: la máquina está donde está el dato, y el mismo grafo salta de vecina en vecina, un paso por ciclo. Este chip no existe todavía. Es lo que una red de interacciones le pide al silicio, y el fondo de este proyecto.",
     cpuPctLabel: "de los ciclos computando; el resto, esperando a la memoria",
-    opth2: "El truco tiene teorema.",
+    opth2: "Por qué siempre funciona.",
     optIntro:
-      "Lo que acabas de ver arriba no es una argucia de esta demo. En 1990 Lamping demostró que compartir todo el trabajo repetido solo se consigue reescribiendo grafos, porque a cualquier evaluador que trabaje sobre el texto del programa se le puede construir un caso donde duplica trabajo sin remedio. En 1997 Lafont llevó la idea al límite con los Interaction Combinators, y la clave de su resultado es una asimetría entre traducir hacia dentro y traducir hacia fuera.",
+      "Lo de arriba no es un caso amañado. En 1990 Lamping demostró que compartir todo el trabajo repetido solo se consigue reescribiendo grafos, porque a cualquier evaluador que trabaje sobre el texto del programa se le puede construir un caso donde duplica trabajo sin remedio. En 1997 Lafont llevó la idea al límite con los Interaction Combinators, y la clave de su resultado es una asimetría entre traducir hacia dentro y traducir hacia fuera.",
     optInH: "Hacia dentro no se paga.",
     optIn:
       "Una máquina de Turing o un programa clásico se traducen a redes de interacción conservando su coste y destapando el paralelismo que llevaban dentro.",
@@ -291,7 +291,7 @@ const STRINGS: Record<Lang, Strings> = {
     optOut:
       "Sacar una red de interacción a un modelo secuencial obliga a elegir entre duplicar trabajo compartido o renunciar al paralelismo.",
     optClose:
-      "Esa asimetría es lo que significa «teóricamente óptimo». No dice que este paradigma sea el más rápido hoy, la etiqueta del final cuenta justo lo contrario, sino que aquí el coste de un cómputo es único, ya que el orden no lo cambia y ninguna traducción lo abarata. La máquina de Turing garantiza qué se puede computar, pero no cuánto cuesta computarlo; los combinators garantizan las dos cosas a la vez.",
+      "Esa asimetría es lo que significa «teóricamente óptimo». No dice que este paradigma sea el más rápido hoy, la etiqueta del final cuenta justo lo contrario, sino que aquí el coste de un cómputo es único, no lo cambia el orden ni lo abarata ninguna traducción. La máquina de Turing garantiza qué se puede computar, pero no cuánto cuesta computarlo; los combinators garantizan las dos cosas a la vez.",
     teoh2: "De ejemplos a teoremas",
     teoIntro:
       "Los ejemplos son una promesa pequeña, porque atan puntos sueltos y no la función entera. Pide f(1) = 2 y f(5) = 8 y sale un programa que cumple ambos pero no acaba nunca con los pares, ya que ahí nadie le pidió nada. Si añades f(0) = 1, ese programa deja de sobrevivir a la criba. Cada ejemplo es una malla más fina.",
@@ -358,14 +358,14 @@ const STRINGS: Record<Lang, Strings> = {
     h1hilo: "threads",
     h1b: " that recombine.",
     heroExplain:
-      "In the background animation, every diamond is a tiny machine and every thread, a connection. When two machines touch, they transform by a handful of fixed rules, and from millions of those touches comes any computation you can imagine.",
+      "In the background animation, every diamond is a tiny machine and every thread, a connection. When two machines touch, they transform by a handful of fixed rules, and from millions of those touches comes any computation.",
     h1sub:
-      "The Jacquard loom was the first programmable machine, two hundred years ago. This page is about a paradigm that computes like that again: by weaving.",
+      "The Jacquard loom was the first programmable machine, two hundred years ago. This page is about a paradigm that computes by weaving again.",
     hint: "scroll",
     minerh2: "Think of a rule, link inputs to outputs, get the program.",
     minerIntro:
-      "The page finds, by itself, the shortest program that fits all your links, trying every possible program at once. (That “at once” has a name: superposition. The trick, further down.)",
-    minersub: "No AI and no tricks: what comes out fits your examples always, by construction.",
+      "The page finds, by itself, the shortest program that fits all your links, trying every possible program at once. (That “at once” is called superposition. Why it always works, further down.)",
+    minersub: "No AI and no tricks, what comes out fits your examples always, by construction.",
     run: "Sift the space of programs",
     running: "Sifting…",
     outidle: "These examples say “double it”. Press it, or invent your own function.",
@@ -408,11 +408,11 @@ const STRINGS: Record<Lang, Strings> = {
     trTotal: "total",
     trJotted: "what was jotted",
     delPair: "remove example",
-    raceh2: "The trick: sharing the work.",
+    raceh2: "Folding instead of retracing.",
     racelead:
-      "A deliberately absurd job: negate a statement 2^N times in a row. The classic way of computing, the one behind almost all the software you use, does the work of each negation, one by one. The loom paradigm notices that almost every pass is identical… and weaves it once. Move N and compare. Both counters come from real executions, in your browser, now.",
+      "The job is absurd on purpose, negate a statement 2^N times in a row. The classic way of computing, the one behind almost all the software you use, does the work of each negation, one by one. The loom paradigm notices that almost every pass is identical and weaves it once. Move N and compare. Both counters come from real executions in your browser.",
     raceNote:
-      "(Experts call these two worlds “λ-calculus” and “optimal evaluation of interaction nets”. The names don't matter yet; the difference between the two columns does. We give the classic method a patience budget of 10 million steps: if it runs out, it gives up and tells you how much was left.)",
+      "(Experts call these two worlds “λ-calculus” and “optimal evaluation of interaction nets”. The names don't matter yet; the difference between the two columns does. We give the classic method a patience budget of 10 million steps, and if it runs out it gives up and tells you how much was left.)",
     gorace: "Do it for real",
     goraceRunning: "Weaving…",
     passes: "negations",
@@ -424,7 +424,7 @@ const STRINGS: Record<Lang, Strings> = {
     overB:
       "pieces, one per negation, more than its whole budget. The loom writes that same job with",
     overC: "foldings.",
-    shapeh2: "Regular and irregular: the shape of the work.",
+    shapeh2: "The shape of the work.",
     shapeIntro:
       "Splitting a computation across many cores is only easy if you know its shape before you start. That is the line between what a GPU devours and what jams it. Tap through each step.",
     shapeStep1: "1 · The grid",
@@ -482,7 +482,7 @@ const STRINGS: Record<Lang, Strings> = {
     cpuStep3: "3 · Pointer chasing",
     cpuCap1head: "The CPU's home turf:",
     cpuCap1:
-      "a chain of dependencies: every step needs the previous one. Everything fits in the core. No trips. One step per cycle; nothing does it faster.",
+      "the chain of dependencies, every step needs the previous one. Everything fits in the core. No trips. One step per cycle; nothing does it faster.",
     cpuCap2head: "The toll:",
     cpuCap2:
       "data lives far away and every datum travels. (It has a name: the von Neumann bottleneck.) The CPU bets on locality: read in order and a single trip brings the whole row into the pantry. The bet pays off.",
@@ -494,9 +494,9 @@ const STRINGS: Record<Lang, Strings> = {
     cpuCap4:
       "what if every memory cell could compute? Data never travels: the machine is where the data is, and the same graph hops neighbor to neighbor, one step per cycle. This chip does not exist yet. It is what an interaction net asks of silicon, and the undercurrent of this project.",
     cpuPctLabel: "of the cycles computing; the rest, waiting for memory",
-    opth2: "The trick has a theorem.",
+    opth2: "Why it always works.",
     optIntro:
-      "What you just saw above is no sleight of hand by this demo. In 1990 Lamping proved that sharing all repeated work can only be achieved by rewriting graphs, because any evaluator working on the program's text can be handed a case where it duplicates work with no way out. In 1997 Lafont took the idea to its limit with the Interaction Combinators, and the key to his result is an asymmetry between translating inward and translating outward.",
+      "The thing above is not a rigged case. In 1990 Lamping proved that sharing all repeated work can only be achieved by rewriting graphs, because any evaluator working on the program's text can be handed a case where it duplicates work with no way out. In 1997 Lafont took the idea to its limit with the Interaction Combinators, and the key to his result is an asymmetry between translating inward and translating outward.",
     optInH: "Inward costs nothing.",
     optIn:
       "A Turing machine or a classical program translates into interaction nets keeping its cost and uncovering the parallelism it carried inside.",
@@ -504,7 +504,7 @@ const STRINGS: Record<Lang, Strings> = {
     optOut:
       "Taking an interaction net out to a sequential model forces a choice between duplicating shared work or giving up the parallelism.",
     optClose:
-      "That asymmetry is what «theoretically optimal» means. It does not say this paradigm is the fastest today, the label at the end says quite the opposite, but that here the cost of a computation is unique, since the order cannot change it and no translation can make it cheaper. The Turing machine guarantees what can be computed, but not what computing it costs; the combinators guarantee both at once.",
+      "That asymmetry is what «theoretically optimal» means. It does not say this paradigm is the fastest today, the label at the end says quite the opposite, but that here the cost of a computation is unique, unchanged by order and undercut by no translation. The Turing machine guarantees what can be computed, but not what computing it costs; the combinators guarantee both at once.",
     teoh2: "From examples to theorems",
     teoIntro:
       "Examples are a small promise, because they pin down single points and not the whole function. Ask for f(1) = 2 and f(5) = 8 and out comes a program that satisfies both but never finishes on even numbers, since nobody asked for anything there. If you add f(0) = 1, that program no longer survives the sieve. Each example is a finer mesh.",
