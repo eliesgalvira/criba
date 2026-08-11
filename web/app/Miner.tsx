@@ -186,7 +186,9 @@ export function Miner() {
   const isSifting = mine.phase === "sifting";
   useEffect(() => {
     if (!isSifting) return;
-    const id = setTimeout(() => dispatch({ type: "loader" }), 400);
+    // 800 ms: por debajo caben el arranque del worker y las cribas normales,
+    // y un loader que aparece justo antes del resultado es solo un destello
+    const id = setTimeout(() => dispatch({ type: "loader" }), 800);
     return () => clearTimeout(id);
   }, [isSifting]);
 
