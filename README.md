@@ -3,24 +3,24 @@
 > ⚠️ SLOP WARNING: proyecto en construcción, asistido por IA, verificado a mano.
 
 Minador de programas por superposiciones, sobre un runtime del **Interaction Calculus** de Victor
-Taelin — y una web de divulgación que lo enseña en vivo.
+Taelin, y una web de divulgación que lo enseña en vivo.
 
-Le das ejemplos entrada→salida (`f(1)=2, f(5)=8`) y **criba** el espacio de todos los programas
-hasta quedarse con el mínimo que los cumple. Correcto por construcción respecto a tus ejemplos: no
-hay modelo, no hay entrenamiento, no hay alucinación — hay búsqueda con sharing óptimo.
+Le das ejemplos entrada→salida (`f(1)=2, f(5)=10`) y **criba** el espacio de todos los programas
+hasta quedarse con el mínimo que los cumple. El resultado es correcto por construcción respecto a
+tus ejemplos, sin modelo, sin entrenamiento y sin alucinación, solo búsqueda con sharing óptimo.
 
 ## Los nombres
 
 | Nombre         | Qué es                                   | Por qué                                                                                                                                                                                                                                               |
 | -------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Criba**      | El proyecto y el minador                 | Cribar es lo que hace un minador: tamizar la grava para encontrar oro. Cada ejemplo entrada→salida es una malla que deja caer familias enteras de programas de golpe. Evoca la criba de Eratóstenes: búsqueda por eliminación con pedigrí matemático. |
-| **Copenhague** | El motor clásico (`copenhague()`)        | Como la interpretación de Copenhague: colapsa primero y observa después — colapsa el árbol superpuesto en un stream de programas concretos y los prueba universo a universo.                                                                          |
+| **Copenhague** | El motor clásico (`copenhague()`)        | Como la interpretación de Copenhague, colapsa primero y observa después, convirtiendo el árbol superpuesto en un stream de programas concretos que prueba universo a universo.                                                                        |
 | **Everett**    | El motor superpuesto (`everett()`)       | Many-worlds: evalúa todos los universos a la vez, las ramas comparten estructura, las etiquetas mantienen cada mundo autoconsistente, y un ejemplo que falla poda mundos enteros de golpe.                                                            |
 | **Peanito**    | El mini-lenguaje Nat→Nat que se mina     | Sus constructores son los axiomas de Peano en miniatura (cero, sucesor, match sobre predecesor, recursión). El diminutivo dice honestamente "lenguaje diminuto a propósito".                                                                          |
-| **Telar**      | El runtime del Interaction Calculus (TS) | Un telar teje y recombina hilos — literalmente lo que hace la reducción con los cables de una interaction net. El telar de Jacquard fue la primera máquina programable. Teje la web: el fondo vivo del sitio corre sobre él.                          |
+| **Telar**      | El runtime del Interaction Calculus (TS) | Un telar teje y recombina hilos, que es literalmente lo que hace la reducción con los cables de una interaction net. El telar de Jacquard fue la primera máquina programable. Teje la web: el fondo vivo del sitio corre sobre él.                    |
 
-El sistema completo: **el Telar teje el espacio de todos los programas Peanito; Criba lo tamiza —
-con Copenhague universo a universo, con Everett todos a la vez.**
+El sistema completo: **el Telar teje el espacio de todos los programas Peanito; Criba lo tamiza, con
+Copenhague universo a universo y con Everett todos a la vez.**
 
 Regla de uso: estos nombres identifican la implementación (repo, docs, demos). El copy de la web de
 divulgación no se apoya en ellos salvo cuando sea relevante; el título público de la web está
@@ -28,26 +28,26 @@ pendiente de decisión.
 
 ## Qué hay
 
-- **`src/`** — el núcleo, TypeScript estricto sin dependencias, 29 tests:
-  - `peanito.ts` — el DSL: términos, intérprete iterativo con fuel escalado, `fits`.
-  - `criba.ts` — enumeración (etiquetada y sin etiquetar), colapso perezoso, Copenhague y Everett
+- **`src/`**: el núcleo, TypeScript estricto sin dependencias, 30 tests:
+  - `peanito.ts`: el DSL: términos, intérprete iterativo con fuel escalado, `fits`.
+  - `criba.ts`: enumeración (etiquetada y sin etiquetar), colapso perezoso, Copenhague y Everett
     (con presupuesto de pasos, progreso y eventos de criba), `spaceAtDepth` (la recurrencia del
     tamaño del espacio, contrastada por test contra el conteo real).
-  - `telar.ts` — runtime IC tipado (whnf/normal con contador de interacciones), la demo de fusión
+  - `telar.ts`: runtime IC tipado (whnf/normal con contador de interacciones), la demo de fusión
     (`not^(2^N)` en O(N)) y el corredor clásico como **máquina de Krivine** (misma cuenta de betas
-    que la sustitución textual, sin reventar la pila — verificado por test: `3·2^N`).
-  - `explain.ts` / `trace.ts` — las vistas pedagógicas del programa encontrado: bucle sin recursión,
+    que la sustitución textual, sin reventar la pila, verificado por test (`3·2^N`)).
+  - `explain.ts` / `trace.ts`: las vistas pedagógicas del programa encontrado: bucle sin recursión,
     traza paso a paso, casos aplanados, pattern matching.
-- **`web/`** — la página (React 19 + Base UI, bundle con Deno, sin servidor): el minador con las
+- **`web/`**: la página (React 19 + Base UI, bundle con Deno, sin servidor): el minador con las
   orillas de hilos, pestañas de reglas, cuatro vistas del programa, el telar en modal, la carrera
   clásico-contra-telar con contadores reales, ES/EN, panel de honestidad.
-- **`lab/spike-ic.js`** — el spike de viabilidad original (2026-08-08): el evaluador IC portado del
+- **`lab/spike-ic.js`**: el spike de viabilidad original (2026-08-08): el evaluador IC portado del
   [gist de referencia de Taelin][ic-gist] computa `not^(2^1000)` en 12.004 interacciones / ~5 ms y
   resuelve SAT con booleanos superpuestos (n≤14, verificado contra fuerza bruta). Ya portado y
   tipado como `src/telar.ts`; se conserva como registro.
-- Antecedente directo: **kolmo** — mini-minador en Python (dos motores, minimalidad verificada
+- Antecedente directo: **kolmo**, mini-minador en Python (dos motores, minimalidad verificada
   exhaustivamente) construido como ejercicio de aprendizaje del mecanismo.
-- `PRODUCT.md` / `DESIGN.md` / `PLAN.md` — registro de producto, sistema de diseño («El Telar») y el
+- `PRODUCT.md` / `DESIGN.md` / `PLAN.md`: registro de producto, sistema de diseño («El Telar») y el
   plan del mes.
 
 ## Los límites, medidos
@@ -58,14 +58,14 @@ profundidad 3, **3,5×10⁹** a 4, **1,2×10¹⁹** a 5, **1,5×10³⁸** a 6. L
 familia de reglas de las pestañas aparece en ≤5 (mod3, la más honda, en 222 ms); subir a 6
 multiplica el coste ~30× (10 s) sin encontrar nada nuevo, y mod4 necesitaría profundidad 7, fuera
 del alcance de un navegador. La perla: refutar n² (imposible en Peanito) contra los 10³⁸ programas
-de profundidad 6 cuesta 486k pasos — la superposición compartiendo trabajo a través de 38 órdenes de
+de profundidad 6 cuesta 486k pasos, la superposición compartiendo trabajo a través de 38 órdenes de
 magnitud. El colapsador perezoso por cola de prioridad (el mecanismo de SupGen, que cambiaría el
 tope de profundidad por presupuesto de paciencia) es la ambición del mes en `PLAN.md`.
 
 ## Correr en local
 
 ```sh
-deno task test    # los 29 tests del núcleo
+deno task test    # los 30 tests del núcleo
 deno task check   # tipos (src/ y web/app/)
 deno task web     # bundle + servidor estático en :4508
 ```
