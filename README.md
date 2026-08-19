@@ -1,6 +1,6 @@
 # Criba
 
-> ⚠️ SLOP WARNING: proyecto en construcción, asistido por IA, verificado a mano.
+> Proyecto cerrado y archivado (agosto de 2026). Fue el prototipo de una propuesta de mini-beca; la web sigue desplegada en [mihura.elies.site](https://mihura.elies.site/). El mes becado tomó otra dirección: software maleable y vivo, programación de objetos y LLMs. Se construyó asistido por IA y verificado a mano.
 
 Minador de programas por superposiciones, sobre un runtime del **Interaction Calculus** de Victor
 Taelin, y una web de divulgación que lo enseña en vivo.
@@ -23,8 +23,8 @@ El sistema completo: **el Telar teje el espacio de todos los programas Peanito; 
 Copenhague universo a universo y con Everett todos a la vez.**
 
 Regla de uso: estos nombres identifican la implementación (repo, docs, demos). El copy de la web de
-divulgación no se apoya en ellos salvo cuando sea relevante; el título público de la web está
-pendiente de decisión.
+divulgación no se apoya en ellos salvo cuando sea relevante; el título público quedó en «Computar es
+tejer · prototipo».
 
 ## Qué hay
 
@@ -60,7 +60,8 @@ multiplica el coste ~30× (10 s) sin encontrar nada nuevo, y mod4 necesitaría p
 del alcance de un navegador. La perla: refutar n² (imposible en Peanito) contra los 10³⁸ programas
 de profundidad 6 cuesta 486k pasos, la superposición compartiendo trabajo a través de 38 órdenes de
 magnitud. El colapsador perezoso por cola de prioridad (el mecanismo de SupGen, que cambiaría el
-tope de profundidad por presupuesto de paciencia) es la ambición del mes en `PLAN.md`.
+tope de profundidad por presupuesto de paciencia) quedó apuntado en `PLAN.md` y sin construir: el
+mes becado cambió de foco antes de empezarlo.
 
 ## Correr en local
 
